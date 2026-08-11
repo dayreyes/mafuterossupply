@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mafutero's Supply</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="theme-color" content="#402310">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mafutero's">
+<link rel="stylesheet" href="_ds/organic-3a154886-6784-4644-b0ba-93973fea61e6/styles.css">
+<script src="_ds/organic-3a154886-6784-4644-b0ba-93973fea61e6/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+html,body{margin:0;padding:0;background:#2e2b25;font-family:"Figtree",system-ui,sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+a{color:#f6a06b}a:hover{color:#ffc6a5}
+input,textarea,select{font-size:16px}
+@keyframes mfPop{0%{transform:scale(.86) rotate(-6deg);opacity:0}60%{transform:scale(1.04) rotate(2deg)}100%{transform:scale(1) rotate(-2deg);opacity:1}}
+.mf-hscroll{-ms-overflow-style:none}.mf-hscroll::-webkit-scrollbar{display:none;width:0;height:0}
+@keyframes mfSlide{0%{transform:translateY(-14px);opacity:0}100%{transform:translateY(0);opacity:1}}
+</style>
+<script>
+(function(){
+  var l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.appendChild(l);
+  var a=document.createElement('link');a.rel='apple-touch-icon';a.href='icons/icon-180.png';document.head.appendChild(a);
+  var v=document.querySelector('meta[name=viewport]');
+  if(v)v.setAttribute('content','width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1');
+  if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
+    window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
+  }
+})();
+</script>
+</helmet>
+
+<div style="position:relative;min-height:100dvh;max-width:560px;margin:0 auto;background:#f5ead8;overflow-x:hidden">
+
+
+        <sc-if value="{{ isLang }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;min-height:100dvh;background:#2e2b25;background-image:radial-gradient(circle at 50% 26%,#56633f 0%,#2e2b25 64%),radial-gradient(rgba(0,0,0,.3) 1px,transparent 1.4px);background-size:auto,9px 9px;padding:150px 34px 60px;display:flex;flex-direction:column;align-items:center;gap:34px;box-sizing:border-box">
+            <div style="position:absolute;top:90px;right:-46px;width:170px;height:170px;border-radius:50%;background:#c67139;opacity:.22"></div>
+            <div style="position:absolute;bottom:150px;left:-40px;width:190px;height:190px;border-radius:50%;background:#8fa073;opacity:.18"></div>
+            <div style="position:relative;text-align:center">
+              <div style="font-family:'Caprasimo',serif;font-size:42px;line-height:.95;color:#f5ead8;letter-spacing:-.02em">Mafutero&rsquo;s</div>
+              <div style="font:700 12px/1 'Figtree';letter-spacing:.44em;text-transform:uppercase;color:#ccdbb2;margin-top:10px">Supply</div>
+            </div>
+            <div style="position:relative;font:700 13px/1.5 'Figtree';color:#e1eecc;text-align:center;max-width:250px">&iquest;En qu&eacute; lo quieres?<br>Pick your language</div>
+            <div style="position:relative;width:100%;display:flex;flex-direction:column;gap:13px">
+              <div onClick="{{ pickEs }}" style="height:66px;border-radius:999px;background:#c67139;border:2px solid #201e1d;box-shadow:4px 4px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:'Caprasimo',serif;font-size:22px;color:#f5ead8" style-active="box-shadow:0 0 0 #201e1d;transform:translate(4px,4px)">Espa&ntilde;ol</div>
+              <div onClick="{{ pickEn }}" style="height:66px;border-radius:999px;background:#f5ead8;border:2px solid #201e1d;box-shadow:4px 4px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:'Caprasimo',serif;font-size:22px;color:#201e1d" style-active="box-shadow:0 0 0 #201e1d;transform:translate(4px,4px)">English</div>
+            </div>
+            <div style="position:relative;font:500 11.5px/1.5 'Figtree';color:#aebf92;text-align:center;max-width:260px">Lo guardamos pa&rsquo; la pr&oacute;xima. Lo puedes cambiar arriba en el men&uacute;.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isLock }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative;min-height:100dvh;background:#2e2b25;background-image:radial-gradient(circle at 50% 22%,#56633f 0%,#2e2b25 62%),radial-gradient(rgba(0,0,0,.3) 1px,transparent 1.4px);background-size:auto,9px 9px;padding:120px 34px 60px;display:flex;flex-direction:column;align-items:center;gap:26px;box-sizing:border-box">
+            <div style="position:absolute;top:64px;left:-34px;width:150px;height:150px;border-radius:50%;background:#c67139;opacity:.25"></div>
+            <div style="position:absolute;bottom:120px;right:-40px;width:180px;height:180px;border-radius:50%;background:#8fa073;opacity:.2"></div>
+            <div style="position:relative;text-align:center">
+              <div style="font-family:'Caprasimo',serif;font-size:40px;line-height:.95;color:#f5ead8;letter-spacing:-.02em">Mafutero&rsquo;s</div>
+              <div style="font:700 12px/1 'Figtree';letter-spacing:.44em;text-transform:uppercase;color:#ccdbb2;margin-top:10px">Supply</div>
+            </div>
+            <div style="position:relative;display:{{ modeBadgeDisplay }};background:{{ modeBadgeBg }};border:2px solid #201e1d;border-radius:999px;padding:7px 14px;font:800 10.5px/1.3 'Figtree';letter-spacing:.06em;text-transform:uppercase;color:#f5ead8;text-align:center;max-width:280px">{{ modeBadge }}</div>
+            <div style="position:relative;display:flex;gap:6px;background:rgba(32,30,29,.5);border:2px solid #f5ead8;padding:5px;border-radius:999px">
+              <div onClick="{{ pickClient }}" style="padding:10px 18px;border-radius:999px;font:700 12.5px/1 'Figtree';cursor:pointer;color:{{ clientFg }};background:{{ clientBg }};transition:background .2s ease">{{ t.tabClient }}</div>
+              <div onClick="{{ pickOwner }}" style="padding:10px 18px;border-radius:999px;font:700 12.5px/1 'Figtree';cursor:pointer;color:{{ ownerFg }};background:{{ ownerBg }};transition:background .2s ease">{{ t.tabOwner }}</div>
+            </div>
+            <div style="position:relative;font:600 13px/1.4 'Figtree';color:#e1eecc;text-align:center;max-width:250px">{{ lockHint }}</div>
+            <div style="position:relative;display:flex;gap:14px">
+              <sc-for list="{{ dots }}" as="d" hint-placeholder-count="4">
+                <div style="width:16px;height:16px;border-radius:50%;border:2px solid #f5ead8;background:{{ d.fill }}"></div>
+              </sc-for>
+            </div>
+            <div style="position:relative;display:grid;grid-template-columns:repeat(3,72px);gap:14px;justify-content:center;margin-top:4px">
+              <sc-for list="{{ keys }}" as="k" hint-placeholder-count="12">
+                <div onClick="{{ k.press }}" style="height:72px;border-radius:50%;border:2px solid {{ k.border }};background:{{ k.bg }};color:#f5ead8;font-family:'Caprasimo',serif;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:{{ k.cursor }};user-select:none" style-hover="background:{{ k.hoverBg }}" style-active="background:{{ k.pressBg }}">{{ k.label }}</div>
+              </sc-for>
+            </div>
+            <div style="position:relative;display:{{ codeErrDisplay }};padding:8px 14px;border-radius:999px;background:#8c2f1a;border:2px solid #201e1d;font:700 12px/1.3 'Figtree';color:#ffd9c7;text-align:center;max-width:270px">{{ codeErr }}</div>
+            <div style="position:relative;margin-top:4px;font:500 11.5px/1.5 'Figtree';color:#aebf92;text-align:center;max-width:270px">{{ t.codeFoot }}</div>
+            <div style="position:relative;display:flex;gap:9px;flex-wrap:wrap;justify-content:center">
+              <div onClick="{{ toLang }}" style="padding:8px 14px;border-radius:999px;border:2px solid rgba(245,234,216,.4);font:700 11px/1 'Figtree';color:#e1eecc;cursor:pointer" style-hover="background:rgba(245,234,216,.12)">{{ t.switchLang }}</div>
+              <div onClick="{{ goSignup }}" style="padding:8px 14px;border-radius:999px;border:2px solid #ffc6a5;background:rgba(198,113,57,.35);font:700 11px/1 'Figtree';color:#ffe1d0;cursor:pointer" style-hover="background:rgba(198,113,57,.6)">{{ t.newHere }}</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
+          <div style="min-height:100dvh;background:#f5ead8;background-image:radial-gradient(rgba(32,30,29,.07) 1px,transparent 1.3px);background-size:8px 8px;padding:60px 0 0;box-sizing:border-box;display:flex;flex-direction:column">
+            <div style="padding:0 22px;display:flex;align-items:center;gap:12px">
+              <div onClick="{{ toLock }}" style="width:42px;height:42px;border-radius:50%;background:#f9f4ed;border:2px solid #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" style-active="transform:translate(2px,2px)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#201e1d" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+              </div>
+              <div style="font-family:'Caprasimo',serif;font-size:29px;line-height:1.05;color:#201e1d;letter-spacing:-.02em">{{ t.signupTitle }}</div>
+            </div>
+            <div style="padding:10px 22px 0;font:500 13px/1.5 'Figtree';color:#645c50;max-width:330px">{{ t.signupSub }}</div>
+
+            <div style="padding:20px 22px 0;display:flex;flex-direction:column;gap:14px">
+              <div>
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.fName }}</div>
+                <input value="{{ fName }}" onChange="{{ setName }}" placeholder="{{ t.fNamePh }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 18px;border-radius:999px;border:2px solid #201e1d;background:#f9f4ed;font:600 15px/1 'Figtree';color:#201e1d;outline:none" style-focus="background:#ffe1d0">
+              </div>
+              <div>
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.fPhone }}</div>
+                <input value="{{ fPhone }}" onChange="{{ setPhone }}" placeholder="{{ t.fPhonePh }}" inputMode="tel" style="width:100%;box-sizing:border-box;height:52px;padding:0 18px;border-radius:999px;border:2px solid #201e1d;background:#f9f4ed;font:600 15px/1 'Figtree';color:#201e1d;outline:none" style-focus="background:#ffe1d0">
+              </div>
+              <div>
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.fAddr }}</div>
+                <input value="{{ fAddr }}" onChange="{{ setAddr }}" placeholder="{{ t.fAddrPh }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 18px;border-radius:999px;border:2px solid #201e1d;background:#f9f4ed;font:600 15px/1 'Figtree';color:#201e1d;outline:none" style-focus="background:#ffe1d0">
+              </div>
+              <div>
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.fBday }}</div>
+                <input value="{{ fBday }}" onChange="{{ setBday }}" placeholder="{{ t.fBdayPh }}" inputMode="numeric" style="width:100%;box-sizing:border-box;height:52px;padding:0 18px;border-radius:999px;border:2px solid #201e1d;background:#f9f4ed;font:600 15px/1 'Figtree';color:#201e1d;outline:none" style-focus="background:#ffe1d0">
+                <div style="display:{{ ageWarnDisplay }};font:700 12px/1.4 'Figtree';color:#8c491a;margin-top:7px;padding-left:4px">{{ ageWarn }}</div>
+              </div>
+              <div>
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.fId }}</div>
+                <div onClick="{{ toggleId }}" style="display:flex;align-items:center;gap:13px;padding:14px 16px;border-radius:22px;border:2px {{ idBorderStyle }} #201e1d;background:{{ idBg }};cursor:pointer" style-hover="background:#ffe1d0">
+                  <div style="width:44px;height:44px;border-radius:50%;background:#f5ead8;border:2px solid #201e1d;display:flex;align-items:center;justify-content:center;flex:none">
+                    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"></rect><circle cx="8.5" cy="12" r="2.5"></circle><path d="M14 10h5M14 14h3"></path></svg>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font:800 13.5px/1.3 'Figtree';color:#201e1d">{{ idText }}</div>
+                    <div style="font:500 11.5px/1.45 'Figtree';color:#645c50;margin-top:3px">{{ t.idNote }}</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:8px">{{ t.fPay }}</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <sc-for list="{{ payPicks }}" as="p" hint-placeholder-count="4">
+                    <div onClick="{{ p.pick }}" style="padding:10px 15px;border-radius:999px;border:2px solid #201e1d;font:700 12.5px/1 'Figtree';cursor:pointer;background:{{ p.bg }};color:{{ p.fg }}">{{ p.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
+            <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;margin-top:auto;padding:26px 22px 40px;background:#f5ead8;border-top:2px solid #201e1d">
+              <div onClick="{{ submitSignup }}" style="height:56px;border-radius:999px;background:{{ signupBg }};border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:18px;opacity:{{ signupOp }}" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.submitSignup }}</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isWaiting }}" hint-placeholder-val="{{ false }}">
+          <div style="min-height:100dvh;background:#2e2b25;background-image:radial-gradient(circle at 50% 18%,#56633f 0%,#2e2b25 66%),radial-gradient(rgba(0,0,0,.3) 1px,transparent 1.4px);background-size:auto,9px 9px;padding:96px 26px 60px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:18px">
+            <div style="width:140px;height:140px;border-radius:50%;background:#f5ead8;border:3px solid #201e1d;box-shadow:5px 6px 0 rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-4deg);animation:mfPop .5s ease both;flex:none">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <div style="font:800 9px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#645c50;margin-top:9px">Mafutero&rsquo;s</div>
+            </div>
+            <div style="font-family:'Caprasimo',serif;font-size:33px;line-height:1.05;color:#f5ead8;letter-spacing:-.02em;text-align:center">{{ t.waitTitle }}</div>
+            <div style="font:500 13.5px/1.55 'Figtree';color:#e1eecc;text-align:center;max-width:290px">{{ t.waitBody }}</div>
+
+            <div style="width:100%;background:#f5ead8;border:2px solid #201e1d;border-radius:26px;padding:18px;box-shadow:4px 5px 0 rgba(0,0,0,.4)">
+              <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a">{{ t.rulesTitle }}</div>
+              <div style="display:flex;flex-direction:column;gap:15px;margin-top:15px">
+                <sc-for list="{{ rules }}" as="r" hint-placeholder-count="3">
+                  <div style="display:flex;gap:13px;align-items:flex-start">
+                    <div style="width:34px;height:34px;border-radius:50%;background:#ffe1d0;border:2px solid #201e1d;display:flex;align-items:center;justify-content:center;flex:none;font-family:'Caprasimo',serif;font-size:16px;color:#402310">{{ r.n }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font:800 13.5px/1.3 'Figtree';color:#201e1d">{{ r.h }}</div>
+                      <div style="font:500 12.5px/1.5 'Figtree';color:#645c50;margin-top:4px">{{ r.b }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="font:500 12px/1.5 'Figtree';color:#aebf92;text-align:center;max-width:250px">{{ t.waitFoot }}</div>
+            <div onClick="{{ toLock }}" style="padding:13px 22px;border-radius:999px;background:#f5ead8;border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;font-family:'Caprasimo',serif;font-size:16px;color:#201e1d;cursor:pointer" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.backToLock }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+          <div style="min-height:100dvh;background:#f5ead8;background-image:radial-gradient(rgba(32,30,29,.07) 1px,transparent 1.3px);background-size:8px 8px;padding:60px 0 108px;box-sizing:border-box">
+            <div style="padding:0 22px 8px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+              <div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ openTillLine }}</div>
+                  <div onClick="{{ flipLang }}" style="font:800 9.5px/1 'Figtree';letter-spacing:.1em;padding:5px 9px;border-radius:999px;border:2px solid #201e1d;background:#f9f4ed;color:#201e1d;cursor:pointer" style-hover="background:#ffe1d0">{{ langFlip }}</div>
+                </div>
+                <div style="font-family:'Caprasimo',serif;font-size:31px;line-height:1.02;color:#201e1d;letter-spacing:-.02em;margin-top:6px">{{ t.greet }}<br>{{ clientName }}</div>
+              </div>
+              <div onClick="{{ goBag }}" style="position:relative;width:50px;height:50px;border-radius:50%;background:#c67139;border:2px solid #201e1d;box-shadow:2px 2px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" style-active="box-shadow:0 0 0 #201e1d;transform:translate(2px,2px)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f5ead8" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <sc-if value="{{ hasCart }}" hint-placeholder-val="{{ true }}">
+                  <div style="position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;border-radius:999px;background:#56633f;border:2px solid #201e1d;color:#f5ead8;font:800 11px/1 'Figtree';display:flex;align-items:center;justify-content:center">{{ cartCount }}</div>
+                </sc-if>
+              </div>
+            </div>
+
+            <div style="padding:12px 22px 0">
+              <div style="display:flex;align-items:center;gap:11px;background:{{ runBannerBg }};border:2px solid #201e1d;border-radius:20px;padding:11px 14px">
+                <div style="width:34px;height:34px;border-radius:50%;background:#f9f4ed;border:2px solid #201e1d;display:flex;align-items:center;justify-content:center;flex:none">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#201e1d" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"></path><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"></path><circle cx="7.5" cy="17.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:800 12.5px/1.2 'Figtree';color:#402310">{{ runBannerTitle }}</div>
+                  <div style="font:600 11.5px/1.35 'Figtree';color:#5c3a1c;margin-top:3px">{{ runBannerSub }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mf-hscroll" style="display:flex;gap:9px;overflow-x:auto;padding:14px 22px 18px;scrollbar-width:none">
+              <sc-for list="{{ chips }}" as="c" hint-placeholder-count="6">
+                <div onClick="{{ c.pick }}" style="flex:none;padding:8px 14px;border-radius:999px;border:2px solid #201e1d;font:700 12px/1 'Figtree';white-space:nowrap;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};opacity:{{ c.op }}">{{ c.label }}</div>
+              </sc-for>
+            </div>
+
+            <sc-for list="{{ sections }}" as="s" hint-placeholder-count="4">
+              <div style="padding:0 22px 26px">
+                <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+                  <div style="font-family:'Caprasimo',serif;font-size:23px;color:#201e1d;letter-spacing:-.01em">{{ s.title }}</div>
+                  <div style="flex:1;height:2px;background:#201e1d;opacity:.18"></div>
+                  <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#82796a">{{ s.sub }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
+                  <sc-for list="{{ s.items }}" as="p" hint-placeholder-count="3">
+                    <div onClick="{{ p.open }}" style="display:flex;gap:14px;align-items:center;background:#f9f4ed;border:2px solid #201e1d;border-radius:22px;padding:12px;box-shadow:3px 3px 0 rgba(32,30,29,.22);cursor:pointer" style-active="box-shadow:0 0 0 rgba(32,30,29,.22);transform:translate(3px,3px)">
+                      <div style="flex:none;width:66px;height:66px;border-radius:50%;border:2px solid #201e1d;display:flex;flex-direction:column;align-items:center;justify-content:center;background:{{ p.stickerBg }};background-image:radial-gradient(rgba(32,30,29,.22) 1.2px,transparent 1.4px);background-size:6px 6px">
+                        <div style="font-family:'Caprasimo',serif;font-size:21px;line-height:1;color:#201e1d">{{ p.initials }}</div>
+                        <div style="font:800 8px/1 'Figtree';letter-spacing:.1em;text-transform:uppercase;color:#402310;margin-top:3px">{{ p.type }}</div>
+                      </div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font:700 15.5px/1.2 'Figtree';color:#201e1d">{{ p.name }}</div>
+                        <div style="font:500 12px/1.4 'Figtree';color:#645c50;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.notes }}</div>
+                        <div style="display:flex;gap:6px;margin-top:7px;align-items:center">
+                          <span style="flex:none;white-space:nowrap;font:800 10px/1.2 'Figtree';letter-spacing:.06em;padding:5px 8px;border-radius:999px;background:#e1eecc;border:1.5px solid #56633f;color:#3d472b">THC {{ p.thc }}</span>
+                          <span style="flex:none;white-space:nowrap;font:700 10.5px/1.2 'Figtree';color:{{ p.stockFg }}">{{ p.stockLabel }}</span>
+                        </div>
+                      </div>
+                      <div style="flex:none;text-align:right">
+                        <div style="font:600 9.5px/1 'Figtree';letter-spacing:.1em;text-transform:uppercase;color:#82796a">{{ t.from }}</div>
+                        <div style="font-family:'Caprasimo',serif;font-size:22px;line-height:1.1;color:#8c491a">{{ p.fromPrice }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+
+            <div style="padding:0 22px 8px">
+              <div style="border:2px dashed #a19786;border-radius:22px;padding:14px 16px;text-align:center">
+                <div style="font:700 12.5px/1.3 'Figtree';color:#645c50">{{ t.notStockedTitle }}</div>
+                <div style="font:500 12px/1.4 'Figtree';color:#82796a;margin-top:3px">{{ t.notStockedSub }}</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isProduct }}" hint-placeholder-val="{{ true }}">
+          <div style="min-height:100dvh;background:#f5ead8;padding:0 0 132px;box-sizing:border-box">
+            <div style="position:relative;padding:64px 22px 26px;background:{{ selBg }};background-image:radial-gradient(rgba(32,30,29,.18) 1.3px,transparent 1.5px);background-size:7px 7px;border-bottom:2px solid #201e1d">
+              <div onClick="{{ back }}" style="width:42px;height:42px;border-radius:50%;background:#f9f4ed;border:2px solid #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:translate(2px,2px)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#201e1d" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+              </div>
+              <div style="display:flex;justify-content:center;margin:14px 0 4px">
+                <div style="width:172px;height:172px;border-radius:50%;background:#f9f4ed;border:3px solid #201e1d;box-shadow:5px 6px 0 rgba(32,30,29,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-4deg);animation:mfPop .45s ease both">
+                  <div style="font:800 9px/1 'Figtree';letter-spacing:.2em;text-transform:uppercase;color:#8c491a">Mafutero&rsquo;s</div>
+                  <div style="font-family:'Caprasimo',serif;font-size:46px;line-height:1;color:#201e1d;margin:6px 0">{{ selInitials }}</div>
+                  <div style="font:800 9.5px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#56633f">{{ selType }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding:22px 22px 0">
+              <div style="font-family:'Caprasimo',serif;font-size:32px;line-height:1.04;color:#201e1d;letter-spacing:-.02em">{{ selName }}</div>
+              <div style="font:500 13.5px/1.5 'Figtree';color:#645c50;margin-top:7px">{{ selNotes }}</div>
+
+              <div style="display:flex;gap:10px;margin-top:16px">
+                <div style="flex:1;background:#f9f4ed;border:2px solid #201e1d;border-radius:18px;padding:11px 13px">
+                  <div style="font:700 9.5px/1 'Figtree';letter-spacing:.13em;text-transform:uppercase;color:#82796a">THC</div>
+                  <div style="font-family:'Caprasimo',serif;font-size:24px;color:#8c491a;line-height:1.2">{{ selThc }}</div>
+                </div>
+                <div style="flex:1;background:#f9f4ed;border:2px solid #201e1d;border-radius:18px;padding:11px 13px">
+                  <div style="font:700 9.5px/1 'Figtree';letter-spacing:.13em;text-transform:uppercase;color:#82796a">CBD</div>
+                  <div style="font-family:'Caprasimo',serif;font-size:24px;color:#56633f;line-height:1.2">{{ selCbd }}</div>
+                </div>
+                <div style="flex:1;background:#f9f4ed;border:2px solid #201e1d;border-radius:18px;padding:11px 13px">
+                  <div style="font:700 9.5px/1 'Figtree';letter-spacing:.13em;text-transform:uppercase;color:#82796a">{{ t.inJar }}</div>
+                  <div style="font-family:'Caprasimo',serif;font-size:24px;line-height:1.2;color:{{ selStockFg }}">{{ selStock }}</div>
+                </div>
+              </div>
+
+              <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a;margin:24px 0 10px">{{ t.effects }}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ selEffects }}" as="e" hint-placeholder-count="3">
+                  <div style="padding:7px 12px;border-radius:999px;background:#ffe1d0;border:2px solid #201e1d;font:700 12px/1 'Figtree';color:#402310">{{ e }}</div>
+                </sc-for>
+              </div>
+
+              <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a;margin:24px 0 10px">{{ t.pickWeight }}</div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <sc-for list="{{ selWeights }}" as="w" hint-placeholder-count="4">
+                  <div onClick="{{ w.pick }}" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:18px;border:2px solid #201e1d;cursor:pointer;background:{{ w.bg }}">
+                    <div style="display:flex;align-items:center;gap:11px">
+                      <div style="width:19px;height:19px;border-radius:50%;border:2px solid #201e1d;display:flex;align-items:center;justify-content:center;background:{{ w.dotBg }}">
+                        <div style="width:8px;height:8px;border-radius:50%;background:{{ w.dotIn }}"></div>
+                      </div>
+                      <div style="font:700 15px/1 'Figtree';color:#201e1d">{{ w.label }}</div>
+                    </div>
+                    <div style="font-family:'Caprasimo',serif;font-size:20px;color:#402310">{{ w.price }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font:500 12px/1.5 'Figtree';color:#82796a;margin-top:12px">{{ selFootnote }}</div>
+            </div>
+
+            <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;padding:14px 22px 40px;background:#f5ead8;border-top:2px solid #201e1d;display:flex;gap:12px;align-items:center">
+              <div style="flex:none">
+                <div style="font:600 9.5px/1 'Figtree';letter-spacing:.1em;text-transform:uppercase;color:#82796a">{{ t.selected }}</div>
+                <div style="font-family:'Caprasimo',serif;font-size:21px;line-height:1.2;color:#201e1d">{{ selPrice }}</div>
+              </div>
+              <div onClick="{{ addToBag }}" style="flex:1;height:54px;border-radius:999px;background:#c67139;border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:17px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#f5ead8" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                {{ t.addToBag }}
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isBag }}" hint-placeholder-val="{{ true }}">
+          <div style="min-height:100dvh;background:#f5ead8;padding:60px 0 0;box-sizing:border-box;display:flex;flex-direction:column">
+            <div style="padding:0 22px;display:flex;align-items:center;gap:12px">
+              <div onClick="{{ goHome }}" style="width:42px;height:42px;border-radius:50%;background:#f9f4ed;border:2px solid #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" style-active="transform:translate(2px,2px)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#201e1d" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+              </div>
+              <div style="font-family:'Caprasimo',serif;font-size:30px;color:#201e1d;letter-spacing:-.02em">{{ t.bagTitle }}</div>
+            </div>
+
+            <div style="padding:20px 22px 0;display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ cartLines }}" as="l" hint-placeholder-count="2">
+                <div style="display:flex;gap:12px;align-items:center;background:#f9f4ed;border:2px solid #201e1d;border-radius:20px;padding:12px">
+                  <div style="flex:none;width:52px;height:52px;border-radius:50%;border:2px solid #201e1d;background:{{ l.bg }};display:flex;align-items:center;justify-content:center;font-family:'Caprasimo',serif;font-size:17px;color:#201e1d">{{ l.initials }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font:700 14.5px/1.2 'Figtree';color:#201e1d">{{ l.name }}</div>
+                    <div style="font:500 12px/1.4 'Figtree';color:#645c50;margin-top:2px">{{ l.label }}</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:9px;flex:none">
+                    <div onClick="{{ l.dec }}" style="width:30px;height:30px;border-radius:50%;border:2px solid #201e1d;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 15px/1 'Figtree';color:#201e1d">&minus;</div>
+                    <div style="font:800 15px/1 'Figtree';min-width:14px;text-align:center;color:#201e1d">{{ l.qty }}</div>
+                    <div onClick="{{ l.inc }}" style="width:30px;height:30px;border-radius:50%;border:2px solid #201e1d;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 15px/1 'Figtree';color:#201e1d">+</div>
+                  </div>
+                  <div style="flex:none;font-family:'Caprasimo',serif;font-size:18px;color:#402310;min-width:52px;text-align:right">{{ l.total }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ bagEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="border:2px dashed #a19786;border-radius:22px;padding:28px 18px;text-align:center">
+                  <div style="font-family:'Caprasimo',serif;font-size:20px;color:#645c50">{{ t.bagEmpty }}</div>
+                  <div onClick="{{ goHome }}" style="margin-top:10px;display:inline-block;padding:9px 16px;border-radius:999px;background:#c67139;border:2px solid #201e1d;color:#f5ead8;font:700 12.5px/1 'Figtree';cursor:pointer">{{ t.backToMenu }}</div>
+                </div>
+              </sc-if>
+            </div>
+
+            <div style="padding:26px 22px 0">
+              <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a;margin-bottom:10px">{{ t.howLabel }}</div>
+              <div style="display:flex;gap:10px">
+                <div onClick="{{ setPickup }}" style="flex:1;padding:14px;border-radius:20px;border:2px solid #201e1d;cursor:pointer;background:{{ pickupBg }}">
+                  <div style="font:800 14.5px/1 'Figtree';color:#201e1d">{{ t.pickupTitle }}</div>
+                  <div style="font:500 11.5px/1.4 'Figtree';color:#645c50;margin-top:4px">{{ t.pickupSub }}</div>
+                </div>
+                <div onClick="{{ setDelivery }}" style="flex:1;padding:14px;border-radius:20px;border:2px solid #201e1d;cursor:{{ deliveryCursor }};background:{{ deliveryBg }};opacity:{{ deliveryOp }}">
+                  <div style="font:800 14.5px/1 'Figtree';color:#201e1d">{{ t.deliveryTitle }}</div>
+                  <div style="font:500 11.5px/1.4 'Figtree';color:#645c50;margin-top:4px">{{ deliverySub }}</div>
+                </div>
+              </div>
+
+              <sc-if value="{{ showZones }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:14px;background:#f9f4ed;border:2px solid #201e1d;border-radius:20px;padding:14px 16px">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+                    <div style="font:700 10px/1 'Figtree';letter-spacing:.13em;text-transform:uppercase;color:#82796a">{{ t.zoneLabel }}</div>
+                    <div style="font:700 10.5px/1 'Figtree';color:#8c491a">{{ runNoteClient }}</div>
+                  </div>
+                  <div class="mf-hscroll" style="display:flex;gap:7px;overflow-x:auto;margin-top:11px;padding-bottom:2px;scrollbar-width:none">
+                    <sc-for list="{{ zoneChips }}" as="z" hint-placeholder-count="6">
+                      <div onClick="{{ z.pick }}" style="flex:none;padding:8px 12px;border-radius:999px;border:2px solid #201e1d;font:700 11.5px/1 'Figtree';white-space:nowrap;cursor:{{ z.cursor }};background:{{ z.bg }};color:{{ z.fg }};opacity:{{ z.op }}">{{ z.label }}</div>
+                    </sc-for>
+                  </div>
+                  <div style="font:600 11.5px/1.45 'Figtree';color:#5c3a1c;margin-top:10px">{{ zoneNote }}</div>
+                </div>
+              </sc-if>
+
+              <div style="margin-top:14px;background:#f9f4ed;border:2px solid #201e1d;border-radius:20px;padding:14px 16px">
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.13em;text-transform:uppercase;color:#82796a">{{ fulfilLabel }}</div>
+                <div style="font:700 14.5px/1.35 'Figtree';color:#201e1d;margin-top:6px">{{ fulfilValue }}</div>
+                <div style="display:flex;gap:8px;margin-top:11px;flex-wrap:wrap">
+                  <sc-for list="{{ slots }}" as="t2" hint-placeholder-count="4">
+                    <div onClick="{{ t2.pick }}" style="padding:8px 13px;border-radius:999px;border:2px solid #201e1d;font:700 12px/1 'Figtree';cursor:pointer;color:{{ t2.fg }};background:{{ t2.bg }}">{{ t2.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a;margin:26px 0 10px">{{ t.payLabel }}</div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <sc-for list="{{ payMethods }}" as="m" hint-placeholder-count="4">
+                  <div onClick="{{ m.pick }}" style="display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:20px;border:2px solid #201e1d;cursor:pointer;background:{{ m.bg }}">
+                    <div style="width:19px;height:19px;border-radius:50%;border:2px solid #201e1d;display:flex;align-items:center;justify-content:center;flex:none;background:{{ m.dotBg }}">
+                      <div style="width:8px;height:8px;border-radius:50%;background:{{ m.dotIn }}"></div>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font:800 14px/1.2 'Figtree';color:#201e1d">{{ m.label }}</div>
+                      <div style="font:500 11.5px/1.35 'Figtree';color:#645c50;margin-top:3px">{{ m.handle }}</div>
+                    </div>
+                    <div style="flex:none;font:800 9.5px/1 'Figtree';letter-spacing:.1em;text-transform:uppercase;padding:6px 9px;border-radius:999px;border:2px solid {{ m.tagBorder }};background:{{ m.tagBg }};color:{{ m.tagFg }}">{{ m.tag }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:11px;background:{{ payNoteBg }};border:2px solid {{ payNoteBorder }};border-radius:18px;padding:12px 14px">
+                <div style="font:800 12.5px/1.3 'Figtree';color:#402310">{{ payNoteTitle }}</div>
+                <div style="font:500 12px/1.5 'Figtree';color:#5c3a1c;margin-top:4px">{{ payNoteBody }}</div>
+              </div>
+
+              <div style="margin-top:16px;display:flex;flex-direction:column;gap:7px;padding:0 4px">
+                <div style="display:flex;justify-content:space-between;font:500 13.5px/1 'Figtree';color:#645c50"><span>{{ t.subtotal }}</span><span>{{ subtotal }}</span></div>
+                <div style="display:flex;justify-content:space-between;font:500 13.5px/1 'Figtree';color:#645c50"><span>{{ feeLabel }}</span><span>{{ fee }}</span></div>
+                <div style="height:2px;background:#201e1d;opacity:.15;margin:5px 0"></div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+                  <span style="font:800 14px/1.25 'Figtree';color:#201e1d">{{ dueLabel }}</span>
+                  <span style="font-family:'Caprasimo',serif;font-size:27px;color:#8c491a;flex:none">{{ total }}</span>
+                </div>
+                <div style="font:500 11.5px/1.5 'Figtree';color:#82796a;margin-top:4px">{{ t.nothingCharged }}</div>
+              </div>
+            </div>
+
+            <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;margin-top:auto;padding-top:26px;padding:14px 22px 40px;background:#f5ead8;border-top:2px solid #201e1d">
+              <div onClick="{{ place }}" style="height:56px;border-radius:999px;background:#56633f;border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:18px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.sendOrder }}</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isConfirm }}" hint-placeholder-val="{{ true }}">
+          <div style="min-height:100dvh;background:#56633f;background-image:radial-gradient(rgba(0,0,0,.22) 1px,transparent 1.4px);background-size:9px 9px;padding:96px 30px 128px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px">
+            <div style="width:148px;height:148px;border-radius:50%;background:#f5ead8;border:3px solid #201e1d;box-shadow:5px 6px 0 rgba(32,30,29,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-5deg);animation:mfPop .5s ease both">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#56633f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+              <div style="font:800 9.5px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a;margin-top:8px">{{ t.orderSent }}</div>
+            </div>
+            <div style="font-family:'Caprasimo',serif;font-size:32px;line-height:1.06;color:#f5ead8;letter-spacing:-.02em">{{ t.gotIt }}</div>
+            <div style="font:500 13.5px/1.55 'Figtree';color:#e1eecc;max-width:290px">{{ t.buzzed }}</div>
+
+            <div style="width:100%;background:{{ holdCardBg }};border:2px solid #201e1d;border-radius:22px;padding:14px 16px;text-align:left;box-shadow:4px 4px 0 rgba(32,30,29,.3)">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="flex:1;min-width:0">
+                  <div style="font:800 13px/1.25 'Figtree';color:#402310">{{ holdTitle }}</div>
+                  <div style="font:500 11.5px/1.45 'Figtree';color:#5c3a1c;margin-top:4px">{{ holdBody }}</div>
+                </div>
+                <sc-if value="{{ showClock }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:none;text-align:center;background:#f9f4ed;border:2px solid #201e1d;border-radius:16px;padding:8px 11px">
+                    <div style="font-family:'Caprasimo',serif;font-size:22px;line-height:1;color:#8c491a">{{ holdClock }}</div>
+                    <div style="font:800 8.5px/1 'Figtree';letter-spacing:.1em;text-transform:uppercase;color:#82796a;margin-top:4px">{{ t.holdLeftLabel }}</div>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+
+            <div style="width:100%;background:#f5ead8;border:2px solid #201e1d;border-radius:24px;padding:16px 18px;text-align:left;box-shadow:4px 4px 0 rgba(32,30,29,.3)">
+              <div style="display:flex;justify-content:space-between;align-items:baseline">
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#82796a">{{ t.orderLabel }}</div>
+                <div style="font-family:'Caprasimo',serif;font-size:19px;color:#201e1d">{{ orderNo }}</div>
+              </div>
+              <div style="height:2px;background:#201e1d;opacity:.15;margin:11px 0"></div>
+              <sc-for list="{{ lastLines }}" as="l" hint-placeholder-count="2">
+                <div style="display:flex;justify-content:space-between;gap:10px;font:600 13px/1.7 'Figtree';color:#474238"><span>{{ l.qty }}&times; {{ l.name }} &middot; {{ l.label }}</span><span style="flex:none">{{ l.total }}</span></div>
+              </sc-for>
+              <div style="height:2px;background:#201e1d;opacity:.15;margin:11px 0"></div>
+              <div style="display:flex;justify-content:space-between;gap:10px;font:800 14px/1.3 'Figtree';color:#201e1d"><span>{{ lastMode }}</span><span style="flex:none">{{ lastTotal }}</span></div>
+              <div style="font:600 12px/1.5 'Figtree';color:#645c50;margin-top:6px">{{ lastPay }}</div>
+              <div style="font:500 12px/1.5 'Figtree';color:#645c50;margin-top:4px">{{ lastWhen }}</div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+              <div onClick="{{ goHome }}" style="padding:13px 20px;border-radius:999px;background:#f5ead8;border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;font-family:'Caprasimo',serif;font-size:15px;color:#201e1d;cursor:pointer" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.backToMenu }}</div>
+              <sc-if value="{{ showClock }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ forceExpire }}" style="padding:13px 20px;border-radius:999px;background:transparent;border:2px dashed rgba(245,234,216,.6);font:700 12.5px/1 'Figtree';color:#e1eecc;cursor:pointer" style-hover="background:rgba(245,234,216,.12)">{{ t.simulateExpiry }}</div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isExpired }}" hint-placeholder-val="{{ false }}">
+          <div style="min-height:100dvh;background:#8c491a;background-image:radial-gradient(rgba(0,0,0,.24) 1px,transparent 1.4px);background-size:9px 9px;padding:104px 30px 128px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px">
+            <div style="width:152px;height:152px;border-radius:50%;background:#f5ead8;border:3px solid #201e1d;box-shadow:5px 6px 0 rgba(32,30,29,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(4deg);animation:mfPop .5s ease both">
+              <div style="font-family:'Caprasimo',serif;font-size:34px;line-height:1;color:#8c491a">00:00</div>
+              <div style="font:800 9px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#645c50;margin-top:8px">{{ t.expiredStamp }}</div>
+            </div>
+            <div style="font-family:'Caprasimo',serif;font-size:33px;line-height:1.06;color:#f5ead8;letter-spacing:-.02em">{{ t.expiredTitle }}</div>
+            <div style="font:500 14px/1.55 'Figtree';color:#ffe1d0;max-width:295px">{{ t.expiredBody }}</div>
+
+            <div style="width:100%;background:#f5ead8;border:2px solid #201e1d;border-radius:24px;padding:16px 18px;text-align:left;box-shadow:4px 4px 0 rgba(32,30,29,.35)">
+              <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a">{{ t.stillInHand }}</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+                <sc-for list="{{ suggestions }}" as="g" hint-placeholder-count="3">
+                  <div onClick="{{ g.open }}" style="display:flex;align-items:center;gap:11px;cursor:pointer">
+                    <div style="flex:none;width:44px;height:44px;border-radius:50%;border:2px solid #201e1d;background:{{ g.bg }};display:flex;align-items:center;justify-content:center;font-family:'Caprasimo',serif;font-size:15px;color:#201e1d">{{ g.initials }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font:800 14px/1.2 'Figtree';color:#201e1d">{{ g.name }}</div>
+                      <div style="font:600 11.5px/1.35 'Figtree';color:#56633f;margin-top:3px">{{ g.stockLabel }}</div>
+                    </div>
+                    <div style="font-family:'Caprasimo',serif;font-size:17px;color:#8c491a;flex:none">{{ g.fromPrice }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div onClick="{{ repeat }}" style="width:100%;height:56px;border-radius:999px;background:#56633f;border:2px solid #201e1d;box-shadow:4px 4px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:18px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(4px,4px)">{{ t.repeatOrder }}</div>
+            <div onClick="{{ goHome }}" style="font:700 12.5px/1 'Figtree';color:#ffe1d0;cursor:pointer;text-decoration:underline">{{ t.backToMenu }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+          <div style="min-height:100dvh;background:#f5ead8;padding:60px 0 120px;box-sizing:border-box">
+            <div style="padding:0 22px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+                <div>
+                  <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.dateline }}</div>
+                  <div style="font-family:'Caprasimo',serif;font-size:30px;line-height:1.04;color:#201e1d;letter-spacing:-.02em;margin-top:5px">{{ t.shopToday }}</div>
+                </div>
+                <div style="display:flex;gap:7px;flex:none">
+                  <div onClick="{{ flipLang }}" style="padding:9px 11px;border-radius:999px;border:2px solid #201e1d;background:#f9f4ed;font:800 10.5px/1 'Figtree';color:#201e1d;cursor:pointer" style-hover="background:#ffe1d0">{{ langFlip }}</div>
+                  <div onClick="{{ logout }}" style="padding:9px 13px;border-radius:999px;border:2px solid #201e1d;background:#f9f4ed;font:700 11.5px/1 'Figtree';color:#201e1d;cursor:pointer" style-hover="background:#ffe1d0">{{ t.lock }}</div>
+                </div>
+              </div>
+
+              <div style="margin-top:16px;background:#2e2b25;border:2px solid #201e1d;border-radius:26px;padding:16px 18px;box-shadow:4px 4px 0 rgba(32,30,29,.35)">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                  <div>
+                    <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#aebf92">{{ t.runTitle }}</div>
+                    <div style="font-family:'Caprasimo',serif;font-size:25px;line-height:1.1;color:#f5ead8;margin-top:6px">{{ runHeadline }}</div>
+                  </div>
+                  <div onClick="{{ toggleRun }}" style="flex:none;width:70px;height:36px;border-radius:999px;border:2px solid #f5ead8;background:{{ runSwitchBg }};padding:3px;display:flex;align-items:center;justify-content:{{ runSwitchJustify }};cursor:pointer">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#f5ead8;display:flex;align-items:center;justify-content:center;font:800 9px/1 'Figtree';color:#201e1d">{{ runSwitchLabel }}</div>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:9px;margin-top:14px">
+                  <div style="flex:1;background:rgba(245,234,216,.1);border:2px solid rgba(245,234,216,.35);border-radius:18px;padding:11px 13px">
+                    <div style="font:700 9.5px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:#aebf92">{{ t.hoursTitle }}</div>
+                    <div style="display:flex;align-items:center;gap:7px;margin-top:8px">
+                      <input type="time" value="{{ runStart }}" onChange="{{ setRunStart }}" style="flex:1;min-width:0;height:38px;padding:0 8px;border-radius:12px;border:2px solid rgba(245,234,216,.5);background:rgba(245,234,216,.12);color:#f5ead8;font:700 14px/1 'Figtree';box-sizing:border-box">
+                      <div style="font:800 13px/1 'Figtree';color:#8fa073;flex:none">&ndash;</div>
+                      <input type="time" value="{{ runEnd }}" onChange="{{ setRunEnd }}" style="flex:1;min-width:0;height:38px;padding:0 8px;border-radius:12px;border:2px solid rgba(245,234,216,.5);background:rgba(245,234,216,.12);color:#f5ead8;font:700 14px/1 'Figtree';box-sizing:border-box">
+                    </div>
+                    <div style="font:600 10px/1.3 'Figtree';color:#8fa073;margin-top:7px">{{ runWindowLabel }}</div>
+                  </div>
+                  <div style="flex:1;background:rgba(245,234,216,.1);border:2px solid rgba(245,234,216,.35);border-radius:18px;padding:11px 13px">
+                    <div style="font:700 9.5px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:#aebf92">{{ t.runStops }}</div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+                      <div onClick="{{ fewerStops }}" style="width:28px;height:28px;border-radius:50%;border:2px solid #f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 15px/1 'Figtree';color:#f5ead8">&minus;</div>
+                      <div style="flex:1;text-align:center;font-family:'Caprasimo',serif;font-size:20px;line-height:1;color:#f5ead8">{{ runStopsLabel }}</div>
+                      <div onClick="{{ moreStops }}" style="width:28px;height:28px;border-radius:50%;border:2px solid #f5ead8;background:#c67139;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 15px/1 'Figtree';color:#f5ead8">+</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top:10px;background:rgba(245,234,216,.1);border:2px solid rgba(245,234,216,.35);border-radius:18px;padding:12px 13px">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+                    <div style="font:700 9.5px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:#aebf92">{{ t.zonesTitle }}</div>
+                    <div style="font:700 10px/1 'Figtree';color:#8fa073;flex:none">{{ runZonesMeta }}</div>
+                  </div>
+                  <div style="font:500 10.5px/1.4 'Figtree';color:#8fa073;margin-top:5px">{{ t.zonesSub }}</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:11px">
+                    <sc-for list="{{ runZoneChips }}" as="z" hint-placeholder-count="9">
+                      <div onClick="{{ z.toggle }}" style="padding:8px 12px;border-radius:999px;border:2px solid {{ z.border }};background:{{ z.bg }};color:{{ z.fg }};cursor:pointer;font:700 12px/1.15 'Figtree'">{{ z.label }}<span style="display:block;font:600 9.5px/1.2 'Figtree';opacity:.75;margin-top:2px">{{ z.meta }}</span></div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:16px;background:#c67139;background-image:radial-gradient(rgba(32,30,29,.2) 1.2px,transparent 1.4px);background-size:7px 7px;border:2px solid #201e1d;border-radius:26px;padding:18px 20px;box-shadow:4px 4px 0 rgba(32,30,29,.3)">
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#402310">{{ t.takenToday }}</div>
+                <div style="font-family:'Caprasimo',serif;font-size:46px;line-height:1.02;color:#f9f4ed;margin-top:6px">$1,240</div>
+                <div style="display:flex;gap:14px;margin-top:10px;font:700 12px/1.3 'Figtree';color:#402310;flex-wrap:wrap">
+                  <span>{{ t.ninePlaced }}</span><span>&middot;</span><span>{{ t.avgTicket }}</span>
+                </div>
+                <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
+                  <sc-for list="{{ payMix }}" as="p" hint-placeholder-count="4">
+                    <div style="padding:6px 10px;border-radius:999px;background:#f9f4ed;border:2px solid #201e1d;font:800 10.5px/1 'Figtree';color:#402310">{{ p.label }} {{ p.value }}</div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div onClick="{{ goQueue }}" style="margin-top:14px;display:flex;align-items:center;gap:13px;background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:15px 17px;cursor:pointer;box-shadow:3px 3px 0 rgba(32,30,29,.22)" style-active="box-shadow:0 0 0 rgba(32,30,29,.22);transform:translate(3px,3px)">
+                <div style="width:44px;height:44px;border-radius:50%;background:#ffe1d0;border:2px solid #201e1d;display:flex;align-items:center;justify-content:center;flex:none">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+                </div>
+                <div style="flex:1">
+                  <div style="font:800 14.5px/1.25 'Figtree';color:#201e1d">{{ waitingLine }}</div>
+                  <div style="font:500 12px/1.4 'Figtree';color:#645c50;margin-top:3px">{{ newestLine }}</div>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#201e1d" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
+              </div>
+
+              <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.runningLow }}</div>
+              <div style="display:flex;flex-direction:column;gap:9px;margin-top:11px">
+                <sc-for list="{{ lowStock }}" as="s" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:11px;background:#ffe1d0;border:2px solid #8c491a;border-radius:18px;padding:11px 14px">
+                    <div style="width:9px;height:9px;border-radius:50%;background:#b2622d;flex:none"></div>
+                    <div style="flex:1;font:700 13.5px/1.3 'Figtree';color:#402310">{{ s.name }}</div>
+                    <div style="font:800 12.5px/1 'Figtree';color:#8c491a;flex:none;white-space:nowrap">{{ s.left }}</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.fastest }}</div>
+              <div style="margin-top:11px;background:#f9f4ed;border:2px solid #201e1d;border-radius:22px;padding:6px 16px">
+                <sc-for list="{{ bestSellers }}" as="b" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(32,30,29,.12)">
+                    <div style="font-family:'Caprasimo',serif;font-size:18px;color:#c67139;width:20px">{{ b.rank }}</div>
+                    <div style="flex:1;font:700 13.5px/1.2 'Figtree';color:#201e1d">{{ b.name }}</div>
+                    <div style="font:600 12px/1 'Figtree';color:#645c50;flex:none">{{ b.orders }}</div>
+                    <div style="font-family:'Caprasimo',serif;font-size:16px;color:#56633f;flex:none">{{ b.take }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isQueue }}" hint-placeholder-val="{{ true }}">
+          <div style="min-height:100dvh;background:#f5ead8;padding:60px 0 120px;box-sizing:border-box">
+            <div style="padding:0 22px">
+              <div style="font-family:'Caprasimo',serif;font-size:30px;color:#201e1d;letter-spacing:-.02em">{{ t.ordersTitle }}</div>
+              <div style="font:500 13px/1.4 'Figtree';color:#645c50;margin-top:4px">{{ t.ordersSub }}</div>
+
+              <div style="margin-top:16px;display:flex;align-items:center;gap:12px;background:#2e2b25;border:2px solid #201e1d;border-radius:22px;padding:13px 15px;animation:mfSlide .4s ease both">
+                <div style="width:38px;height:38px;border-radius:11px;background:#c67139;display:flex;align-items:center;justify-content:center;flex:none;font-family:'Caprasimo',serif;font-size:17px;color:#f5ead8">M</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:800 12.5px/1 'Figtree';color:#f5ead8">Mafutero&rsquo;s Supply &middot; {{ t.now }}</div>
+                  <div style="font:500 12.5px/1.4 'Figtree';color:#ccdbb2;margin-top:3px">{{ pushText }}</div>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:12px;margin-top:18px">
+                <sc-for list="{{ orders }}" as="o" hint-placeholder-count="3">
+                  <div style="background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:15px 16px;box-shadow:3px 3px 0 rgba(32,30,29,.2)">
+                    <div style="display:flex;align-items:center;gap:11px">
+                      <div style="width:42px;height:42px;border-radius:50%;border:2px solid #201e1d;background:#e1eecc;display:flex;align-items:center;justify-content:center;font-family:'Caprasimo',serif;font-size:16px;color:#3d472b;flex:none">{{ o.initials }}</div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font:800 15px/1.15 'Figtree';color:#201e1d">{{ o.client }}</div>
+                        <div style="font:500 12px/1.4 'Figtree';color:#645c50;margin-top:2px">{{ o.no }} &middot; {{ o.when }}</div>
+                      </div>
+                      <div style="padding:6px 11px;border-radius:999px;border:2px solid #201e1d;font:800 10.5px/1 'Figtree';letter-spacing:.06em;text-transform:uppercase;background:{{ o.statusBg }};color:{{ o.statusFg }};flex:none;white-space:nowrap">{{ o.status }}</div>
+                    </div>
+                    <div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
+                      <div style="padding:6px 10px;border-radius:999px;border:2px solid {{ o.payBorder }};background:{{ o.payBg }};font:800 10px/1 'Figtree';letter-spacing:.06em;text-transform:uppercase;color:{{ o.payFg }};white-space:nowrap">{{ o.payTag }}</div>
+                      <sc-if value="{{ o.showHold }}" hint-placeholder-val="{{ false }}">
+                        <div style="padding:6px 10px;border-radius:999px;border:2px solid #8c491a;background:#ffe1d0;font:800 10px/1 'Figtree';letter-spacing:.06em;text-transform:uppercase;color:#8c491a;white-space:nowrap">{{ o.holdTag }}</div>
+                      </sc-if>
+                    </div>
+                    <div style="margin-top:11px;padding:11px 13px;border-radius:16px;background:#f5ead8;border:1.5px solid rgba(32,30,29,.18)">
+                      <sc-for list="{{ o.items }}" as="it" hint-placeholder-count="2">
+                        <div style="display:flex;justify-content:space-between;gap:10px;font:600 13px/1.7 'Figtree';color:#474238"><span>{{ it.line }}</span><span style="flex:none">{{ it.price }}</span></div>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:13px">
+                      <div style="flex:1;min-width:0">
+                        <div style="font:700 10px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:#82796a">{{ o.modeLabel }}</div>
+                        <div style="font:700 13px/1.35 'Figtree';color:#201e1d;margin-top:4px">{{ o.where }}</div>
+                      </div>
+                      <div style="font-family:'Caprasimo',serif;font-size:23px;color:#8c491a;flex:none">{{ o.total }}</div>
+                    </div>
+                    <div onClick="{{ o.confirmPay }}" style="display:{{ o.confirmDisplay }};align-items:center;gap:10px;margin-top:11px;padding:11px 13px;border-radius:18px;background:#ffe1d0;border:2px solid #8c491a;cursor:pointer" style-hover="background:#ffd3ba">
+                        <div style="width:28px;height:28px;border-radius:50%;background:#8c491a;display:flex;align-items:center;justify-content:center;flex:none">
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffe1d0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                        </div>
+                        <div style="flex:1;min-width:0">
+                          <div style="font:800 12.5px/1.25 'Figtree';color:#402310">{{ o.confirmTitle }}</div>
+                          <div style="font:500 11.5px/1.4 'Figtree';color:#5c3a1c;margin-top:3px">{{ o.confirmSub }}</div>
+                        </div>
+                    </div>
+                    <div onClick="{{ o.undoPay }}" style="display:{{ o.undoDisplay }};align-items:center;justify-content:center;gap:8px;margin-top:11px;padding:9px 13px;border-radius:999px;background:#f5ead8;border:2px dashed #8c491a;cursor:pointer;font:700 12px/1 'Figtree';color:#8c491a" style-hover="background:#ffe1d0">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"></path><path d="M4 9h11a5 5 0 0 1 0 10h-1"></path></svg>
+                      {{ o.undoPayLabel }}
+                    </div>
+                    <div style="display:flex;gap:9px;margin-top:13px">
+                      <div onClick="{{ o.stepBack }}" title="{{ o.stepBackLabel }}" style="display:{{ o.backDisplay }};width:46px;height:46px;border-radius:50%;border:2px solid #201e1d;background:#f5ead8;align-items:center;justify-content:center;cursor:pointer;flex:none" style-hover="background:#eee7db">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#201e1d" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"></path><path d="M4 9h11a5 5 0 0 1 0 10h-1"></path></svg>
+                      </div>
+                      <div onClick="{{ o.advance }}" style="flex:1;height:46px;border-radius:999px;background:{{ o.actionBg }};border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:{{ o.actionCursor }};color:#f5ead8;font-family:'Caprasimo',serif;font-size:15px;text-align:center;padding:0 10px;opacity:{{ o.actionOp }}" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ o.action }}</div>
+                      <div onClick="{{ o.revoke }}" title="{{ o.revokeLabel }}" style="width:46px;height:46px;border-radius:50%;border:2px solid #8c491a;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" style-hover="background:#ffe1d0">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isInv }}" hint-placeholder-val="{{ true }}">
+          <div style="min-height:100dvh;background:#f5ead8;padding:60px 0 120px;box-sizing:border-box">
+            <div style="padding:0 22px">
+              <div style="font-family:'Caprasimo',serif;font-size:30px;color:#201e1d;letter-spacing:-.02em">{{ t.stockTitle }}</div>
+              <div style="font:500 13px/1.4 'Figtree';color:#645c50;margin-top:4px">{{ t.stockSub }}</div>
+
+              <div onClick="{{ openAdd }}" style="margin-top:16px;height:52px;border-radius:999px;background:#c67139;border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:16px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5ead8" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                {{ t.addStrain }}
+              </div>
+
+              <div style="display:{{ addFormDisplay }};margin-top:14px;background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:16px;box-shadow:3px 3px 0 rgba(32,30,29,.22)">
+                <div style="font-family:'Caprasimo',serif;font-size:20px;color:#201e1d">{{ t.addTitle }}</div>
+                <div style="display:flex;flex-direction:column;gap:13px;margin-top:14px">
+                  <div>
+                    <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainName }}</div>
+                    <input value="{{ npName }}" onChange="{{ setNpName }}" placeholder="{{ t.fStrainNamePh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+                  </div>
+                  <div>
+                    <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainSec }}</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:7px">
+                      <sc-for list="{{ npSecs }}" as="o1" hint-placeholder-count="4">
+                        <div onClick="{{ o1.pick }}" style="padding:9px 14px;border-radius:999px;border:2px solid #201e1d;font:700 12.5px/1 'Figtree';cursor:pointer;background:{{ o1.bg }};color:{{ o1.fg }}">{{ o1.label }}</div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div>
+                    <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainType }}</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:7px">
+                      <sc-for list="{{ npTypes }}" as="o2" hint-placeholder-count="4">
+                        <div onClick="{{ o2.pick }}" style="padding:9px 14px;border-radius:999px;border:2px solid #201e1d;font:700 12.5px/1 'Figtree';cursor:pointer;background:{{ o2.bg }};color:{{ o2.fg }}">{{ o2.label }}</div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:10px">
+                    <div style="flex:1;min-width:0">
+                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainPrice }}</div>
+                      <input value="{{ npPrice }}" onChange="{{ setNpPrice }}" inputMode="numeric" placeholder="25" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainStock }}</div>
+                      <input value="{{ npStock }}" onChange="{{ setNpStock }}" inputMode="numeric" placeholder="10" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainThc }}</div>
+                      <input value="{{ npThc }}" onChange="{{ setNpThc }}" placeholder="{{ t.fStrainThcPh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+                    </div>
+                  </div>
+                  <div style="font:500 11.5px/1.4 'Figtree';color:#645c50;margin-top:-4px">{{ npPriceHint }}</div>
+                  <div>
+                    <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainNote }}</div>
+                    <input value="{{ npNote }}" onChange="{{ setNpNote }}" placeholder="{{ t.fStrainNotePh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+                  </div>
+                  <div style="display:flex;gap:9px;margin-top:2px">
+                    <div onClick="{{ saveProduct }}" style="flex:1;height:50px;border-radius:999px;background:{{ addBg }};border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:16px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.saveStrain }}</div>
+                    <div onClick="{{ closeAdd }}" style="padding:0 18px;height:50px;border-radius:999px;border:2px solid #a19786;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 12.5px/1 'Figtree';color:#645c50" style-hover="background:#eee7db">{{ t.cancelAdd }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+                <sc-for list="{{ invRows }}" as="r" hint-placeholder-count="6">
+                  <div style="display:flex;align-items:center;gap:12px;background:#f9f4ed;border:2px solid #201e1d;border-radius:20px;padding:12px 13px">
+                    <div style="flex:none;width:46px;height:46px;border-radius:50%;border:2px solid #201e1d;background:{{ r.bg }};display:flex;align-items:center;justify-content:center;font-family:'Caprasimo',serif;font-size:15px;color:#201e1d">{{ r.initials }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font:700 14px/1.2 'Figtree';color:#201e1d">{{ r.name }}</div>
+                      <div style="font:600 11.5px/1.3 'Figtree';color:{{ r.fg }};margin-top:3px">{{ r.note }}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;flex:none">
+                      <div onClick="{{ r.dec }}" style="width:32px;height:32px;border-radius:50%;border:2px solid #201e1d;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 16px/1 'Figtree';color:#201e1d">&minus;</div>
+                      <div style="font-family:'Caprasimo',serif;font-size:20px;min-width:26px;text-align:center;color:#201e1d">{{ r.stock }}</div>
+                      <div onClick="{{ r.inc }}" style="width:32px;height:32px;border-radius:50%;border:2px solid #201e1d;background:#c67139;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 16px/1 'Figtree';color:#f5ead8">+</div>
+                      <div onClick="{{ r.remove }}" title="{{ t.removeStrain }}" style="width:32px;height:32px;border-radius:50%;border:2px solid #8c491a;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:#ffe1d0">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isCodes }}" hint-placeholder-val="{{ true }}">
+          <div style="min-height:100dvh;background:#f5ead8;padding:60px 0 120px;box-sizing:border-box">
+            <div style="padding:0 22px">
+              <div style="font-family:'Caprasimo',serif;font-size:30px;color:#201e1d;letter-spacing:-.02em">{{ t.whoTitle }}</div>
+              <div style="font:500 13px/1.4 'Figtree';color:#645c50;margin-top:4px">{{ t.whoSub }}</div>
+
+              <div style="display:{{ reqsDisplay }};margin-top:16px;background:#ffe1d0;border:2px solid #8c491a;border-radius:24px;padding:15px 16px">
+                <div style="display:flex;align-items:baseline;gap:9px">
+                  <div style="font-family:'Caprasimo',serif;font-size:19px;color:#402310">{{ t.newReqsTitle }}</div>
+                  <div style="flex:1;height:2px;background:#8c491a;opacity:.3"></div>
+                  <div style="font:700 10px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:#8c491a">{{ t.newReqsSub }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:11px;margin-top:13px">
+                  <sc-for list="{{ newReqs }}" as="r" hint-placeholder-count="2">
+                    <div style="background:#f9f4ed;border:2px solid #201e1d;border-radius:20px;padding:13px 14px">
+                      <div style="display:flex;align-items:center;gap:11px">
+                        <div style="width:40px;height:40px;border-radius:50%;border:2px solid #201e1d;background:#ffc6a5;display:flex;align-items:center;justify-content:center;font-family:'Caprasimo',serif;font-size:16px;color:#402310;flex:none">{{ r.initials }}</div>
+                        <div style="flex:1;min-width:0">
+                          <div style="font:800 14.5px/1.2 'Figtree';color:#201e1d">{{ r.name }}</div>
+                          <div style="font:600 11.5px/1.35 'Figtree';color:#645c50;margin-top:3px">{{ r.phone }} &middot; {{ r.when }}</div>
+                        </div>
+                      </div>
+                      <div style="font:500 12px/1.45 'Figtree';color:#474238;margin-top:9px">{{ r.addr }}</div>
+                      <div style="font:700 11px/1.3 'Figtree';color:#56633f;margin-top:5px">{{ r.meta }}</div>
+                      <div style="display:flex;gap:9px;margin-top:12px">
+                        <div onClick="{{ r.approve }}" style="flex:1;height:42px;border-radius:999px;background:#56633f;border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:14px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.reqApprove }}</div>
+                        <div onClick="{{ r.ignore }}" style="padding:0 16px;height:42px;border-radius:999px;border:2px solid #a19786;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 12px/1 'Figtree';color:#645c50" style-hover="background:#eee7db">{{ t.reqIgnore }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div onClick="{{ issueCode }}" style="margin-top:16px;height:54px;border-radius:999px;background:#c67139;border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:17px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#f5ead8" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                {{ t.newCode }}
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:11px;margin-top:18px">
+                <sc-for list="{{ codeRows }}" as="c" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:12px;background:#f9f4ed;border:2px solid #201e1d;border-radius:20px;padding:13px 14px">
+                    <div style="flex:1;min-width:0">
+                      <div style="font:800 14.5px/1.2 'Figtree';color:#201e1d">{{ c.name }}</div>
+                      <div style="font:500 11.5px/1.35 'Figtree';color:#645c50;margin-top:3px">{{ c.meta }}</div>
+                    </div>
+                    <div style="font-family:'Caprasimo',serif;font-size:20px;letter-spacing:.1em;color:#402310;padding:5px 11px;border-radius:12px;background:#ffe1d0;border:2px solid #201e1d;flex:none">{{ c.code }}</div>
+                    <div onClick="{{ c.toggle }}" style="padding:7px 11px;border-radius:999px;border:2px solid #201e1d;font:800 10.5px/1 'Figtree';letter-spacing:.06em;text-transform:uppercase;cursor:pointer;flex:none;white-space:nowrap;background:{{ c.bg }};color:{{ c.fg }}">{{ c.state }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isClientNav }}" hint-placeholder-val="{{ false }}">
+          <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;height:84px;background:#2e2b25;border-top:2px solid #201e1d;display:flex;align-items:flex-start;padding:10px 8px 0">
+            <div onClick="{{ goHome }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:5px 0;color:{{ navHomeFg }}">
+              <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:{{ navHomePill }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 10v10h14V10"></path></svg>
+              </div>
+              <div style="font:800 10.5px/1 'Figtree';letter-spacing:.04em">{{ t.navMenu }}</div>
+            </div>
+            <div onClick="{{ goBag }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:5px 0;color:{{ navBagFg }}">
+              <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:{{ navBagPill }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+              </div>
+              <div style="font:800 10.5px/1 'Figtree';letter-spacing:.04em">{{ t.navBag }}</div>
+            </div>
+            <div onClick="{{ logout }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:5px 0;color:#a19786">
+              <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(245,234,216,.1)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
+              </div>
+              <div style="font:800 10.5px/1 'Figtree';letter-spacing:.04em">{{ t.navOut }}</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isOwner }}" hint-placeholder-val="{{ false }}">
+          <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;height:84px;background:#2e2b25;border-top:2px solid #201e1d;display:flex;align-items:flex-start;padding:10px 8px 0">
+            <sc-for list="{{ ownerTabs }}" as="t3" hint-placeholder-count="4">
+              <div onClick="{{ t3.go }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:5px 0;color:{{ t3.fg }}">
+                <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:{{ t3.pill }}">
+                  <div style="width:9px;height:9px;border-radius:50%;background:{{ t3.fg }}"></div>
+                </div>
+                <div style="font:800 10.5px/1 'Figtree';letter-spacing:.04em">{{ t3.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+
+</div>
+
+<template id="__bundler_thumbnail" data-bg-color="#2e2b25"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#2e2b25"/><circle cx="50" cy="50" r="28" fill="#c67139"/><text x="50" y="61" text-anchor="middle" font-family="Georgia,serif" font-size="28" fill="#f5ead8">M</text></svg></template>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;shopName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Mafutero's Supply&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;startInOwnerView&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototype start&quot;},&quot;startUnlocked&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototype start&quot;}}">
+const COPY = {
+  es: {
+    switchLang: 'English / Español',
+    tabClient: 'Código de cliente', tabOwner: 'PIN del dueño',
+    hintClient: 'Mete los cuatro números que El Mafu te textió.',
+    hintOwner: 'PIN del dueño.',
+    hintSetup: 'Primera vez. Escoge el PIN del dueño — estos cuatro números quedan guardados.',
+    badgeDemo: 'Modo demo · sin servidor, cualquier código entra',
+    badgeSetup: 'Sin configurar · abre PIN del dueño para escoger el tuyo',
+    badgeNoStore: 'Sin memoria · los códigos vienen de Netlify, no se guardan aquí',
+    needSetup: 'Todavía no hay códigos. El Mafu tiene que configurar el suyo primero.',
+    codeBad: 'Ese código no sirve. Escríbele a El Mafu.',
+    codeFoot: 'Un código por cliente. Si lo pierdes, textéale a El Mafu al (656) 247-1884 o IG @Mafutero3000.',
+    openTill: h => 'Abierto hasta las ' + h, closedToday: 'Hoy solo recogido', greet: 'Qué es la que,',
+    from: 'desde', inJar: 'En mano', effects: 'Cómo pega', pickWeight: 'Escoge el peso',
+    addToBag: 'Échalo al bulto', selected: 'Escogido',
+    soldOut: 'Se acabó', onlyLeft: n => 'Quedan ' + n, inStock: n => n + ' en mano',
+    notStockedTitle: 'Comestibles, tinturas, cremas y cristal',
+    notStockedSub: 'Todavía no hay. Textéale a El Mafu si quieres algo en específico.',
+    bagTitle: 'Tu bulto', bagEmpty: 'El bulto está vacío', backToMenu: 'Pa’ atrás al menú',
+    howLabel: 'Cómo lo quieres',
+    pickupTitle: 'Lo busco yo', pickupSub: 'Listo en ~25 min',
+    deliveryTitle: 'Delivery', deliveryOn: w => 'Run de hoy ' + w,
+    deliveryOff: 'Hoy no hay run', deliveryFull: 'El run está lleno',
+    zoneLabel: 'Por dónde estás', zoneFree: z => z + ' — ' + 'dentro de las 5 millas, delivery gratis',
+    zonePaid: (z, m, f) => z + ' — ' + m + ' millas, $' + f + ' de delivery',
+    zoneOut: z => z + ' está fuera del run de hoy. Busca en la tienda o espera el próximo run.',
+    cutoffNote: z => 'Solo hasta ' + z + ' hoy',
+    deliverTo: 'Se lo llevo a', pickUpAt: 'Lo buscas en',
+    addrDelivery: 'La dirección que me textees',
+    addrPickup: 'Textéame cuando vengas y te doy el punto',
+    payLabel: 'Cómo pagas', subtotal: 'Subtotal', feeDelivery: 'Delivery', feePickup: 'Recogido', free: 'Gratis',
+    dueCash: 'Efectivo al llegar', duePaid: m => 'Le mandas por ' + m,
+    nothingCharged: 'La app no cobra nada. Goldo-Mafu confirma por texto.',
+    sendOrder: 'Mándale la orden',
+    tagFast: 'Rápido', tagCash: 'Efectivo', tagPicked: 'Escogido',
+    payFastTitle: 'Pago rápido = producto separado',
+    payFastBody: 'Mándale los chavos y esa mota queda con tu nombre hasta que llegues. Nadie te la quita.',
+    payCashPickupTitle: 'Efectivo = 30 minutos de hold',
+    payCashPickupBody: 'Se te guarda 30 minutos. Si no llegas, se suelta la orden y esa mota vuelve al menú. En la tienda te cuadramos otra.',
+    payCashDeliveryTitle: 'Efectivo en delivery está bien',
+    payCashDeliveryBody: 'Él va pa’ allá, así que no hay hold. Ten los chavos listos y exactos si puedes.',
+    orderSent: 'Orden enviada', gotIt: 'El Mafu la cogió',
+    buzzed: 'Le brincó el teléfono. Te textea pa’ confirmar, casi siempre en cinco minutos.',
+    orderLabel: 'Orden', holdLeftLabel: 'Te queda',
+    holdSeparado: 'Separado a tu nombre',
+    holdSeparadoBody: 'Queda separado en cuanto él vea el pago. Si no le llega, suelta la orden y vuelve al menú.',
+    payPending: 'Pago sin confirmar', payOkTag: 'Pago confirmado',
+    undoPay: 'Me equivoqué — quítalo',
+    stepBackLabel: 'Atrás',
+    zonesPicked: n => n === 1 ? '1 zona prendida' : n + ' zonas prendidas',
+    zonesTitle: 'Dónde entrega',
+    zonesSub: 'Toca las que quieras. Las apagadas no le salen a nadie.',
+    hoursTitle: 'Horario de entrega',
+    hoursFrom: 'Desde', hoursTo: 'Hasta',
+    addStrain: 'Añadir mata', addTitle: 'Mata nueva',
+    fStrainName: 'Nombre', fStrainNamePh: 'Ej: Cherry Runtz',
+    fStrainSec: 'Categoría', fStrainType: 'Tipo',
+    fStrainThc: 'THC', fStrainThcPh: '28%',
+    fStrainPrice: 'Precio base', fStrainStock: 'Unidades',
+    fStrainNote: 'Descripción', fStrainNotePh: 'Cómo sabe, cómo pega',
+    priceHint: u => 'Precio de ' + u + '. Los demás pesos se calculan solos.',
+    saveStrain: 'Guardar la mata', cancelAdd: 'Cancelar',
+    removeStrain: 'Quitar',
+    navMenu: 'Menú', navBag: 'Bolsa', navOut: 'Salir',
+    confirmTitle: 'Confirma que te llegó el pago',
+    confirmSub: 'Hasta que lo confirmes, esto no está separado.',
+    revokeLabel: 'Cancelar la orden', cancelled: 'Cancelada', archived: 'Archivar',
+    noPay: 'Nadie pagó',
+    holdClockTitle: 'Tienes 30 minutos',
+    holdClockBody: 'Llega antes de que llegue a cero. Si se pasa, se suelta y si se vendió, se vendió.',
+    holdDeliveryCash: 'Va en el run de hoy',
+    holdDeliveryCashBody: 'Paga en efectivo cuando llegue. Si el run se llena antes, te textea.',
+    simulateExpiry: 'Ver qué pasa si se pasa',
+    expiredStamp: 'Se pasó', expiredTitle: 'Se soltó tu orden',
+    expiredBody: 'Pasaron los 30 minutos sin pago y sin que llegaras, así que se soltó y volvió al menú. Si todavía queda, la coges otra vez. Si se vendió, se vendió — la próxima mándale por Cash App, Zelle o Venmo y queda separada.',
+    stillInHand: 'Esto está en mano ahora', repeatOrder: 'Repite la orden',
+    dateline: 'Martes, 10 de agosto', shopToday: 'La tienda hoy', lock: 'Trancar',
+    runTitle: 'El run de hoy', runOn: w => 'Rodando ' + w, runOff: 'Hoy no hay run',
+    runFull: w => 'Lleno · ' + w, runWindow: 'Horario', runStops: 'Paradas',
+    runNote: 'Hasta dónde llego', tapToChange: 'Toca pa’ cambiar',
+    stopsOf: (a, b) => a + '/' + b,
+    cutoffMeta: (m, f) => 'Hasta ' + m + ' millas · $' + f + ' · gratis hasta la 5, $5 hasta la 10, +$1 cada 5 millas',
+    takenToday: 'Chavos de hoy', ninePlaced: '9 órdenes', avgTicket: '$138 promedio',
+    waiting: n => n + (n === 1 ? ' orden esperando' : ' órdenes esperando') + ' por ti',
+    newest: 'La última: ', runningLow: 'Se está acabando', leftN: n => 'quedan ' + n,
+    fastest: 'Lo que más se mueve', ordersN: n => n + ' órdenes',
+    ordersTitle: 'Órdenes', ordersSub: 'Toca el botón pa’ moverla.',
+    now: 'ahora', newOrderPush: (total, who, how) => 'Orden nueva · ' + total + ' · ' + who + ' quiere ' + how + '.',
+    howDelivery: 'delivery', howPickup: 'recogerlo',
+    stockTitle: 'Inventario', stockSub: 'Lo que hay en mano. Si llega a cero, se esconde del menú.',
+    whoTitle: 'Quién está dentro', whoSub: 'Un código por cliente. Lo quitas y quedan fuera.',
+    newCode: 'Código nuevo', active: 'Activo', revoked: 'Quitado',
+    justIssued: 'Recién dado — textéalo', newClient: 'Cliente nuevo',
+    statuses: [
+      { label: 'Nueva', action: 'Acepta la orden' },
+      { label: 'Empacando', action: 'Ya está lista' },
+      { label: 'Lista', action: 'Ya la entregué' },
+      { label: 'Hecha', action: 'Archivar' }
+    ],
+    tabs: ['Chavos', 'Órdenes', 'Inventario', 'Códigos'],
+    rail: ['Idioma', 'Trancar', 'Menú', 'Producto', 'Bulto', 'Enviada', 'Se soltó', 'Chavos', 'Órdenes', 'Inventario', 'Códigos', 'Registro', 'Espera'],
+    newHere: 'Soy nuevo — regístrame',
+    signupTitle: 'Dime quién eres',
+    signupSub: 'El Mafu te manda el código por texto cuando te apruebe. Esto es entre él y tú.',
+    fName: 'Cómo te llamas', fNamePh: 'Nombre o apodo',
+    fPhone: 'Teléfono', fPhonePh: '(813) 000-0000',
+    fAddr: 'Dirección pa’ el delivery', fAddrPh: 'Calle, apto, pueblo',
+    fBday: 'Fecha de nacimiento', fBdayPh: 'MM/DD/AAAA',
+    fId: 'Foto del ID', fIdPh: 'Toca pa’ subir la foto', fIdDone: 'ID subido',
+    fPay: 'Con qué prefieres pagar',
+    idNote: 'Tienes que tener 21 o más. La foto es solo pa’ verificar, no se comparte.',
+    tooYoung: 'Tienes que tener 21 o más pa’ entrar.',
+    submitSignup: 'Mándale mi información',
+    waitTitle: 'Espera el texto',
+    waitBody: 'El Mafu va a mirar tu información y te textea el código de cuatro números. Casi siempre el mismo día. Si tardas, escríbele: (656) 247-1884 · IG @Mafutero3000.',
+    rulesTitle: 'Mientras esperas, así se brega',
+    rules: [
+      { n: '1', h: 'Pago rápido = producto separado', b: 'Zelle o Venmo. En cuanto El Mafu ve el pago, esa mota queda con tu nombre.' },
+      { n: '2', h: 'Efectivo tiene 30 minutos', b: 'Si vas a pagar en efectivo al buscarlo, tienes 30 minutos. Después se suelta la orden.' },
+      { n: '3', h: 'Un run al día', b: 'El delivery sale una vez al día en un horario fijo. Gratis dentro de 5 millas, $5 hasta la 10, y $1 más por cada 5 millas después. Si se llena, es recogido.' }
+    ],
+    waitFoot: 'Ya con el código, entras con el teclado.',
+    backToLock: 'Volver al teclado',
+    newReqsTitle: 'Nuevos', newReqsSub: 'Toca uno pa’ darle su código.',
+    reqApprove: 'Dale código', reqIgnore: 'Ignorar',
+    yearsOld: n => n + ' años', idOk: 'ID verificado',
+    payTagPaid: m => 'Pagó · ' + m, payTagCash: 'Efectivo', holdTagOn: 'Hold 30 min', holdTagSep: 'Separado',
+    pushDate: 'Martes, 10 de agosto',
+    push1Title: 'Orden nueva · $140 · Delivery',
+    push1Body: 'Dee R. pagó por Zelle. 1 oz Bubble Gum Gelato pa’ las 8:30pm.',
+    push2When: 'hace 6m', push2Title: 'Hold corriendo · $100 · Marcus T.',
+    push2Body: 'Efectivo al buscarlo. Le quedan 21 minutos.',
+    push3When: 'hace 12m', push3Title: 'Candy Fumes va por 2 unidades',
+    push3Body: 'Consigue más antes del fin de semana.',
+    slideUp: 'Sube pa’ abrir Mafutero’s',
+    weightLadderFoot: 'Indoor. Cuatro pesos, el mismo frasco.'
+  },
+  en: {
+    switchLang: 'Español / English',
+    tabClient: 'Client code', tabOwner: 'Owner PIN',
+    hintClient: 'Enter the four digits El Mafu texted you.',
+    hintOwner: 'Owner PIN.',
+    hintSetup: 'First run. Pick the owner PIN — these four digits get saved.',
+    badgeDemo: 'Demo mode · no server, any code gets in',
+    badgeSetup: 'Not set up yet · open Owner PIN to choose yours',
+    badgeNoStore: 'No storage · codes come from Netlify env, nothing saves here',
+    needSetup: 'No codes exist yet. El Mafu has to set his up first.',
+    codeBad: 'That code isn’t good. Text El Mafu.',
+    codeFoot: 'One code per client. Lose it, text El Mafu at (656) 247-1884 or IG @Mafutero3000.',
+    openTill: h => 'Open till ' + h, closedToday: 'Pickup only today', greet: 'Evening,',
+    from: 'from', inJar: 'In jar', effects: 'Effects', pickWeight: 'Pick your weight',
+    addToBag: 'Add to bag', selected: 'Selected',
+    soldOut: 'Sold out', onlyLeft: n => 'Only ' + n + ' left', inStock: n => n + ' in stock',
+    notStockedTitle: 'Edibles, tinctures, topicals and glass',
+    notStockedSub: 'Not stocked yet — text El Mafu if you want something specific.',
+    bagTitle: 'Your bag', bagEmpty: 'Bag’s empty', backToMenu: 'Back to the menu',
+    howLabel: 'How do you want it',
+    pickupTitle: 'Pickup', pickupSub: 'Ready in ~25 min',
+    deliveryTitle: 'Delivery', deliveryOn: w => 'Today’s run ' + w,
+    deliveryOff: 'No run today', deliveryFull: 'Run is booked out',
+    zoneLabel: 'Where you at', zoneFree: z => z + ' — inside 5 miles, delivery free',
+    zonePaid: (z, m, f) => z + ' — ' + m + ' miles, $' + f + ' delivery',
+    zoneOut: z => z + ' is outside today’s run. Pick up instead, or catch the next run.',
+    cutoffNote: z => 'Only as far as ' + z + ' today',
+    deliverTo: 'Deliver to', pickUpAt: 'Pick up at',
+    addrDelivery: 'The address you text him',
+    addrPickup: 'Text him when you head over and he sends the spot',
+    payLabel: 'How you’re paying', subtotal: 'Subtotal', feeDelivery: 'Delivery', feePickup: 'Pickup', free: 'Free',
+    dueCash: 'Cash on arrival', duePaid: m => 'You send it by ' + m,
+    nothingCharged: 'Nothing is charged in the app. Goldo-Mafu confirms by text.',
+    sendOrder: 'Send the order',
+    tagFast: 'Fast', tagCash: 'Cash', tagPicked: 'Picked',
+    payFastTitle: 'Fast payment = the jar is yours',
+    payFastBody: 'Send it and that strain sits with your name on it until you show up. Nobody takes it.',
+    payCashPickupTitle: 'Cash = a 30-minute hold',
+    payCashPickupBody: 'Held 30 minutes. Miss it and the order releases — that strain goes back on the menu. He’ll set you up with another on site.',
+    payCashDeliveryTitle: 'Cash on delivery is fine',
+    payCashDeliveryBody: 'He’s coming to you, so there’s no hold. Have it ready, exact if you can.',
+    orderSent: 'Order sent', gotIt: 'El Mafu got it',
+    buzzed: 'It just buzzed his phone. He’ll text to confirm — usually inside five minutes.',
+    orderLabel: 'Order', holdLeftLabel: 'Left',
+    holdSeparado: 'Held under your name',
+    holdSeparadoBody: 'It’s held as soon as he sees the payment land. If it never lands, the order releases and goes back on the menu.',
+    payPending: 'Payment unconfirmed', payOkTag: 'Payment confirmed',
+    undoPay: 'Wrong tap — undo it',
+    stepBackLabel: 'Back',
+    zonesPicked: n => n === 1 ? '1 zone on' : n + ' zones on',
+    zonesTitle: 'Where he delivers',
+    zonesSub: 'Tap the ones you want. The dark ones nobody sees.',
+    hoursTitle: 'Delivery hours',
+    hoursFrom: 'From', hoursTo: 'To',
+    addStrain: 'Add a strain', addTitle: 'New strain',
+    fStrainName: 'Name', fStrainNamePh: 'e.g. Cherry Runtz',
+    fStrainSec: 'Category', fStrainType: 'Type',
+    fStrainThc: 'THC', fStrainThcPh: '28%',
+    fStrainPrice: 'Base price', fStrainStock: 'Units',
+    fStrainNote: 'Description', fStrainNotePh: 'How it tastes, how it hits',
+    priceHint: u => 'Price for ' + u + '. The other weights are worked out from it.',
+    saveStrain: 'Save strain', cancelAdd: 'Cancel',
+    removeStrain: 'Remove',
+    navMenu: 'Menu', navBag: 'Bag', navOut: 'Sign out',
+    confirmTitle: 'Confirm the payment landed',
+    confirmSub: 'Until you confirm, nothing is held.',
+    revokeLabel: 'Cancel this order', cancelled: 'Cancelled', archived: 'Archive',
+    noPay: 'Never paid',
+    holdClockTitle: 'You’ve got 30 minutes',
+    holdClockBody: 'Get here before it hits zero. Past that it releases, and if it sold, it sold.',
+    holdDeliveryCash: 'On today’s run',
+    holdDeliveryCashBody: 'Pay cash when he pulls up. If the run fills first, he’ll text you.',
+    simulateExpiry: 'See what happens if it runs out',
+    expiredStamp: 'Expired', expiredTitle: 'Your order released',
+    expiredBody: 'Thirty minutes went by with no payment and no show, so it released and went back on the menu. If it’s still there you can grab it again. If it sold, it sold — next time send it by Cash App, Zelle or Venmo and it stays held.',
+    stillInHand: 'Still in hand right now', repeatOrder: 'Reorder',
+    dateline: 'Tuesday, Aug 10', shopToday: 'Shop today', lock: 'Lock',
+    runTitle: 'Today’s run', runOn: w => 'Rolling ' + w, runOff: 'No run today',
+    runFull: w => 'Booked out · ' + w, runWindow: 'Window', runStops: 'Stops',
+    runNote: 'How far I go', tapToChange: 'Tap to change',
+    stopsOf: (a, b) => a + '/' + b,
+    cutoffMeta: (m, f) => 'Out to ' + m + ' miles · $' + f + ' · free to 5, $5 to 10, +$1 every 5 after',
+    takenToday: 'Taken today', ninePlaced: '9 orders', avgTicket: '$138 average',
+    waiting: n => n + (n === 1 ? ' order' : ' orders') + ' waiting on you',
+    newest: 'Newest: ', runningLow: 'Running low', leftN: n => n + ' left',
+    fastest: 'Moving fastest', ordersN: n => n + ' orders',
+    ordersTitle: 'Orders', ordersSub: 'Tap the button to move an order along.',
+    now: 'now', newOrderPush: (total, who, how) => 'New order · ' + total + ' · ' + who + ' wants ' + how + '.',
+    howDelivery: 'delivery', howPickup: 'pickup',
+    stockTitle: 'Stock', stockSub: 'Units on hand. Hit zero and the client menu hides it.',
+    whoTitle: 'Who’s in', whoSub: 'One code per client. Revoke and they’re out.',
+    newCode: 'New invite code', active: 'Active', revoked: 'Revoked',
+    justIssued: 'Just issued — text it over', newClient: 'New client',
+    statuses: [
+      { label: 'New', action: 'Accept order' },
+      { label: 'Packing', action: 'Mark ready' },
+      { label: 'Ready', action: 'Mark handed off' },
+      { label: 'Done', action: 'Archive' }
+    ],
+    tabs: ['Sales', 'Orders', 'Stock', 'Codes'],
+    rail: ['Language', 'Unlock', 'Menu', 'Product', 'Bag', 'Sent', 'Released', 'Sales', 'Orders', 'Stock', 'Codes', 'Signup', 'Waiting'],
+    newHere: 'I’m new — sign me up',
+    signupTitle: 'Tell him who you are',
+    signupSub: 'El Mafu texts you the code once he approves you. This stays between you two.',
+    fName: 'What to call you', fNamePh: 'Name or nickname',
+    fPhone: 'Phone', fPhonePh: '(813) 000-0000',
+    fAddr: 'Delivery address', fAddrPh: 'Street, apt, city',
+    fBday: 'Date of birth', fBdayPh: 'MM/DD/YYYY',
+    fId: 'Photo of your ID', fIdPh: 'Tap to upload the photo', fIdDone: 'ID uploaded',
+    fPay: 'How you’d rather pay',
+    idNote: 'You have to be 21 or over. The photo is only for the check and isn’t shared.',
+    tooYoung: 'You have to be 21 or over to get in.',
+    submitSignup: 'Send him my info',
+    waitTitle: 'Wait for the text',
+    waitBody: 'El Mafu will look over your info and text you the four-digit code. Usually the same day. If it drags, hit him up: (656) 247-1884 · IG @Mafutero3000.',
+    rulesTitle: 'While you wait, here’s how it works',
+    rules: [
+      { n: '1', h: 'Fast payment = the jar is yours', b: 'Zelle or Venmo. The moment El Mafu sees the payment, that strain has your name on it.' },
+      { n: '2', h: 'Cash gets 30 minutes', b: 'Paying cash on pickup gives you 30 minutes. After that the order releases.' },
+      { n: '3', h: 'One run a day', b: 'Delivery goes out once a day in a set window. Free inside 5 miles, $5 out to 10, then $1 more every 5 miles. If it fills up, it’s pickup only.' }
+    ],
+    waitFoot: 'Once you have the code, get in with the keypad.',
+    backToLock: 'Back to the keypad',
+    newReqsTitle: 'New', newReqsSub: 'Tap one to hand out their code.',
+    reqApprove: 'Give a code', reqIgnore: 'Ignore',
+    yearsOld: n => n + ' years old', idOk: 'ID checked',
+    payTagPaid: m => 'Paid · ' + m, payTagCash: 'Cash', holdTagOn: '30-min hold', holdTagSep: 'Held',
+    pushDate: 'Tuesday, August 10',
+    push1Title: 'New order · $140 · Delivery',
+    push1Body: 'Dee R. paid by Zelle. 1 oz Bubble Gum Gelato by 8:30pm.',
+    push2When: '6m ago', push2Title: 'Hold running · $100 · Marcus T.',
+    push2Body: 'Cash on pickup. 21 minutes left on the clock.',
+    push3When: '12m ago', push3Title: 'Candy Fumes is down to 2 units',
+    push3Body: 'Restock before the weekend rush.',
+    slideUp: 'Slide up to open Mafutero’s',
+    weightLadderFoot: 'Indoor. Four weights, same jar.'
+  }
+};
+
+const LADDER = [['3.5g', 25], ['7g', 40], ['1/2 oz', 80], ['1 oz', 140]];
+const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
+const SECS = ['Flower', 'Indoors', 'Concentrated', 'Vapes'];
+const TYPES = ['Hybrid', 'Indica', 'Sativa', 'Cart'];
+
+const ZONES = [
+  { id: 'tt', name: 'Temple Terrace / USF', mi: 2 },
+  { id: 'sh', name: 'Seminole Heights', mi: 5 },
+  { id: 'ybor', name: 'Ybor City', mi: 8 },
+  { id: 'carr', name: 'Carrollwood', mi: 8 },
+  { id: 'dt', name: 'Downtown Tampa', mi: 10 },
+  { id: 'bran', name: 'Brandon', mi: 12 },
+  { id: 'st', name: 'South Tampa', mi: 14 },
+  { id: 'riv', name: 'Riverview', mi: 18 },
+  { id: 'pc', name: 'Plant City', mi: 20 }
+];
+
+const PAYS = [
+  { id: 'zelle', label: 'Zelle', handle: '(656) 247-1884', fast: true },
+  { id: 'venmo', label: 'Venmo', handle: '@Mafutero3000', fast: true },
+  { id: 'cash', label: 'Cash', labelEs: 'Efectivo', handle: '', fast: false }
+];
+
+class Component extends DCLogic {
+  state = {
+    lang: 'es', screen: 'lang', role: null, pending: 'client', code: '', codeErr: '', checking: false, backend: 'demo', persists: true,
+    selId: null, weightIdx: 0, cart: [], mode: 'pickup', slot: 0, zone: 'sh', pay: 'zelle',
+    last: null, orderSeq: 1042, hold: 1800,
+    form: { name: '', phone: '', addr: '', bday: '', id: false, pay: 'zelle' },
+    newReqs: [
+      { id: 91, name: 'Kiko', phone: '(813) 555-0188', addr: '4120 E Fowler Ave, Apt 12 · Temple Terrace', age: 24, pay: 'Venmo', when: '7:58pm' },
+      { id: 92, name: 'Yaz', phone: '(813) 555-0231', addr: '1907 N 15th St · Ybor City', age: 31, pay: 'Zelle', when: '6:40pm' }
+    ],
+    run: { on: true, start: '18:00', end: '21:00', stops: 9, max: 15, zones: ['tt', 'sh', 'ybor', 'carr', 'dt', 'bran', 'st'] },
+    filter: 'all', showAdd: false,
+    newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', price: '', stock: '', note: '' },
+    stock: { icc: 12, frosted: 8, bolo: 14, candy: 2, bubble: 6, suzhi: 9, slur: 3, packman: 5, party: 7 },
+    orders: [
+      { id: 1, client: 'Dee R.', no: '#1041', when: '8:14pm', mode: 'delivery', pay: 'zelle', payOk: false, where: 'Seminole Heights · 8:30pm', items: [{ line: '1× Bubble Gum Gelato · 1 oz', price: '$140' }], total: '$140', step: 0 },
+      { id: 2, client: 'Marcus T.', no: '#1040', when: '7:52pm', mode: 'pickup', pay: 'cash', hold: 21, where: 'Pickup 8:15pm', items: [{ line: '2× Packman 3g cart', price: '$80' }, { line: '1× Slurricane Badder · 1g', price: '$20' }], total: '$100', step: 1 },
+      { id: 3, client: 'Junie', no: '#1039', when: '7:20pm', mode: 'pickup', pay: 'venmo', payOk: true, where: 'Pickup 7:45pm', items: [{ line: '1× Bolo Runtz · 7g', price: '$40' }], total: '$40', step: 2 }
+    ],
+    products: Component.seedProducts(),
+    codes: [
+      { id: 1, name: 'Dee R.', code: '4417', meta: '9 · Zelle', active: true },
+      { id: 2, name: 'Marcus T.', code: '2093', meta: '14 · Venmo', active: true },
+      { id: 3, name: 'Junie', code: '7758', meta: '3 · Venmo', active: true },
+      { id: 4, name: 'Ray', code: '3120', meta: '0', active: true }
+    ]
+  };
+
+  catalog() { return this.state.products; }
+
+  static seedProducts() {
+    const L = LADDER;
+    return [
+      { id: 'icc', name: 'ICC', sec: 'Flower', type: 'Hybrid', thc: '18%', cbd: '0.4%', bg: '#e1eecc',
+        notes: { en: 'Gassy and earthy with citrus rind on the exhale.', es: 'Gasolina y tierra, con cáscara de china al soltarlo.' },
+        effects: { en: ['Mellow', 'Body calm', 'Daytime ok'], es: ['Suave', 'Calma el cuerpo', 'Pa’ el día'] },
+        weights: [['7g', 25], ['1/2 oz', 50], ['1 oz', 80]],
+        foot: { en: 'Outdoor grown. Sold by the bag.', es: 'De afuera. Se vende por bolsa.' } },
+      { id: 'frosted', name: 'Frosted Bananas', sec: 'Indoors', type: 'Indica', thc: '27%', cbd: '0.1%', bg: '#ffe1d0',
+        notes: { en: 'Banana cream, cold sugar, tropical finish.', es: 'Crema de guineo, azúcar fría, tropical al final.' },
+        effects: { en: ['Heavy', 'Couch lock', 'Sleepy'], es: ['Pesao', 'Te pega al sofá', 'Sueño'] },
+        weights: L, foot: { en: 'Indoor. Four weights, same jar.', es: 'Indoor. Cuatro pesos, el mismo frasco.' } },
+      { id: 'bolo', name: 'Bolo Runtz', sec: 'Indoors', type: 'Hybrid', thc: '29%', cbd: '0.2%', bg: '#ffc6a5',
+        notes: { en: 'Candy gas with ripe berry underneath.', es: 'Dulce con gasolina y berry maduro por debajo.' },
+        effects: { en: ['Giggly', 'Talkative', 'Hungry'], es: ['Risa', 'Habladera', 'Jartera'] },
+        weights: L, foot: { en: 'Best seller. Moves fast on weekends.', es: 'La que más se vende. Los fines vuela.' } },
+      { id: 'candy', name: 'Candy Fumes', sec: 'Indoors', type: 'Sativa', thc: '26%', cbd: '0.1%', bg: '#f0fae1',
+        notes: { en: 'Sour candy up front, diesel on the back end.', es: 'Dulce agrio al principio, diésel al final.' },
+        effects: { en: ['Bright', 'Focused', 'Chatty'], es: ['Arriba', 'Enfocao', 'Conversador'] },
+        weights: L, foot: { en: 'Indoor. Running low this week.', es: 'Indoor. Queda poquito esta semana.' } },
+      { id: 'bubble', name: 'Bubble Gum Gelato', sec: 'Indoors', type: 'Hybrid', thc: '28%', cbd: '0.2%', bg: '#ffe1d0',
+        notes: { en: 'Pink bubblegum with a creamy gelato finish.', es: 'Chicle rosado con gelato cremoso al final.' },
+        effects: { en: ['Even', 'Relaxed', 'Social'], es: ['Parejo', 'Relajao', 'Pa’ janguear'] },
+        weights: L, foot: { en: 'Indoor. Ask about the ounce deal.', es: 'Indoor. Pregunta por el deal de la onza.' } },
+      { id: 'suzhi', name: 'Blue Suzhi', sec: 'Indoors', type: 'Indica', thc: '25%', cbd: '0.3%', bg: '#e1eecc',
+        notes: { en: 'Blueberry, funk and a trace of incense.', es: 'Blueberry, funk y un toque de incienso.' },
+        effects: { en: ['Nightcap', 'Achy relief', 'Dreamy'], es: ['Pa’ la noche', 'Quita el dolor', 'Arrebatao'] },
+        weights: L, foot: { en: 'Indoor. Night jar.', es: 'Indoor. Frasco de noche.' } },
+      { id: 'slur', name: 'Slurricane Badder', sec: 'Concentrated', type: 'Indica', thc: '74%', cbd: '0.6%', bg: '#ffc6a5',
+        notes: { en: 'Whipped badder, grape and cream.', es: 'Badder batida, uva y crema.' },
+        effects: { en: ['Strong', 'Fast', 'Heavy'], es: ['Fuerte', 'Rápido', 'Pesao'] },
+        weights: [['1g', 20], ['7g', 100]], foot: { en: 'Badder. Keep it cold.', es: 'Badder. Mantenla fría.' } },
+      { id: 'packman', name: 'Packman 3g', sec: 'Vapes', type: 'Cart', thc: '88%', cbd: '—', bg: '#f0fae1',
+        notes: { en: 'Three gram disposable. Ask for strain.', es: 'Desechable de tres gramos. Pregunta por la mata.' },
+        effects: { en: ['Quick', 'Discreet', 'Clean'], es: ['Rápido', 'Discreto', 'Limpio'] },
+        weights: [['1 cart', 40], ['4 carts', 120]], foot: { en: 'Strain availability changes weekly — ask.', es: 'Las matas cambian cada semana — pregunta.' } },
+      { id: 'party', name: 'PartyBoyz 3g', sec: 'Vapes', type: 'Cart', thc: '90%', cbd: '—', bg: '#ffc6a5',
+        notes: { en: 'Three gram, plus five diamond infused prerolls.', es: 'Tres gramos, más cinco philies con diamantes.' },
+        effects: { en: ['Strong', 'Long', 'Party'], es: ['Fuerte', 'Largo', 'Pa’ la fiesta'] },
+        weights: [['1 cart', 40], ['4 carts', 120]], foot: { en: 'Comes with 5 diamond infused prerolls.', es: 'Viene con 5 philies infusiaos con diamantes.' } }
+    ];
+  }
+
+  tx(v) { return typeof v === 'string' ? v : (v && v[this.state.lang]) || ''; }
+  txa(v) { return Array.isArray(v) ? v : (v && v[this.state.lang]) || []; }
+
+  fmtTime(hhmm) {
+    const p = String(hhmm || '18:00').split(':');
+    const h = +p[0] || 0, m = +p[1] || 0;
+    const ap = h >= 12 ? 'pm' : 'am', hh = h % 12 === 0 ? 12 : h % 12;
+    return hh + ':' + String(m).padStart(2, '0') + ap;
+  }
+  runSlots() {
+    const r = this.state.run;
+    const mins = x => { const p = String(x || '0:0').split(':'); return (+p[0] || 0) * 60 + (+p[1] || 0); };
+    let a = mins(r.start), b = mins(r.end);
+    if (b <= a) b = a + 60;
+    const out = [];
+    for (let m = a + 30; m <= b && out.length < 6; m += 60) {
+      out.push(this.fmtTime(String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0')));
+    }
+    return out.length ? out : [this.fmtTime(r.start)];
+  }
+  allowedZones() {
+    const picked = ZONES.filter(z => this.state.run.zones.indexOf(z.id) > -1);
+    return picked.length ? picked : [ZONES[0]];
+  }
+  toggleRunZone(id) {
+    const r = this.state.run;
+    const has = r.zones.indexOf(id) > -1;
+    const zones = has ? r.zones.filter(x => x !== id) : r.zones.concat([id]);
+    if (!zones.length) return;
+    this.setState({ run: Object.assign({}, r, { zones }) });
+  }
+  setRun(k, v) { this.setState({ run: Object.assign({}, this.state.run, { [k]: v }) }); }
+
+  weightsFor(sec, base) {
+    const b = Math.max(1, Math.round(base));
+    if (sec === 'Concentrated') return [['1g', b], ['7g', b * 5]];
+    if (sec === 'Vapes') return [['1 cart', b], ['4 carts', b * 3]];
+    return [['3.5g', b], ['7g', Math.round(b * 1.6)], ['1/2 oz', Math.round(b * 3.2)], ['1 oz', Math.round(b * 5.6)]];
+  }
+  setNewP(k, v) { this.setState({ newP: Object.assign({}, this.state.newP, { [k]: v }) }); }
+  addReady() {
+    const n = this.state.newP;
+    return n.name.trim().length > 1 && +n.price > 0;
+  }
+  addProduct() {
+    if (!this.addReady()) return;
+    const n = this.state.newP;
+    const id = 'p' + Date.now();
+    const p = {
+      id, name: n.name.trim(), sec: n.sec, type: n.type,
+      thc: (n.thc || '').trim() || '—', cbd: '—',
+      bg: STICKERS[this.state.products.length % STICKERS.length],
+      notes: n.note.trim() || (this.state.lang === 'es' ? 'Pregúntale a El Mafu.' : 'Ask El Mafu about this one.'),
+      effects: [], weights: this.weightsFor(n.sec, +n.price),
+      foot: '', custom: true
+    };
+    const stock = Object.assign({}, this.state.stock);
+    stock[id] = Math.max(0, Math.round(+n.stock) || 0);
+    this.setState({
+      products: this.state.products.concat([p]), stock, showAdd: false,
+      newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', price: '', stock: '', note: '' }
+    });
+  }
+  removeProduct(id) {
+    const stock = Object.assign({}, this.state.stock);
+    delete stock[id];
+    this.setState({
+      products: this.state.products.filter(p => p.id !== id), stock,
+      selId: this.state.selId === id ? null : this.state.selId
+    });
+  }
+
+  money(n) { return '$' + n.toLocaleString(); }
+  initials(name) { return name.split(' ').slice(0, 2).map(w => w[0]).join(''); }
+  set(k, v) { this.setState({ [k]: v }); }
+  t() { return COPY[this.state.lang]; }
+  zone() { const a = this.allowedZones(); return a.find(z => z.id === this.state.zone) || a[0]; }
+  win() { const r = this.state.run; return { label: this.fmtTime(r.start) + '–' + this.fmtTime(r.end), slots: this.runSlots() }; }
+  runFull() { return this.state.run.stops >= this.state.run.max; }
+  deliveryOpen() { return this.state.run.on && !this.runFull(); }
+  payObj(id) { return PAYS.find(p => p.id === (id || this.state.pay)) || PAYS[0]; }
+  payLabel(id) { const p = this.payObj(id); return this.state.lang === 'es' && p.labelEs ? p.labelEs : p.label; }
+  mileFee(mi) {
+    if (mi <= 5) return 0;
+    if (mi <= 10) return 5;
+    return 6 + Math.floor((mi - 10) / 5);
+  }
+  feeAmount() { return this.state.mode === 'delivery' ? this.mileFee(this.zone().mi) : 0; }
+  holdActive() { return this.state.mode === 'pickup' && this.state.pay === 'cash'; }
+
+  setLang(lang) {
+    this.setState({ lang, screen: 'lock' });
+    try { localStorage.setItem('mf-lang', lang); } catch (e) {}
+  }
+  flipLang() {
+    const lang = this.state.lang === 'es' ? 'en' : 'es';
+    this.setState({ lang });
+    try { localStorage.setItem('mf-lang', lang); } catch (e) {}
+  }
+
+  field(k, v) { this.setState({ form: Object.assign({}, this.state.form, { [k]: v }) }); }
+
+  ageFrom(bday) {
+    const m = /^(\d{1,2})\D(\d{1,2})\D(\d{4})$/.exec(bday.trim());
+    if (!m) return null;
+    const d = new Date(+m[3], +m[1] - 1, +m[2]);
+    if (isNaN(d)) return null;
+    const now = new Date(2026, 7, 11);
+    let a = now.getFullYear() - d.getFullYear();
+    const md = now.getMonth() - d.getMonth();
+    if (md < 0 || (md === 0 && now.getDate() < d.getDate())) a--;
+    return a;
+  }
+
+  formReady() {
+    const f = this.state.form, a = this.ageFrom(f.bday);
+    return !!(f.name.trim() && f.phone.trim() && f.addr.trim() && f.id && a !== null && a >= 21);
+  }
+
+  submitSignup() {
+    if (!this.formReady()) return;
+    const f = this.state.form;
+    const req = {
+      id: Date.now(), name: f.name.trim(), phone: f.phone.trim(), addr: f.addr.trim(),
+      age: this.ageFrom(f.bday), pay: this.payLabel(f.pay), when: this.t().now
+    };
+    this.setState({ screen: 'waiting', newReqs: [req].concat(this.state.newReqs) });
+    this.notify('signup', req);
+  }
+
+  approveReq(id) {
+    const req = this.state.newReqs.find(r => r.id === id);
+    if (!req) return;
+    const code = String(Math.floor(1000 + Math.random() * 8999));
+    this.setState({
+      newReqs: this.state.newReqs.filter(r => r.id !== id),
+      codes: [{ id: Date.now(), name: req.name, code, meta: this.t().justIssued, active: true }].concat(this.state.codes)
+    });
+    if (this.live() && this.ownerPin) {
+      this.api('codes', { action: 'issue', pin: this.ownerPin, name: req.name, code })
+        .then(() => this.notify('code', { name: req.name, code }));
+    }
+  }
+
+  live() { return location.protocol.indexOf('http') === 0; }
+
+  componentDidMount() {
+    if (!this.live()) { this.setState({ backend: 'demo' }); return; }
+    this.api('codes', { action: 'status' }).then(res => {
+      if (!res || !res.ok) this.setState({ backend: 'demo' });
+      else this.setState({ backend: res.configured ? 'ready' : 'setup', persists: res.persists !== false });
+    });
+  }
+
+  api(fn, body) {
+    if (!this.live()) return Promise.resolve(null);
+    return fetch('/.netlify/functions/' + fn, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body)
+    }).then(r => r.json()).catch(() => null);
+  }
+
+  notify(kind, data) { this.api('order', { kind, data }); }
+
+  press(d) {
+    const code = (this.state.code + d).slice(0, 4);
+    if (code.length !== 4) { this.setState({ code }); return; }
+    const owner = this.state.pending === 'owner';
+    if (!this.live() || this.state.backend === 'demo') {
+      this.setState({ code: '', role: owner ? 'owner' : 'client', screen: owner ? 'dash' : 'home' });
+      return;
+    }
+    if (this.state.backend === 'setup') {
+      if (!owner) { this.setState({ code: '', codeErr: this.t().needSetup }); return; }
+      this.setState({ code, checking: true, codeErr: '' });
+      this.api('codes', { action: 'setup', pin: code }).then(res => {
+        if (res && res.ok) {
+          this.ownerPin = code;
+          this.setState({ code: '', checking: false, codeErr: '', backend: 'ready', role: 'owner', screen: 'dash' });
+        } else this.setState({ code: '', checking: false, codeErr: (res && res.error) || this.t().codeBad });
+      });
+      return;
+    }
+    this.setState({ code, checking: true, codeErr: '' });
+    const req = owner ? { action: 'owner', pin: code } : { action: 'validate', code };
+    this.api('codes', req).then(res => {
+      if (!res) {
+        this.setState({ code: '', checking: false, codeErr: '', role: owner ? 'owner' : 'client', screen: owner ? 'dash' : 'home' });
+        return;
+      }
+      if (res.ok) {
+        if (owner) this.ownerPin = code;
+        this.setState({ code: '', checking: false, codeErr: '', role: owner ? 'owner' : 'client', screen: owner ? 'dash' : 'home' });
+        if (!owner) this.pullCodes();
+      } else {
+        this.setState({ code: '', checking: false, codeErr: this.t().codeBad });
+      }
+    });
+  }
+
+  pullCodes() {
+    if (!this.live() || !this.ownerPin) return;
+    this.api('codes', { action: 'list', pin: this.ownerPin }).then(res => {
+      if (res && res.ok && res.codes) {
+        this.setState({ codes: res.codes.map(c => ({
+          id: c.id, name: c.name, code: c.code, active: c.active,
+          meta: String(c.uses || 0)
+        })) });
+      }
+    });
+  }
+
+  addToBag() {
+    const p = this.catalog().find(x => x.id === this.state.selId);
+    const w = p.weights[this.state.weightIdx];
+    const cart = this.state.cart.slice();
+    const hit = cart.find(l => l.pid === p.id && l.label === w[0]);
+    if (hit) hit.qty += 1;
+    else cart.push({ pid: p.id, name: p.name, label: w[0], price: w[1], qty: 1, bg: p.bg, initials: this.initials(p.name) });
+    this.setState({ cart, screen: 'bag' });
+  }
+
+  qty(i, d) {
+    const cart = this.state.cart.slice();
+    cart[i].qty += d;
+    this.setState({ cart: cart.filter(l => l.qty > 0) });
+  }
+
+  slotsFor() {
+    return this.state.mode === 'pickup' ? ['ASAP', '8:15pm', '8:45pm', '9:30pm'] : this.runSlots();
+  }
+
+  place() {
+    if (!this.state.cart.length) return;
+    const s = this.state, t = this.t();
+    const lines = s.cart.map(l => ({ qty: l.qty, name: l.name, label: l.label, total: this.money(l.price * l.qty) }));
+    const sub = s.cart.reduce((a, l) => a + l.price * l.qty, 0);
+    const fee = this.feeAmount();
+    const seq = s.orderSeq + 1;
+    const slot = this.slotsFor()[Math.min(s.slot, this.slotsFor().length - 1)];
+    const del = s.mode === 'delivery';
+    const order = {
+      id: seq, client: s.lang === 'es' ? 'Tú (cliente)' : 'You (client)', no: '#' + seq, when: t.now,
+      mode: s.mode, pay: s.pay, payOk: false, hold: this.holdActive() ? 30 : null,
+      where: del ? this.zone().name + ' · ' + slot : (s.lang === 'es' ? 'Recogido ' : 'Pickup ') + slot,
+      items: s.cart.map(l => ({ line: l.qty + '× ' + l.name + ' · ' + l.label, price: this.money(l.price * l.qty) })),
+      total: this.money(sub + fee), step: 0
+    };
+    this.notify('order', order);
+    this.setState({
+      screen: 'confirm', orderSeq: seq, cart: [], hold: 1800,
+      run: del ? Object.assign({}, s.run, { stops: s.run.stops + 1 }) : s.run,
+      orders: [order].concat(s.orders),
+      last: {
+        no: '#' + seq, lines, total: this.money(sub + fee), pay: s.pay, mode: s.mode,
+        modeLabel: del ? t.deliveryTitle : t.pickupTitle,
+        when: del ? this.zone().name + ' · ' + slot : slot
+      }
+    });
+  }
+
+  stepBack(id) {
+    this.setState({ orders: this.state.orders.map(o => o.id === id ? Object.assign({}, o, { step: Math.max(0, o.step - 1), cancelled: false }) : o) });
+  }
+
+  advance(id) {
+    this.setState({ orders: this.state.orders.map(o => o.id === id && !o.cancelled ? Object.assign({}, o, { step: Math.min(o.step + 1, 3) }) : o) });
+  }
+
+  patchOrder(id, patch) {
+    this.setState({ orders: this.state.orders.map(o => o.id === id ? Object.assign({}, o, patch) : o) });
+  }
+
+  restock(id, d) {
+    const stock = Object.assign({}, this.state.stock);
+    stock[id] = Math.max(0, stock[id] + d);
+    this.setState({ stock });
+  }
+
+  issueCode() {
+    const t = this.t();
+    const code = String(Math.floor(1000 + Math.random() * 8999));
+    this.setState({ codes: [{ id: Date.now(), name: t.newClient, code, meta: t.justIssued, active: true }].concat(this.state.codes) });
+  }
+
+  renderVals() {
+    const s = this.state, t = this.t(), cat = this.catalog(), L = s.lang;
+    const cash = n => this.money(n);
+    const sel = cat.find(p => p.id === s.selId) || cat[0] ||
+      { id: '', name: '', sec: 'Indoors', type: '', thc: '—', cbd: '—', bg: '#f9f4ed', notes: '', effects: [], weights: [['—', 0]], foot: '' };
+    const sub = s.cart.reduce((a, l) => a + l.price * l.qty, 0);
+    const fee = this.feeAmount();
+    const zone = this.zone(), win = this.win();
+    const allowed = this.allowedZones();
+    const zonesLabel = allowed.map(z => z.name).join(' · ');
+    const delOpen = this.deliveryOpen();
+    const holdOn = this.holdActive();
+    const pay = this.payObj();
+    const stockNote = id => { const n = s.stock[id]; return n === 0 ? t.soldOut : n <= 3 ? t.onlyLeft(n) : t.inStock(n); };
+    const stockFg = id => { const n = s.stock[id]; return n === 0 ? '#8c491a' : n <= 3 ? '#b2622d' : '#56633f'; };
+    const secs = SECS.filter(n => cat.some(p => p.sec === n));
+    const secTitle = { Flower: L === 'es' ? 'Pasto de afuera' : 'Flower', Indoors: 'Indoor', Concentrated: L === 'es' ? 'Concentrados' : 'Concentrates', Vapes: 'Vapes' };
+    const secSub = {
+      Flower: L === 'es' ? 'De afuera' : 'Outdoor',
+      Indoors: cat.filter(p => p.sec === 'Indoors').length + (L === 'es' ? ' matas' : ' strains'),
+      Concentrated: 'Badder', Vapes: L === 'es' ? '3 gramos' : '3 gram'
+    };
+    const statusStyle = [
+      { bg: '#ffc6a5', fg: '#402310' }, { bg: '#e1eecc', fg: '#3d472b' },
+      { bg: '#ccdbb2', fg: '#272e1b' }, { bg: '#eee7db', fg: '#645c50' }
+    ];
+    const mmss = sec => Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    const tab = (id, label) => ({
+      label, go: () => this.set('screen', id),
+      fg: s.screen === id ? '#f5ead8' : '#a19786',
+      pill: s.screen === id ? '#c67139' : 'rgba(245,234,216,.1)'
+    });
+    const railItem = (id, label, role) => ({
+      label, bg: s.screen === id ? '#c67139' : 'rgba(245,234,216,.1)',
+      fg: s.screen === id ? '#f5ead8' : '#e1eecc',
+      go: () => this.setState({ screen: id, role, selId: s.selId || 'bubble' })
+    });
+    const suggIds = ['bolo', 'bubble', 'suzhi'];
+
+    let payNoteTitle = t.payFastTitle, payNoteBody = t.payFastBody, payNoteBg = '#e1eecc', payNoteBorder = '#56633f';
+    if (s.pay === 'cash' && s.mode === 'pickup') { payNoteTitle = t.payCashPickupTitle; payNoteBody = t.payCashPickupBody; payNoteBg = '#ffe1d0'; payNoteBorder = '#8c491a'; }
+    else if (s.pay === 'cash') { payNoteTitle = t.payCashDeliveryTitle; payNoteBody = t.payCashDeliveryBody; payNoteBg = '#f9f4ed'; payNoteBorder = '#201e1d'; }
+
+    const lastPaid = s.last && s.last.pay !== 'cash';
+    const lastCashPickup = s.last && s.last.pay === 'cash' && s.last.mode === 'pickup';
+    let holdTitle = t.holdSeparado, holdBody = t.holdSeparadoBody, holdCardBg = '#e1eecc';
+    if (lastCashPickup) { holdTitle = t.holdClockTitle; holdBody = t.holdClockBody; holdCardBg = '#ffe1d0'; }
+    else if (s.last && s.last.pay === 'cash') { holdTitle = t.holdDeliveryCash; holdBody = t.holdDeliveryCashBody; holdCardBg = '#f9f4ed'; }
+
+    return {
+      t: Object.assign({}, t),
+      shopName: this.props.shopName ?? "Mafutero's Supply",
+      clientName: 'Dee',
+      langFlip: L === 'es' ? 'EN' : 'ES',
+      flipLang: () => this.flipLang(),
+      pickEs: () => this.setLang('es'), pickEn: () => this.setLang('en'),
+      toLang: () => this.set('screen', 'lang'),
+
+      isLang: s.screen === 'lang', isLock: s.screen === 'lock', isHome: s.screen === 'home',
+      isSignup: s.screen === 'signup', isWaiting: s.screen === 'waiting',
+      goSignup: () => this.set('screen', 'signup'),
+      toLock: () => this.set('screen', 'lock'),
+      fName: s.form.name, fPhone: s.form.phone, fAddr: s.form.addr, fBday: s.form.bday,
+      setName: e => this.field('name', e.target.value),
+      setPhone: e => this.field('phone', e.target.value),
+      setAddr: e => this.field('addr', e.target.value),
+      setBday: e => this.field('bday', e.target.value),
+      toggleId: () => this.field('id', !s.form.id),
+      idBg: s.form.id ? '#e1eecc' : '#f9f4ed',
+      idBorderStyle: s.form.id ? 'solid' : 'dashed',
+      idText: s.form.id ? t.fIdDone : t.fIdPh,
+      ageWarn: (() => { const a = this.ageFrom(s.form.bday); return a !== null && a < 21 ? t.tooYoung : ''; })(),
+      ageWarnDisplay: (() => { const a = this.ageFrom(s.form.bday); return a !== null && a < 21 ? 'block' : 'none'; })(),
+      payPicks: PAYS.filter(p => p.fast).concat(PAYS.filter(p => !p.fast)).map(p => ({
+        label: L === 'es' && p.labelEs ? p.labelEs : p.label,
+        bg: s.form.pay === p.id ? '#c67139' : '#f9f4ed',
+        fg: s.form.pay === p.id ? '#f5ead8' : '#201e1d',
+        pick: () => this.field('pay', p.id)
+      })),
+      signupReady: this.formReady(),
+      signupBg: this.formReady() ? '#56633f' : '#a19786',
+      signupOp: this.formReady() ? '1' : '.65',
+      submitSignup: () => this.submitSignup(),
+      rules: t.rules,
+      newReqs: s.newReqs.map(r => ({
+        name: r.name, phone: r.phone, addr: r.addr, when: r.when,
+        meta: t.yearsOld(r.age) + ' · ' + t.idOk + ' · ' + r.pay,
+        initials: this.initials(r.name),
+        approve: () => this.approveReq(r.id),
+        ignore: () => this.setState({ newReqs: s.newReqs.filter(x => x.id !== r.id) })
+      })),
+      hasReqs: s.newReqs.length > 0,
+      reqsDisplay: s.newReqs.length ? 'block' : 'none',
+
+      isProduct: s.screen === 'product', isBag: s.screen === 'bag', isConfirm: s.screen === 'confirm',
+      isExpired: s.screen === 'expired',
+      isDash: s.screen === 'dash', isQueue: s.screen === 'queue', isInv: s.screen === 'inv', isCodes: s.screen === 'codes',
+      isOwner: ['dash', 'queue', 'inv', 'codes'].indexOf(s.screen) > -1,
+
+      pickClient: () => this.setState({ pending: 'client', code: '' }),
+      pickOwner: () => this.setState({ pending: 'owner', code: '' }),
+      clientBg: s.pending === 'owner' ? 'transparent' : '#c67139',
+      clientFg: s.pending === 'owner' ? '#e1eecc' : '#f5ead8',
+      ownerBg: s.pending === 'owner' ? '#c67139' : 'transparent',
+      ownerFg: s.pending === 'owner' ? '#f5ead8' : '#e1eecc',
+      lockHint: s.backend === 'setup' && s.pending === 'owner' ? t.hintSetup : (s.pending === 'owner' ? t.hintOwner : t.hintClient),
+      modeBadge: s.backend === 'demo' ? t.badgeDemo : (s.backend === 'setup' ? t.badgeSetup : (!s.persists ? t.badgeNoStore : '')),
+      modeBadgeDisplay: s.backend === 'demo' || s.backend === 'setup' || !s.persists ? 'block' : 'none',
+      modeBadgeBg: s.backend === 'setup' ? '#c67139' : '#4a463d',
+      codeErr: s.codeErr || '',
+      codeErrDisplay: s.codeErr ? 'block' : 'none',
+      dots: [0, 1, 2, 3].map(i => ({ fill: i < s.code.length ? '#c67139' : 'transparent' })),
+      keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].map(k => ({
+        label: k,
+        border: k === '' ? 'transparent' : '#f5ead8',
+        bg: k === '' ? 'transparent' : 'rgba(245,234,216,.08)',
+        cursor: k === '' ? 'default' : 'pointer',
+        hoverBg: k === '' ? 'transparent' : 'rgba(245,234,216,.2)',
+        pressBg: k === '' ? 'transparent' : '#c67139',
+        press: k === '' ? () => {} : k === '⌫' ? () => this.set('code', s.code.slice(0, -1)) : () => this.press(k)
+      })),
+
+      openTillLine: delOpen ? t.openTill(this.fmtTime(s.run.end)) : t.closedToday,
+      runBannerBg: delOpen ? '#e1eecc' : '#ffe1d0',
+      runBannerTitle: !s.run.on ? t.runOff : this.runFull() ? t.deliveryFull : t.deliveryOn(win.label),
+      runBannerSub: !s.run.on || this.runFull()
+        ? (L === 'es' ? 'Solo recogido hoy. Textéale si es urgencia.' : 'Pickup only today. Text him if it’s urgent.')
+        : zonesLabel,
+
+      chips: [{ id: 'all', label: L === 'es' ? 'Todo' : 'Everything' }]
+        .concat(secs.map(n => ({ id: n, label: secTitle[n] })))
+        .map(c => ({
+          label: c.label,
+          bg: s.filter === c.id ? '#c67139' : '#f9f4ed',
+          fg: s.filter === c.id ? '#f5ead8' : '#201e1d',
+          op: 1, pick: () => this.set('filter', c.id)
+        })),
+
+      sections: secs.filter(n => s.filter === 'all' || s.filter === n).map(name => ({
+        title: secTitle[name], sub: secSub[name],
+        items: cat.filter(p => p.sec === name).map(p => ({
+          name: p.name, notes: this.tx(p.notes), thc: p.thc, type: p.type,
+          initials: this.initials(p.name), stickerBg: p.bg,
+          fromPrice: cash(Math.min.apply(null, p.weights.map(w => w[1]))),
+          stockLabel: stockNote(p.id), stockFg: stockFg(p.id),
+          open: () => this.setState({ selId: p.id, weightIdx: 0, screen: 'product' })
+        }))
+      })),
+
+      selName: sel.name, selNotes: this.tx(sel.notes), selThc: sel.thc, selCbd: sel.cbd,
+      selType: sel.type, selInitials: this.initials(sel.name || '?'), selBg: sel.bg,
+      selEffects: this.txa(sel.effects), selFootnote: this.tx(sel.foot),
+      selStock: String(s.stock[sel.id] || 0), selStockFg: stockFg(sel.id),
+      selPrice: cash(sel.weights[Math.min(s.weightIdx, sel.weights.length - 1)][1]),
+      selWeights: sel.weights.map((w, i) => ({
+        label: w[0], price: cash(w[1]),
+        bg: i === s.weightIdx ? '#ffe1d0' : '#f9f4ed',
+        dotBg: i === s.weightIdx ? '#c67139' : 'transparent',
+        dotIn: i === s.weightIdx ? '#f5ead8' : 'transparent',
+        pick: () => this.set('weightIdx', i)
+      })),
+      addToBag: () => this.addToBag(),
+
+      hasCart: s.cart.length > 0, cartCount: s.cart.reduce((a, l) => a + l.qty, 0),
+      bagEmpty: s.cart.length === 0,
+      cartLines: s.cart.map((l, i) => ({
+        name: l.name, label: l.label, qty: l.qty, bg: l.bg, initials: l.initials,
+        total: cash(l.price * l.qty), inc: () => this.qty(i, 1), dec: () => this.qty(i, -1)
+      })),
+
+      pickupBg: s.mode === 'pickup' ? '#ffe1d0' : '#f9f4ed',
+      deliveryBg: s.mode === 'delivery' ? '#ffe1d0' : '#f9f4ed',
+      deliveryOp: delOpen ? '1' : '.45',
+      deliveryCursor: delOpen ? 'pointer' : 'not-allowed',
+      deliverySub: !s.run.on ? t.deliveryOff : this.runFull() ? t.deliveryFull : t.deliveryOn(win.label),
+      setPickup: () => this.setState({ mode: 'pickup', slot: 0 }),
+      setDelivery: () => { if (delOpen) this.setState({ mode: 'delivery', slot: 0 }); },
+
+      showZones: s.mode === 'delivery' && delOpen,
+      zoneChips: allowed.map(z => ({
+        label: z.name + ' · ' + z.mi + ' mi · ' + (this.mileFee(z.mi) ? '$' + this.mileFee(z.mi) : t.free),
+        bg: z.id === zone.id ? '#c67139' : '#f5ead8',
+        fg: z.id === zone.id ? '#f5ead8' : '#201e1d',
+        op: '1', cursor: 'pointer',
+        pick: () => this.set('zone', z.id)
+      })),
+      zoneNote: zone.mi <= 5 ? t.zoneFree(zone.name) : t.zonePaid(zone.name, zone.mi, this.mileFee(zone.mi)),
+      runNoteClient: zonesLabel,
+
+      fulfilLabel: s.mode === 'delivery' ? t.deliverTo : t.pickUpAt,
+      fulfilValue: s.mode === 'delivery' ? zone.name + ' — ' + t.addrDelivery : t.addrPickup,
+      slots: this.slotsFor().map((x, i) => ({
+        label: x, bg: i === s.slot ? '#c67139' : '#f5ead8',
+        fg: i === s.slot ? '#f5ead8' : '#201e1d', pick: () => this.set('slot', i)
+      })),
+
+      payMethods: PAYS.map(p => ({
+        label: L === 'es' && p.labelEs ? p.labelEs : p.label,
+        handle: p.id === 'cash'
+          ? (s.mode === 'delivery' ? (L === 'es' ? 'Le pagas cuando llegue' : 'Pay him at the door') : (L === 'es' ? 'Pagas al buscarlo · 30 min de hold' : 'Pay on pickup · 30-min hold'))
+          : p.handle,
+        bg: s.pay === p.id ? '#ffe1d0' : '#f9f4ed',
+        dotBg: s.pay === p.id ? '#c67139' : 'transparent',
+        dotIn: s.pay === p.id ? '#f5ead8' : 'transparent',
+        tag: p.fast ? t.tagFast : t.tagCash,
+        tagBg: p.fast ? '#e1eecc' : '#eee7db',
+        tagFg: p.fast ? '#3d472b' : '#645c50',
+        tagBorder: p.fast ? '#56633f' : '#a19786',
+        pick: () => this.set('pay', p.id)
+      })),
+      payNoteTitle, payNoteBody, payNoteBg, payNoteBorder,
+
+      subtotal: cash(sub),
+      feeLabel: s.mode === 'delivery' ? t.feeDelivery + ' · ' + zone.mi + ' mi' : t.feePickup,
+      fee: fee ? cash(fee) : t.free,
+      dueLabel: s.pay === 'cash' ? t.dueCash : t.duePaid(this.payLabel()),
+      total: cash(sub + fee), place: () => this.place(),
+
+      orderNo: s.last ? s.last.no : '#1043',
+      lastLines: s.last ? s.last.lines : [],
+      lastTotal: s.last ? s.last.total : '$0',
+      lastMode: s.last ? s.last.modeLabel : t.pickupTitle,
+      lastPay: s.last ? (s.last.pay === 'cash' ? t.dueCash : t.duePaid(this.payLabel(s.last.pay)) + ' · ' + this.payObj(s.last.pay).handle) : '',
+      lastWhen: s.last ? s.last.when : '',
+      holdTitle, holdBody, holdCardBg,
+      showClock: !!lastCashPickup, holdClock: mmss(s.hold),
+      forceExpire: () => this.setState({ screen: 'expired', hold: 0 }),
+
+      suggestions: cat.filter(p => suggIds.indexOf(p.id) > -1).map(p => ({
+        name: p.name, initials: this.initials(p.name), bg: p.bg,
+        stockLabel: stockNote(p.id), fromPrice: cash(Math.min.apply(null, p.weights.map(w => w[1]))),
+        open: () => this.setState({ selId: p.id, weightIdx: 0, screen: 'product' })
+      })),
+      repeat: () => this.setState({ screen: 'product', selId: 'bolo', weightIdx: 0 }),
+
+      runHeadline: !s.run.on ? t.runOff : this.runFull() ? t.runFull(win.label) : t.runOn(win.label),
+      runSwitchBg: s.run.on ? '#56633f' : 'rgba(245,234,216,.15)',
+      runSwitchJustify: s.run.on ? 'flex-end' : 'flex-start',
+      runSwitchLabel: s.run.on ? 'ON' : 'OFF',
+      toggleRun: () => this.setState({ run: Object.assign({}, s.run, { on: !s.run.on }) }),
+      runWindowLabel: win.label,
+      runStart: s.run.start, runEnd: s.run.end,
+      setRunStart: e => this.setRun('start', e.target.value),
+      setRunEnd: e => this.setRun('end', e.target.value),
+      runZoneChips: ZONES.map(z => {
+        const on = s.run.zones.indexOf(z.id) > -1;
+        return {
+          label: z.name, meta: z.mi + ' mi · ' + (this.mileFee(z.mi) ? '$' + this.mileFee(z.mi) : t.free),
+          bg: on ? '#c67139' : 'rgba(245,234,216,.08)',
+          fg: on ? '#f5ead8' : '#e1eecc',
+          border: on ? '#f5ead8' : 'rgba(245,234,216,.35)',
+          toggle: () => this.toggleRunZone(z.id)
+        };
+      }),
+      runZonesMeta: t.zonesPicked(allowed.length),
+      runStopsLabel: t.stopsOf(s.run.stops, s.run.max),
+      moreStops: () => this.setState({ run: Object.assign({}, s.run, { max: Math.min(30, s.run.max + 1) }) }),
+      fewerStops: () => this.setState({ run: Object.assign({}, s.run, { max: Math.max(s.run.stops, s.run.max - 1) }) }),
+
+
+      payMix: [
+        { label: 'Zelle', value: '$585' }, { label: 'Venmo', value: '$450' },
+        { label: L === 'es' ? 'Efectivo' : 'Cash', value: '$205' }
+      ],
+      waitingLine: t.waiting(s.orders.filter(o => o.step < 2 && !o.cancelled).length),
+      newestLine: t.newest + s.orders[0].client + ' · ' + s.orders[0].total + ' · ' + (s.orders[0].mode === 'delivery' ? t.howDelivery : t.howPickup),
+      pushText: t.newOrderPush(s.orders[0].total, s.orders[0].client, s.orders[0].mode === 'delivery' ? t.howDelivery : t.howPickup),
+      lowStock: cat.filter(p => s.stock[p.id] <= 3).map(p => ({ name: p.name, left: t.leftN(s.stock[p.id]) })),
+      bestSellers: [
+        { rank: '1', name: 'Bolo Runtz', orders: t.ordersN(14), take: '$560' },
+        { rank: '2', name: 'Packman 3g', orders: t.ordersN(9), take: '$360' },
+        { rank: '3', name: 'Frosted Bananas', orders: t.ordersN(7), take: '$245' }
+      ],
+      orders: s.orders.map(o => {
+        const st = t.statuses[o.step], stl = statusStyle[o.step];
+        const app = o.pay !== 'cash';
+        const pend = app && !o.payOk && !o.cancelled;
+        return {
+          client: o.client, no: o.no, when: o.when, items: o.items, total: o.total,
+          initials: this.initials(o.client),
+          status: o.cancelled ? t.cancelled : st.label,
+          statusBg: o.cancelled ? '#eee7db' : stl.bg,
+          statusFg: o.cancelled ? '#8c491a' : stl.fg,
+          action: o.cancelled ? t.archived : st.action,
+          actionBg: o.cancelled ? '#a19786' : '#56633f',
+          actionCursor: o.cancelled ? 'default' : 'pointer',
+          actionOp: o.cancelled ? '.6' : '1',
+          modeLabel: o.mode === 'delivery' ? t.deliveryTitle : t.pickupTitle, where: o.where,
+          payTag: o.cancelled ? t.noPay : app ? (o.payOk ? t.payTagPaid(this.payLabel(o.pay)) : t.payPending) : t.payTagCash,
+          payBg: pend ? '#ffe1d0' : app && o.payOk ? '#e1eecc' : '#eee7db',
+          payFg: pend ? '#8c491a' : app && o.payOk ? '#3d472b' : '#645c50',
+          payBorder: pend ? '#8c491a' : app && o.payOk ? '#56633f' : '#a19786',
+          showHold: !o.cancelled && (app ? o.payOk : (o.mode === 'pickup' && o.step < 2)),
+          holdTag: app ? t.holdTagSep : t.holdTagOn + (o.hold ? ' · ' + o.hold + 'm' : ''),
+          needsPayCheck: pend, confirmDisplay: pend ? 'flex' : 'none',
+          confirmTitle: t.confirmTitle, confirmSub: t.confirmSub,
+          confirmPay: () => this.patchOrder(o.id, { payOk: true }),
+          undoDisplay: app && o.payOk && !o.cancelled ? 'flex' : 'none',
+          undoPay: () => this.patchOrder(o.id, { payOk: false }),
+          undoPayLabel: t.undoPay,
+          backDisplay: o.step > 0 || o.cancelled ? 'flex' : 'none',
+          stepBack: () => this.stepBack(o.id),
+          stepBackLabel: t.stepBackLabel,
+          revokeLabel: t.revokeLabel,
+          revoke: () => this.patchOrder(o.id, { cancelled: true, payOk: false }),
+          advance: () => this.advance(o.id)
+        };
+      }),
+      invRows: cat.map(p => ({
+        name: p.name, initials: this.initials(p.name), bg: p.bg, stock: String(s.stock[p.id] || 0),
+        note: secTitle[p.sec] + ' · ' + stockNote(p.id), fg: stockFg(p.id),
+        inc: () => this.restock(p.id, 1), dec: () => this.restock(p.id, -1),
+        remove: () => this.removeProduct(p.id)
+      })),
+      showAdd: s.showAdd,
+      addFormDisplay: s.showAdd ? 'block' : 'none',
+      openAdd: () => this.set('showAdd', true),
+      closeAdd: () => this.set('showAdd', false),
+      npName: s.newP.name, npThc: s.newP.thc, npPrice: s.newP.price, npStock: s.newP.stock, npNote: s.newP.note,
+      setNpName: e => this.setNewP('name', e.target.value),
+      setNpThc: e => this.setNewP('thc', e.target.value),
+      setNpPrice: e => this.setNewP('price', e.target.value),
+      setNpStock: e => this.setNewP('stock', e.target.value),
+      setNpNote: e => this.setNewP('note', e.target.value),
+      npSecs: SECS.map(n => ({
+        label: secTitle[n],
+        bg: s.newP.sec === n ? '#c67139' : '#f5ead8',
+        fg: s.newP.sec === n ? '#f5ead8' : '#201e1d',
+        pick: () => this.setNewP('sec', n)
+      })),
+      npTypes: TYPES.map(n => ({
+        label: n,
+        bg: s.newP.type === n ? '#56633f' : '#f5ead8',
+        fg: s.newP.type === n ? '#f5ead8' : '#201e1d',
+        pick: () => this.setNewP('type', n)
+      })),
+      npPriceHint: t.priceHint(s.newP.sec === 'Concentrated' ? '1g' : s.newP.sec === 'Vapes' ? (L === 'es' ? '1 cartucho' : '1 cart') : '3.5g'),
+      addReady: this.addReady(),
+      addBg: this.addReady() ? '#56633f' : '#a19786',
+      saveProduct: () => this.addProduct(),
+      codeRows: s.codes.map(c => ({
+        name: c.name, code: c.code, meta: (L === 'es' ? 'Órdenes: ' : 'Orders: ') + c.meta,
+        state: c.active ? t.active : t.revoked,
+        bg: c.active ? '#e1eecc' : '#eee7db', fg: c.active ? '#3d472b' : '#82796a',
+        toggle: () => {
+          const next = !c.active;
+          this.setState({ codes: s.codes.map(x => x.id === c.id ? Object.assign({}, x, { active: next }) : x) });
+          if (this.live() && this.ownerPin) this.api('codes', { action: 'revoke', pin: this.ownerPin, code: c.code, active: next });
+        }
+      })),
+      issueCode: () => this.issueCode(),
+
+      ownerTabs: [tab('dash', t.tabs[0]), tab('queue', t.tabs[1]), tab('inv', t.tabs[2]), tab('codes', t.tabs[3])],
+      rail: [
+        railItem('lang', t.rail[0], null), railItem('lock', t.rail[1], null), railItem('home', t.rail[2], 'client'),
+        railItem('product', t.rail[3], 'client'), railItem('bag', t.rail[4], 'client'),
+        railItem('confirm', t.rail[5], 'client'), railItem('expired', t.rail[6], 'client'),
+        railItem('dash', t.rail[7], 'owner'), railItem('queue', t.rail[8], 'owner'),
+        railItem('inv', t.rail[9], 'owner'), railItem('codes', t.rail[10], 'owner'),
+        railItem('signup', t.rail[11], null), railItem('waiting', t.rail[12], null)
+      ],
+      isClientNav: ['home', 'confirm', 'expired'].indexOf(s.screen) > -1,
+      navHomeFg: s.screen === 'home' ? '#f5ead8' : '#a19786',
+      navHomePill: s.screen === 'home' ? '#c67139' : 'rgba(245,234,216,.1)',
+      navBagFg: s.cart.length ? '#f5ead8' : '#a19786',
+      navBagPill: s.cart.length ? '#56633f' : 'rgba(245,234,216,.1)',
+      goHome: () => this.set('screen', 'home'), goBag: () => this.set('screen', 'bag'),
+      goQueue: () => this.set('screen', 'queue'), back: () => this.set('screen', 'home'),
+      logout: () => this.setState({ screen: 'lock', role: null, code: '' })
+    };
+  }
+
+  componentDidMount() {
+    let saved = null;
+    try { saved = localStorage.getItem('mf-lang'); } catch (e) {}
+    const next = {};
+    if (saved === 'es' || saved === 'en') next.lang = saved;
+    if (this.props.startInOwnerView) { next.screen = 'dash'; next.role = 'owner'; }
+    else if (this.props.startUnlocked) { next.screen = 'home'; next.role = 'client'; }
+    if (Object.keys(next).length) this.setState(next);
+
+    this.timer = setInterval(() => {
+      if (this.state.screen !== 'confirm' || !this.holdActive()) return;
+      const left = this.state.hold - 1;
+      if (left <= 0) this.setState({ hold: 0, screen: 'expired' });
+      else this.setState({ hold: left });
+    }, 1000);
+  }
+
+  componentWillUnmount() { clearInterval(this.timer); }
+}
+
+</script>
+</body>
+</html>
