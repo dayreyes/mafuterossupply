@@ -2,6 +2,31 @@
   publish = "."
   functions = "netlify/functions"
 
+  # Assemble the functions directory at deploy time.
+  #
+  # This shop is maintained through the GitHub web UI, which flattens dragged
+  # folders on some browsers — so the backend files can end up loose at the repo
+  # root instead of under netlify/functions/. Rather than demand a folder layout
+  # the web uploader can't reliably produce, this puts them where Netlify
+  # expects them just before it bundles.
+  #
+  # Each copy is guarded, so this is a no-op when the repo already has the
+  # proper structure (a git clone, or an upload that kept its folders). Both
+  # layouts deploy identically.
+  #
+  # The entry files import './lib/<name>.js', which resolves correctly once the
+  # two groups land in their respective directories.
+  command = """
+    mkdir -p netlify/functions/lib
+    for f in auth shop orders signups codes; do
+      [ -f "$f.js" ] && cp -f "$f.js" netlify/functions/
+    done
+    for f in session config invites http store notify; do
+      [ -f "$f.js" ] && cp -f "$f.js" netlify/functions/lib/
+    done
+    echo "functions ready:"; ls netlify/functions netlify/functions/lib
+  """
+
 [functions]
   node_bundler = "esbuild"
 
