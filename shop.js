@@ -6,8 +6,8 @@
 
 import { route, ok, fail, unauthorized, str, num } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
-import { requireOwner } from './lib/auth.js';
-import { defaultConfig, cleanConfig, cleanProduct, publicConfig, publicProduct } from './lib/shop.js';
+import { requireOwner } from './lib/session.js';
+import { defaultConfig, cleanConfig, cleanProduct, publicConfig, publicProduct } from './lib/config.js';
 import { send, configured as telegramConfigured } from './lib/notify.js';
 
 const loadConfig = () => read(KEYS.config, defaultConfig());

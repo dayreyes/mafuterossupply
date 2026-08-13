@@ -4,12 +4,12 @@
 
 import { route, ok, fail, tooMany, clientIp, str } from './lib/http.js';
 import { read, write, mutate, available, KEYS } from './lib/store.js';
-import { defaultConfig } from './lib/shop.js';
+import { defaultConfig } from './lib/config.js';
 import {
   OWNER_PIN_LEN, CLIENT_CODE_LEN, hashPin, verifyPin, isOwnerPin, isClientCode,
   createSession, readSession, destroySession, bearer,
   checkThrottle, recordFailure, recordSuccess
-} from './lib/auth.js';
+} from './lib/session.js';
 import { timingSafeEqual } from 'node:crypto';
 
 const eq = (a, b) => {

@@ -22,17 +22,17 @@ const SHELL_URLS = ['./', './index.html', './manifest.webmanifest'];
 const ASSET_URLS = [
   './styles.css',
   './support.js',
-  './fonts/fonts.css',
-  './fonts/caprasimo-latin.woff2',
-  './fonts/caprasimo-latin-ext.woff2',
-  './fonts/figtree-latin.woff2',
-  './fonts/figtree-latin-ext.woff2',
-  './vendor/react.production.min.js',
-  './vendor/react-dom.production.min.js',
-  './icons/icon-180.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-1024.png'
+  './fonts.css',
+  './caprasimo-latin.woff2',
+  './caprasimo-latin-ext.woff2',
+  './figtree-latin.woff2',
+  './figtree-latin-ext.woff2',
+  './react.production.min.js',
+  './react-dom.production.min.js',
+  './icon-180.png',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-1024.png'
 ];
 
 self.addEventListener('install', (e) => {

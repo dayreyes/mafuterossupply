@@ -9,9 +9,9 @@
 
 import { route, ok, fail, unauthorized, tooMany, clientIp, str } from './lib/http.js';
 import { read, mutate, KEYS } from './lib/store.js';
-import { requireOwner, checkThrottle, recordFailure } from './lib/auth.js';
-import { defaultConfig } from './lib/shop.js';
-import { mintCode } from './lib/codes.js';
+import { requireOwner, checkThrottle, recordFailure } from './lib/session.js';
+import { defaultConfig } from './lib/config.js';
+import { mintCode } from './lib/invites.js';
 import { sendAsync, signupText, codeText } from './lib/notify.js';
 
 const MIN_AGE = 21;

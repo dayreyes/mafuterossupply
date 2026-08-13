@@ -14,13 +14,19 @@ A static front end plus a handful of Netlify Functions over Netlify Blobs. No
 build step, no framework tooling — `index.html` is the app and is edited
 directly.
 
+Static assets sit at the repo root rather than in `fonts/`, `vendor/` and
+`icons/`, and no two files anywhere share a name. That is deliberate: the site
+is maintained through the GitHub web UI, which flattens dragged folders on some
+browsers and silently renames the collisions. Only `netlify/functions` needs to
+be nested, because that path is what tells Netlify where the backend lives.
+
 ```
 index.html            The whole front end: markup template + application logic
 support.js            dc-runtime — renders the {{ }} template with React (vendored, unmodified)
 styles.css            Design-system tokens and component classes
-fonts/                Self-hosted Figtree + Caprasimo (no CDN, works offline)
-vendor/               React 18.3.1 UMD (self-hosted for the same reason)
-icons/                PWA icons
+fonts.css + *.woff2   Self-hosted Figtree + Caprasimo (no CDN, works offline)
+react*.min.js         React 18.3.1 UMD (self-hosted for the same reason)
+icon-*.png            PWA icons
 sw.js                 Service worker: network-first page, cache-first assets
 manifest.webmanifest  PWA manifest
 
@@ -30,7 +36,7 @@ netlify/functions/
   orders.js           place · mine · list · advance · stepBack · patch · cancel
   signups.js          submit · list · approve · ignore
   codes.js            list · issue · revoke · remove
-  lib/                store · auth · http · shop · codes · notify
+  lib/                store · session · http · config · invites · notify
 
 dev-server.mjs        Local server: real functions, in-memory storage
 test/                 Backend and view-layer tests

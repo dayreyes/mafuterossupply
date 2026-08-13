@@ -20,6 +20,36 @@ yourself within a minute of deploying and hand the PIN to the owner.
 
 ---
 
+## 1b. Getting the files into GitHub without git
+
+If you're working from a browser rather than a computer with git, upload through
+**Add file → Upload files** on the repo page.
+
+Everything except the backend lives at the repo root, so those files can simply
+be dragged in. The backend is the one part that must be nested, and dragging a
+folder is unreliable — some browsers flatten it and rename the collisions to
+`auth (1).js`. Do it this way instead, which cannot flatten:
+
+1. **Add file → Create new file.** In the filename box type:
+   `netlify/functions/lib/http.js` — typing `/` creates the folders as you go.
+2. Paste the contents of that file, then **Commit**.
+3. Now the folders exist. Click into `netlify/functions/`, use **Add file →
+   Upload files**, and drag in the five loose files: `auth.js`, `shop.js`,
+   `orders.js`, `signups.js`, `codes.js`.
+4. Click into `netlify/functions/lib/` and upload the remaining five:
+   `session.js`, `config.js`, `invites.js`, `store.js`, `notify.js`.
+
+No two files in the project share a name, so nothing can be uploaded into the
+wrong folder without it being obvious.
+
+**Check before deploying:** the repo file list should show a `netlify` folder,
+and `netlify/functions` should contain exactly five `.js` files plus a `lib`
+folder. Loose files left over at the root from an earlier attempt are harmless
+— Netlify only treats `netlify/functions/*` as backend code — but they can be
+deleted for tidiness.
+
+---
+
 ## 2. Connect the repo to Netlify
 
 1. Sign in at [app.netlify.com](https://app.netlify.com).

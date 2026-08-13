@@ -10,8 +10,8 @@
 
 import { route, ok, fail, unauthorized, str, num } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
-import { requireOwner, requireClient } from './lib/auth.js';
-import { defaultConfig, mileFee } from './lib/shop.js';
+import { requireOwner, requireClient } from './lib/session.js';
+import { defaultConfig, mileFee } from './lib/config.js';
 import { sendAsync, orderText, lowStockText } from './lib/notify.js';
 
 const money = (n) => '$' + Number(n).toLocaleString('en-US');

@@ -10,11 +10,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mafutero&#39;s">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
 
-<!-- Self-hosted: no CDN, no Google Fonts, works offline once installed. -->
-<link rel="stylesheet" href="fonts/fonts.css">
+<!-- Self-hosted: no CDN, no Google Fonts, works offline once installed.
+     Everything sits at the repo root so the whole site can be uploaded through
+     the GitHub web UI, which flattens dragged folders on some browsers. -->
+<link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="styles.css">
 <style>
 html,body{margin:0;padding:0;background:#2e2b25;font-family:"Figtree",system-ui,sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
@@ -26,8 +28,8 @@ input,textarea,select{font-size:16px}
 </style>
 
 <!-- React must be defined before support.js, which otherwise fetches it from a CDN. -->
-<script src="vendor/react.production.min.js"></script>
-<script src="vendor/react-dom.production.min.js"></script>
+<script src="react.production.min.js"></script>
+<script src="react-dom.production.min.js"></script>
 <script src="support.js"></script>
 </head>
 <body>

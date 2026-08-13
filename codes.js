@@ -4,8 +4,8 @@
 
 import { route, ok, fail, unauthorized, str } from './lib/http.js';
 import { read, mutate, KEYS } from './lib/store.js';
-import { requireOwner } from './lib/auth.js';
-import { mintCode } from './lib/codes.js';
+import { requireOwner } from './lib/session.js';
+import { mintCode } from './lib/invites.js';
 import { sendAsync, codeText } from './lib/notify.js';
 
 export default async (req) => route(req, {

@@ -17,14 +17,16 @@
   [headers.values]
     Cache-Control = "no-cache"
 
-# Fingerprint-free assets that genuinely never change.
+# Assets that genuinely never change. They live at the repo root rather than in
+# folders so the whole site can be uploaded through the GitHub web UI, which
+# flattens dragged folders on some browsers.
 [[headers]]
-  for = "/fonts/*"
+  for = "/*.woff2"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
-  for = "/vendor/*"
+  for = "/react*.js"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
