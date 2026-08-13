@@ -1,5 +1,8 @@
 /* Organic — design-system tokens and component classes. This file is the source of truth for the system's look; retune it here and see readme.md. */
-@import url('https://fonts.googleapis.com/css2?family=Caprasimo:wght@400&family=Figtree:wght@400;600;700&display=swap');
+/* Fonts are self-hosted in fonts/fonts.css, which index.html loads before this
+   file. The Google Fonts @import that used to live here was the app's last
+   third-party request: it broke the offline PWA and told Google the IP of
+   every customer who opened the menu. */
 
 :root {
   --color-bg: #f5ead8;
