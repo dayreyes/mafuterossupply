@@ -1576,6 +1576,21 @@ class Component extends DCLogic {
     const saved = store.get(LANG_KEY);
     if (saved === 'es' || saved === 'en') this.setState({ lang: saved });
 
+    // The owner hands out a link ending in #signup. Honour it: someone opening
+    // that link has no code yet, so dropping them on the keypad and expecting
+    // them to find the signup button is the wrong first impression.
+    if (String(location.hash || '').toLowerCase() === '#signup') this.wantSignup = true;
+
+    // Following the link while the app is already open changes the hash without
+    // reloading, so componentDidMount never runs again — handle that too.
+    this.onHash = () => {
+      if (String(location.hash || '').toLowerCase() !== '#signup') return;
+      this.wantSignup = true;
+      if (this.token() || this.state.role) return;
+      this.setState({ screen: store.get(LANG_KEY) ? 'signup' : 'lang' });
+    };
+    window.addEventListener('hashchange', this.onHash);
+
     this.refreshStatus();
 
     // Drives the cash-on-pickup countdown on the confirmation screen.
@@ -1587,7 +1602,10 @@ class Component extends DCLogic {
     }, 1000);
   }
 
-  componentWillUnmount() { clearInterval(this.timer); }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    window.removeEventListener('hashchange', this.onHash);
+  }
 
   refreshStatus() {
     return this.api('auth', 'status').then(res => {
@@ -1609,6 +1627,13 @@ class Component extends DCLogic {
       // Public config, fetched before anyone signs in: the lock screen shows the
       // real shop name and the signup form needs the shop's payment options.
       this.loadMenu();
+      // Someone arriving on the signup link goes to the form, not the keypad —
+      // unless they already have a session, which the branch below restores.
+      if (this.wantSignup && !this.token()) {
+        this.setState({ screen: store.get(LANG_KEY) ? 'signup' : 'lang' });
+        return;
+      }
+
       // A stored token means we can go straight back in after a reload.
       if (this.token()) {
         return this.api('auth', 'session').then(s => {
@@ -1665,7 +1690,7 @@ class Component extends DCLogic {
 
   setLang(lang) {
     store.set(LANG_KEY, lang);
-    this.setState({ lang, screen: 'lock' });
+    this.setState({ lang, screen: this.wantSignup && !this.token() ? 'signup' : 'lock' });
   }
   flipLang() {
     const lang = this.state.lang === 'es' ? 'en' : 'es';
@@ -1841,6 +1866,8 @@ class Component extends DCLogic {
     }).then(res => {
       this.setState({ busy: false });
       if (!res || !res.ok) { this.setState({ signupErr: (res && res.error) || this.t().offline }); return; }
+      this.wantSignup = false;
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
       this.setState({
         screen: 'waiting',
         form: { name: '', phone: '', addr: '', bday: '', id: false, pay: this.state.form.pay }
