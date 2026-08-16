@@ -57,6 +57,16 @@
 
 # Customer names, phone numbers and home addresses pass through this app, so
 # lock down what the page is allowed to do and who may frame it.
+#
+# 'unsafe-eval' is required, not sloppiness: the dc-runtime in support.js
+# compiles the app's logic block and every {{ }} expression with `new Function`
+# (support.js:1218 and :844). Without it the runtime cannot start and the page
+# renders completely blank. Removing it means replacing the template engine.
+#
+# The directives that actually contain the damage are still tight — connect-src
+# 'self' means a stolen customer code cannot be exfiltrated to another host,
+# frame-ancestors 'none' blocks clickjacking, and there is no external script
+# origin, so nothing off-site can be loaded and run in the first place.
 [[headers]]
   for = "/*"
   [headers.values]
@@ -64,4 +74,4 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "no-referrer"
     Permissions-Policy = "geolocation=(), microphone=(), camera=(), interest-cohort=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
