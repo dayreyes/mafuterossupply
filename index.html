@@ -114,18 +114,7 @@ input,textarea,select{font-size:16px}
                 <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.fBday }}</div>
                 <input value="{{ fBday }}" onChange="{{ setBday }}" placeholder="{{ t.fBdayPh }}" inputMode="numeric" style="width:100%;box-sizing:border-box;height:52px;padding:0 18px;border-radius:999px;border:2px solid #201e1d;background:#f9f4ed;font:600 15px/1 'Figtree';color:#201e1d;outline:none" style-focus="background:#ffe1d0">
                 <div style="display:{{ ageWarnDisplay }};font:700 12px/1.4 'Figtree';color:#8c491a;margin-top:7px;padding-left:4px">{{ ageWarn }}</div>
-              </div>
-              <div>
-                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.fId }}</div>
-                <div onClick="{{ toggleId }}" style="display:flex;align-items:center;gap:13px;padding:14px 16px;border-radius:22px;border:2px {{ idBorderStyle }} #201e1d;background:{{ idBg }};cursor:pointer" style-hover="background:#ffe1d0">
-                  <div style="width:44px;height:44px;border-radius:50%;background:#f5ead8;border:2px solid #201e1d;display:flex;align-items:center;justify-content:center;flex:none">
-                    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"></rect><circle cx="8.5" cy="12" r="2.5"></circle><path d="M14 10h5M14 14h3"></path></svg>
-                  </div>
-                  <div style="flex:1;min-width:0">
-                    <div style="font:800 13.5px/1.3 'Figtree';color:#201e1d">{{ idText }}</div>
-                    <div style="font:500 11.5px/1.45 'Figtree';color:#645c50;margin-top:3px">{{ t.idNote }}</div>
-                  </div>
-                </div>
+                <div style="font:500 11.5px/1.45 'Figtree';color:#645c50;margin-top:7px;padding-left:4px">{{ t.idNote }}</div>
               </div>
               <div>
                 <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:8px">{{ t.fPay }}</div>
@@ -139,6 +128,7 @@ input,textarea,select{font-size:16px}
 
             <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;margin-top:auto;padding:26px 22px 40px;background:#f5ead8;border-top:2px solid #201e1d">
               <div onClick="{{ submitSignup }}" style="height:56px;border-radius:999px;background:{{ signupBg }};border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:18px;opacity:{{ signupOp }}" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.submitSignup }}</div>
+              <div style="display:{{ signupMissingDisplay }};font:600 12px/1.45 'Figtree';color:#8c491a;margin-top:8px;text-align:center">{{ signupMissing }}</div>
             </div>
           </div>
         </sc-if>
@@ -727,11 +717,11 @@ input,textarea,select{font-size:16px}
                   <div style="display:flex;gap:10px">
                     <div style="flex:1;min-width:0">
                       <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainPrice }}</div>
-                      <input value="{{ npPrice }}" onChange="{{ setNpPrice }}" inputMode="numeric" placeholder="25" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+                      <input value="{{ npPrice }}" onChange="{{ setNpPrice }}" inputMode="numeric" placeholder="{{ t.egPrice }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
                     </div>
                     <div style="flex:1;min-width:0">
                       <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainStock }}</div>
-                      <input value="{{ npStock }}" onChange="{{ setNpStock }}" inputMode="numeric" placeholder="10" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+                      <input value="{{ npStock }}" onChange="{{ setNpStock }}" inputMode="numeric" placeholder="{{ t.egStock }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
                     </div>
                     <div style="flex:1;min-width:0">
                       <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainThc }}</div>
@@ -745,6 +735,7 @@ input,textarea,select{font-size:16px}
                   </div>
                   <div style="display:flex;gap:9px;margin-top:2px">
                     <div onClick="{{ saveProduct }}" style="flex:1;height:50px;border-radius:999px;background:{{ addBg }};border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:16px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.saveStrain }}</div>
+                  <div style="display:{{ addMissingDisplay }};font:600 12px/1.45 'Figtree';color:#8c491a;margin-top:8px;text-align:center">{{ addMissing }}</div>
                     <div onClick="{{ closeAdd }}" style="padding:0 18px;height:50px;border-radius:999px;border:2px solid #a19786;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 12.5px/1 'Figtree';color:#645c50" style-hover="background:#eee7db">{{ t.cancelAdd }}</div>
                   </div>
                 </div>
@@ -982,6 +973,7 @@ input,textarea,select{font-size:16px}
                   <input value="{{ nzMi }}" onChange="{{ setNzMi }}" inputMode="numeric" placeholder="{{ t.stMiPh }}" style="width:82px;box-sizing:border-box;height:46px;padding:0 13px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 13px/1 'Figtree';color:#201e1d;outline:none">
                 </div>
                 <div onClick="{{ addZone }}" style="margin-top:10px;height:44px;border-radius:999px;background:{{ addZoneBg }};border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:15px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.stAddZone }}</div>
+                <div style="display:{{ addZoneMissingDisplay }};font:600 12px/1.45 'Figtree';color:#8c491a;margin-top:8px;text-align:center">{{ addZoneMissing }}</div>
               </div>
 
               <!-- fees and hold -->
@@ -1019,6 +1011,7 @@ input,textarea,select{font-size:16px}
               <div style="display:{{ settingsMsgDisplay }};margin-top:14px;padding:12px 15px;border-radius:18px;background:#e1eecc;border:2px solid #56633f;font:700 12px/1.4 'Figtree';color:#3d472b">{{ settingsMsg }}</div>
 
               <div onClick="{{ saveSettings }}" style="margin-top:16px;height:56px;border-radius:999px;background:{{ saveBg }};border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:17px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ saveLabel }}</div>
+              <div style="display:{{ saveHintDisplay }};font:600 12px/1.45 'Figtree';color:#8c491a;margin-top:8px;text-align:center">{{ saveHint }}</div>
 
               <div onClick="{{ logout }}" style="margin-top:12px;height:48px;border-radius:999px;border:2px solid #a19786;background:#f5ead8;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font:700 13px/1 'Figtree';color:#645c50" style-hover="background:#eee7db">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
@@ -1178,9 +1171,8 @@ const COPY = {
     fPhone: 'Teléfono', fPhonePh: '(813) 000-0000',
     fAddr: 'Dirección pa’ el delivery', fAddrPh: 'Calle, apto, pueblo',
     fBday: 'Fecha de nacimiento', fBdayPh: 'MM/DD/AAAA',
-    fId: 'Foto del ID', fIdPh: 'Toca pa’ subir la foto', fIdDone: 'ID subido',
     fPay: 'Con qué prefieres pagar',
-    idNote: 'Tienes que tener 21 o más. La foto es solo pa’ verificar, no se comparte.',
+    idNote: 'Tienes que tener 21 o más. El Mafu te verifica en persona.',
     tooYoung: 'Tienes que tener 21 o más pa’ entrar.',
     submitSignup: 'Mándale mi información',
     waitTitle: 'Espera el texto',
@@ -1215,6 +1207,8 @@ const COPY = {
     setupGo: 'Crear la tienda', setupMismatch: 'Los PIN no son iguales.',
     setupNeedName: 'Ponle nombre a la tienda.',
     setupWarn: 'Apunta este PIN. Sin él no entras al panel.',
+    stillNeed: 'Todavía falta: ', nothingToSave: 'No has cambiado nada todavía.',
+    egPrice: 'ej. 25', egStock: 'ej. 10',
     pickupOnlyToday: 'Solo recogido hoy.', noZones: 'No hay áreas de entrega todavía',
     payAtDoor: 'Le pagas cuando llegue', payOnPickup: m => 'Pagas al buscarlo · ' + m + ' min de hold',
     askForHandle: 'Pregunta cómo pagar',
@@ -1348,9 +1342,8 @@ const COPY = {
     fPhone: 'Phone', fPhonePh: '(813) 000-0000',
     fAddr: 'Delivery address', fAddrPh: 'Street, apt, city',
     fBday: 'Date of birth', fBdayPh: 'MM/DD/YYYY',
-    fId: 'Photo of your ID', fIdPh: 'Tap to upload the photo', fIdDone: 'ID uploaded',
     fPay: 'How you’d rather pay',
-    idNote: 'You have to be 21 or over. The photo is only for the check and isn’t shared.',
+    idNote: 'You have to be 21 or over. El Mafu checks in person.',
     tooYoung: 'You have to be 21 or over to get in.',
     submitSignup: 'Send him my info',
     waitTitle: 'Wait for the text',
@@ -1385,6 +1378,8 @@ const COPY = {
     setupGo: 'Create the shop', setupMismatch: 'Those PINs do not match.',
     setupNeedName: 'Give the shop a name.',
     setupWarn: 'Write this PIN down. Without it you cannot get into the dashboard.',
+    stillNeed: 'Still needed: ', nothingToSave: 'Nothing changed yet.',
+    egPrice: 'e.g. 25', egStock: 'e.g. 10',
     pickupOnlyToday: 'Pickup only today.', noZones: 'No delivery areas set up yet',
     payAtDoor: 'Pay him at the door', payOnPickup: m => 'Pay on pickup · ' + m + '-min hold',
     askForHandle: 'Ask how to pay',
@@ -1468,7 +1463,7 @@ class Component extends DCLogic {
     selId: null, weightIdx: 0, cart: [], mode: 'pickup', slot: 0, zone: '', pay: '',
     last: null, hold: 0,
     filter: 'all',
-    form: { name: '', phone: '', addr: '', bday: '', id: false, pay: '' },
+    form: { name: '', phone: '', addr: '', bday: '', pay: '' },
     signupErr: '',
 
     // ── owner editing ──────────────────────────────────────────────────────
@@ -1624,9 +1619,10 @@ class Component extends DCLogic {
         this.setState({ screen: 'down', fatal: res.error || this.t().storageDown });
         return;
       }
-      // Public config, fetched before anyone signs in: the lock screen shows the
-      // real shop name and the signup form needs the shop's payment options.
-      this.loadMenu();
+      // Public config for the lock and signup screens, which are shown before
+      // anyone has a session. Skipped when a token is about to be restored, so
+      // it cannot race the owner's own config load below.
+      if (!this.token()) this.loadMenu();
       // Someone arriving on the signup link goes to the form, not the keypad —
       // unless they already have a session, which the branch below restores.
       if (this.wantSignup && !this.token()) {
@@ -1656,6 +1652,13 @@ class Component extends DCLogic {
   loadMenu() {
     return this.api('shop', 'menu').then(res => {
       if (!res || !res.ok) return;
+      // The owner's config is a superset of this one: the public copy hides
+      // disabled payment methods, drops the `enabled` flag entirely, and omits
+      // any area that is not in today's run. Letting a slow menu response land
+      // on top of it is how the owner ended up looking at a Settings screen
+      // with one payment method and no areas — and saving from that state
+      // would have deleted the missing areas for real.
+      if (this.state.role === 'owner') return;
       const cfg = res.config;
       const firstPay = (cfg.payments[0] || {}).id || '';
       const firstZone = (cfg.zones[0] || {}).id || '';
@@ -1840,7 +1843,13 @@ class Component extends DCLogic {
   // Real "today", not the frozen date the prototype used — a hardcoded now
   // means the age check silently drifts wrong as time passes.
   ageFrom(bday) {
-    const m = /^(\d{1,2})\D(\d{1,2})\D(\d{4})$/.exec(String(bday || '').trim());
+    // Accepts 12/14/1993, 12-14-1993 and 12141993. The last one is what a
+    // phone's numeric keypad actually produces, and rejecting it silently
+    // disabled the signup button — so nobody could ever sign up.
+    const raw = String(bday || '').trim();
+    const digits = raw.replace(/\D/g, '');
+    const m = /^(\d{1,2})\D(\d{1,2})\D(\d{4})$/.exec(raw) ||
+      (digits.length === 8 ? [null, digits.slice(0, 2), digits.slice(2, 4), digits.slice(4)] : null);
     if (!m) return null;
     const d = new Date(+m[3], +m[1] - 1, +m[2]);
     if (isNaN(d) || d.getMonth() !== +m[1] - 1 || d.getDate() !== +m[2]) return null;
@@ -1853,7 +1862,7 @@ class Component extends DCLogic {
 
   formReady() {
     const f = this.state.form, a = this.ageFrom(f.bday);
-    return !!(f.name.trim() && f.phone.trim() && f.addr.trim() && f.id && a !== null && a >= 21);
+    return !!(f.name.trim() && f.phone.trim() && f.addr.trim() && a !== null && a >= 21);
   }
 
   submitSignup() {
@@ -1862,7 +1871,7 @@ class Component extends DCLogic {
     this.setState({ busy: true, signupErr: '' });
     this.api('signups', 'submit', {
       name: f.name.trim(), phone: f.phone.trim(), addr: f.addr.trim(),
-      bday: f.bday.trim(), id: f.id === true, pay: f.pay
+      bday: f.bday.trim(), pay: f.pay
     }).then(res => {
       this.setState({ busy: false });
       if (!res || !res.ok) { this.setState({ signupErr: (res && res.error) || this.t().offline }); return; }
@@ -1870,7 +1879,7 @@ class Component extends DCLogic {
       try { history.replaceState(null, '', location.pathname); } catch (e) {}
       this.setState({
         screen: 'waiting',
-        form: { name: '', phone: '', addr: '', bday: '', id: false, pay: this.state.form.pay }
+        form: { name: '', phone: '', addr: '', bday: '', pay: this.state.form.pay }
       });
     });
   }
@@ -2201,11 +2210,15 @@ class Component extends DCLogic {
       setName: e => this.field('name', e.target.value),
       setPhone: e => this.field('phone', e.target.value),
       setAddr: e => this.field('addr', e.target.value),
-      setBday: e => this.field('bday', e.target.value),
-      toggleId: () => this.field('id', !s.form.id),
-      idBg: s.form.id ? '#e1eecc' : '#f9f4ed',
-      idBorderStyle: s.form.id ? 'solid' : 'dashed',
-      idText: s.form.id ? t.fIdDone : t.fIdPh,
+      setBday: e => {
+        // Insert the slashes for them; typing eight digits on a phone keypad is
+        // what people actually do.
+        const d = e.target.value.replace(/\D/g, '').slice(0, 8);
+        const out = d.length > 4 ? d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4)
+          : d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2)
+          : d;
+        this.field('bday', out);
+      },
       ageWarn: (() => { const a = this.ageFrom(s.form.bday); return a !== null && a < 21 ? t.tooYoung : (s.signupErr || ''); })(),
       ageWarnDisplay: (() => { const a = this.ageFrom(s.form.bday); return (a !== null && a < 21) || s.signupErr ? 'block' : 'none'; })(),
       payPicks: this.payments().map(p => ({
@@ -2214,6 +2227,15 @@ class Component extends DCLogic {
         fg: s.form.pay === p.id ? '#f5ead8' : '#201e1d',
         pick: () => this.field('pay', p.id)
       })),
+      signupMissing: (() => {
+        const f = s.form, a = this.ageFrom(f.bday), miss = [];
+        if (!f.name.trim()) miss.push(t.fName);
+        if (!f.phone.trim()) miss.push(t.fPhone);
+        if (!f.addr.trim()) miss.push(t.fAddr);
+        if (a === null) miss.push(t.fBday);
+        return miss.length ? t.stillNeed + miss.join(', ') : '';
+      })(),
+      signupMissingDisplay: this.formReady() ? 'none' : 'block',
       signupReady: this.formReady() && !s.busy,
       signupBg: this.formReady() && !s.busy ? '#56633f' : '#a19786',
       signupOp: this.formReady() && !s.busy ? '1' : '.65',
@@ -2476,6 +2498,13 @@ class Component extends DCLogic {
         pick: () => this.setNewP('type', n)
       })),
       npPriceHint: t.priceHint(s.newP.sec === 'Concentrated' ? '1g' : s.newP.sec === 'Vapes' ? (L === 'es' ? '1 cartucho' : '1 cart') : '3.5g'),
+      addMissing: (() => {
+        const n = s.newP, miss = [];
+        if (n.name.trim().length < 2) miss.push(t.fStrainName);
+        if (!(+n.price > 0)) miss.push(t.fStrainPrice);
+        return miss.length ? t.stillNeed + miss.join(', ') : '';
+      })(),
+      addMissingDisplay: this.addReady() ? 'none' : 'block',
       addReady: this.addReady() && !s.busy,
       addBg: this.addReady() && !s.busy ? '#56633f' : '#a19786',
       saveProduct: () => this.addProduct(),
@@ -2546,6 +2575,8 @@ class Component extends DCLogic {
       setNzMi: e => this.setState({ newZone: Object.assign({}, s.newZone, { mi: e.target.value }) }),
       addZone: () => this.addZone(),
       addZoneBg: s.newZone.name.trim() ? '#56633f' : '#a19786',
+      addZoneMissing: s.newZone.name.trim() ? '' : t.stillNeed + t.stZonePh,
+      addZoneMissingDisplay: s.newZone.name.trim() ? 'none' : 'block',
 
       stFree: num(d.fees && d.fees.freeMiles), stMid: num(d.fees && d.fees.midMiles), stMidFee: num(d.fees && d.fees.midFee),
       setStFree: e => { const v = e.target.value; this.editDraft(x => { x.fees.freeMiles = +v || 0; }); },
@@ -2566,6 +2597,8 @@ class Component extends DCLogic {
       saveSettings: () => this.saveSettings(),
       saveBg: dirty && !s.busy ? '#c67139' : '#a19786',
       saveLabel: dirty ? t.stSave : t.stSaved,
+      saveHint: dirty ? '' : t.nothingToSave,
+      saveHintDisplay: dirty ? 'none' : 'block',
       settingsMsg: s.settingsMsg,
       settingsMsgDisplay: s.settingsMsg ? 'block' : 'none',
 

@@ -16,9 +16,17 @@ import { sendAsync, signupText, codeText } from './lib/notify.js';
 
 const MIN_AGE = 21;
 
-// Accepts MM/DD/YYYY with any separator, which is what the form asks for.
+// Accepts MM/DD/YYYY with any separator, and eight bare digits — which is what
+// a phone's numeric keypad produces, and what the form now sends.
+//
+// There is no ID-photo step: the owner vets people face to face before handing
+// out the link, so an upload button in the app was a checkbox pretending to be
+// a check. The age is still recomputed here rather than trusted from the form.
 function ageFrom(bday) {
-  const m = /^(\d{1,2})\D(\d{1,2})\D(\d{4})$/.exec(String(bday || '').trim());
+  const raw = String(bday || '').trim();
+  const digits = raw.replace(/\D/g, '');
+  const m = /^(\d{1,2})\D(\d{1,2})\D(\d{4})$/.exec(raw) ||
+    (digits.length === 8 ? [null, digits.slice(0, 2), digits.slice(2, 4), digits.slice(4)] : null);
   if (!m) return null;
   const [, mm, dd, yyyy] = m;
   const d = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
@@ -47,7 +55,6 @@ export default async (req) => route(req, {
     const age = ageFrom(body.bday);
 
     if (!name || !phone || !addr) return fail('Fill in your name, phone and address.');
-    if (body.id !== true) return fail('Confirm you can show ID.');
     if (age === null) return fail('Enter your date of birth as MM/DD/YYYY.');
     if (age < MIN_AGE) return fail('You must be ' + MIN_AGE + ' or older.');
 
