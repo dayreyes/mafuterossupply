@@ -100,52 +100,105 @@ export function mileFee(mi, fees) {
   return f.farBase + Math.floor((mi - f.midMiles) / f.farStepMiles) * f.farStepFee;
 }
 
-// Price ladders are derived from one base price so the owner types a single
-// number per product instead of four.
-export function weightsFor(sec, base) {
-  const b = Math.max(1, Math.round(base));
-  if (sec === 'Concentrated') return [['1g', b], ['7g', b * 5]];
-  if (sec === 'Vapes') return [['1 cart', b], ['4 carts', b * 3]];
-  return [['3.5g', b], ['7g', Math.round(b * 1.6)], ['1/2 oz', Math.round(b * 3.2)], ['1 oz', Math.round(b * 5.6)]];
+// Weight tiers, per category.
+//
+// `grams` is what a sale actually takes off the shelf, which is the whole point
+// of tracking stock in grams: selling an ounce has to remove 28, not 1. Vapes
+// are counted in whole carts instead, so the unit is per category too.
+export const TIERS = {
+  Flower:       { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
+  Indoors:      { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
+  Concentrated: { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7]] },
+  Vapes:        { unit: 'ea', tiers: [['1 cart', 1], ['2 carts', 2], ['4 carts', 4]] }
+};
+
+export const tiersFor = (sec) => (TIERS[sec] || TIERS.Indoors).tiers;
+export const unitFor = (sec) => (TIERS[sec] || TIERS.Indoors).unit;
+
+// Which tier the owner types first. The rest are pre-filled from it as a
+// starting point and stay editable, so an ounce deal can be priced below the
+// multiplier instead of being locked to it.
+export const BASE_INDEX = { Flower: 1, Indoors: 1, Concentrated: 0, Vapes: 0 };
+
+const MULTIPLIERS = {
+  Flower:       [0.4, 1, 1.6, 3.2, 5.6],
+  Indoors:      [0.4, 1, 1.6, 3.2, 5.6],
+  Concentrated: [1, 3, 5],
+  Vapes:        [1, 1.9, 3]
+};
+
+export const suggestPrices = (sec, base) =>
+  (MULTIPLIERS[sec] || MULTIPLIERS.Indoors).map((m) => Math.max(1, Math.round(base * m)));
+
+// Products saved before prices became per-tier carry `weights` ([label, price])
+// and a stock number that counted items rather than grams. Convert on read so
+// an existing shop keeps working; the stock figure is left alone because only
+// the owner knows whether that 16 meant grams or jars.
+export function migrateProduct(p) {
+  if (!p || Array.isArray(p.tiers)) return p;
+  const sec = SECTIONS.includes(p.sec) ? p.sec : 'Indoors';
+  const spec = tiersFor(sec);
+  const old = Array.isArray(p.weights) ? p.weights : [];
+  const byLabel = new Map(old.map((w) => [w[0], w[1]]));
+  const base = Number(p.price) || Number(old[0] && old[0][1]) || 1;
+  const suggested = suggestPrices(sec, base);
+  return {
+    ...p,
+    sec,
+    unit: unitFor(sec),
+    tiers: spec.map(([label, grams], i) => ({
+      label,
+      grams,
+      price: Number(byLabel.get(label)) || suggested[i] || 1
+    }))
+  };
 }
 
 export function cleanProduct(inp, index = 0, existing = null) {
   const name = str(inp.name, 60);
   if (name.length < 2) return { error: 'name too short' };
-  // Validate the raw value BEFORE clamping: num() would quietly lift a 0 (or a
-  // negative) up to the minimum, so clamping first turns "no price given" into
-  // a real product priced at $1.
-  const rawPrice = Number(inp.price);
-  if (!Number.isFinite(rawPrice) || rawPrice < 1) return { error: 'price required' };
-  const price = num(rawPrice, 1, 100000, 1);
   const sec = SECTIONS.includes(inp.sec) ? inp.sec : 'Indoors';
   const type = TYPES.includes(inp.type) ? inp.type : 'Hybrid';
+  const spec = tiersFor(sec);
+
+  // Every tier needs its own price. Validate the raw values BEFORE clamping:
+  // num() would quietly lift a 0 up to the minimum, turning "no price given"
+  // into a real product priced at $1.
+  const given = Array.isArray(inp.prices) ? inp.prices : null;
+  if (!given || given.length !== spec.length) return { error: 'a price is missing' };
+  const prices = [];
+  for (const raw of given) {
+    const v = Number(raw);
+    if (!Number.isFinite(v) || v < 1) return { error: 'a price is missing' };
+    prices.push(num(v, 1, 100000, 1));
+  }
+
   return {
     product: {
       id: (existing && existing.id) || 'p' + Date.now().toString(36) + index,
       name,
       sec,
       type,
-      thc: str(inp.thc, 12) || '—',
-      cbd: str(inp.cbd, 12) || '—',
+      unit: unitFor(sec),
+      thc: str(inp.thc, 12) || '\u2014',
+      cbd: str(inp.cbd, 12) || '\u2014',
       bg: (existing && existing.bg) || STICKERS[index % STICKERS.length],
       notes: str(inp.note ?? inp.notes, 240),
       effects: Array.isArray(inp.effects) ? inp.effects.slice(0, 6).map((e) => str(e, 24)).filter(Boolean) : [],
-      price,
-      weights: weightsFor(sec, price),
+      tiers: spec.map(([label, grams], i) => ({ label, grams, price: prices[i] })),
       foot: str(inp.foot, 160),
-      stock: num(inp.stock, 0, 100000, existing ? existing.stock : 0),
+      // Grams on hand for flower and concentrates, whole carts for vapes.
+      stock: num(inp.stock, 0, 1000000, existing ? existing.stock : 0),
       active: inp.active !== false,
       at: (existing && existing.at) || new Date().toISOString()
     }
   };
 }
 
-// What a customer is allowed to see. Never leak stock counts of hidden items or
-// internal bookkeeping.
+// What a customer is allowed to see. Never leak internal bookkeeping.
 export const publicProduct = (p) => ({
   id: p.id, name: p.name, sec: p.sec, type: p.type, thc: p.thc, cbd: p.cbd,
-  bg: p.bg, notes: p.notes, effects: p.effects, weights: p.weights,
+  bg: p.bg, notes: p.notes, effects: p.effects, tiers: p.tiers, unit: p.unit,
   foot: p.foot, stock: p.stock
 });
 

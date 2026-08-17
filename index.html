@@ -714,21 +714,27 @@ input,textarea,select{font-size:16px}
                       </sc-for>
                     </div>
                   </div>
-                  <div style="display:flex;gap:10px">
-                    <div style="flex:1;min-width:0">
-                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainPrice }}</div>
-                      <input value="{{ npPrice }}" onChange="{{ setNpPrice }}" inputMode="numeric" placeholder="{{ t.egPrice }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+                  <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.perWeight }}</div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ npPrices }}" as="w" hint-placeholder-count="5">
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <div style="flex:none;width:76px;font:800 13px/1.2 'Figtree';color:#201e1d">{{ w.label }}</div>
+                        <div style="flex:none;font:800 15px/1 'Figtree';color:#8c491a">$</div>
+                        <input value="{{ w.value }}" onChange="{{ w.set }}" inputMode="decimal" placeholder="{{ t.egPrice }}" style="flex:1;min-width:0;box-sizing:border-box;height:46px;padding:0 14px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:700 14px/1 'Figtree';color:#201e1d;outline:none">
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="font:500 11.5px/1.4 'Figtree';color:#645c50;margin-top:2px">{{ npPriceHint }}</div>
+                  <div style="display:flex;gap:9px;margin-top:4px">
+                    <div style="flex:1">
+                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ npStockLabel }}</div>
+                      <input value="{{ npStock }}" onChange="{{ setNpStock }}" inputMode="decimal" placeholder="{{ npStockPh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
                     </div>
-                    <div style="flex:1;min-width:0">
-                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainStock }}</div>
-                      <input value="{{ npStock }}" onChange="{{ setNpStock }}" inputMode="numeric" placeholder="{{ t.egStock }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
-                    </div>
-                    <div style="flex:1;min-width:0">
-                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainThc }}</div>
+                    <div style="flex:1">
+                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.fStrainThc }}</div>
                       <input value="{{ npThc }}" onChange="{{ setNpThc }}" placeholder="{{ t.fStrainThcPh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
                     </div>
                   </div>
-                  <div style="font:500 11.5px/1.4 'Figtree';color:#645c50;margin-top:-4px">{{ npPriceHint }}</div>
                   <div>
                     <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainNote }}</div>
                     <input value="{{ npNote }}" onChange="{{ setNpNote }}" placeholder="{{ t.fStrainNotePh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
@@ -1208,7 +1214,9 @@ const COPY = {
     setupNeedName: 'Ponle nombre a la tienda.',
     setupWarn: 'Apunta este PIN. Sin él no entras al panel.',
     stillNeed: 'Todavía falta: ', nothingToSave: 'No has cambiado nada todavía.',
-    egPrice: 'ej. 25', egStock: 'ej. 10',
+    egPrice: 'ej. 25', egStock: 'ej. 10', egGrams: 'ej. 112',
+    fStrainGrams: 'Gramos que tienes', fStrainUnits: 'Cartuchos que tienes',
+    perWeight: 'Precio por peso', perWeightHint: 'Escribe el de {b} y los demás se llenan solos. Puedes cambiar cualquiera.',
     pickupOnlyToday: 'Solo recogido hoy.', noZones: 'No hay áreas de entrega todavía',
     payAtDoor: 'Le pagas cuando llegue', payOnPickup: m => 'Pagas al buscarlo · ' + m + ' min de hold',
     askForHandle: 'Pregunta cómo pagar',
@@ -1379,7 +1387,9 @@ const COPY = {
     setupNeedName: 'Give the shop a name.',
     setupWarn: 'Write this PIN down. Without it you cannot get into the dashboard.',
     stillNeed: 'Still needed: ', nothingToSave: 'Nothing changed yet.',
-    egPrice: 'e.g. 25', egStock: 'e.g. 10',
+    egPrice: 'e.g. 25', egStock: 'e.g. 10', egGrams: 'e.g. 112',
+    fStrainGrams: 'Grams on hand', fStrainUnits: 'Carts on hand',
+    perWeight: 'Price per weight', perWeightHint: 'Type the {b} price and the rest fill in. Change any of them.',
     pickupOnlyToday: 'Pickup only today.', noZones: 'No delivery areas set up yet',
     payAtDoor: 'Pay him at the door', payOnPickup: m => 'Pay on pickup · ' + m + '-min hold',
     askForHandle: 'Ask how to pay',
@@ -1412,6 +1422,26 @@ const COPY = {
 };
 
 const SECS = ['Flower', 'Indoors', 'Concentrated', 'Vapes'];
+
+// Mirrors TIERS in netlify/functions/lib/config.js. Stock is grams for flower
+// and concentrates, whole carts for vapes, so a sale can take 28 off for an
+// ounce instead of 1.
+const TIERS = {
+  Flower:       { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
+  Indoors:      { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
+  Concentrated: { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7]] },
+  Vapes:        { unit: 'ea', tiers: [['1 cart', 1], ['2 carts', 2], ['4 carts', 4]] }
+};
+const tiersFor = sec => (TIERS[sec] || TIERS.Indoors).tiers;
+const unitFor = sec => (TIERS[sec] || TIERS.Indoors).unit;
+// Which tier the owner types first; the rest are suggested from it.
+const BASE_INDEX = { Flower: 1, Indoors: 1, Concentrated: 0, Vapes: 0 };
+const MULTIPLIERS = {
+  Flower: [0.4, 1, 1.6, 3.2, 5.6], Indoors: [0.4, 1, 1.6, 3.2, 5.6],
+  Concentrated: [1, 3, 5], Vapes: [1, 1.9, 3]
+};
+const suggestPrices = (sec, base) =>
+  (MULTIPLIERS[sec] || MULTIPLIERS.Indoors).map(m => String(Math.max(1, Math.round(base * m))));
 const TYPES = ['Hybrid', 'Indica', 'Sativa', 'Cart'];
 const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
 
@@ -1468,7 +1498,7 @@ class Component extends DCLogic {
 
     // ── owner editing ──────────────────────────────────────────────────────
     showAdd: false,
-    newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', price: '', stock: '', note: '' },
+    newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', prices: ['', '', '', '', ''], stock: '', note: '' },
     draft: null,          // working copy of config on the settings screen
     newZone: { name: '', mi: '' },
     settingsMsg: '',
@@ -1499,8 +1529,11 @@ class Component extends DCLogic {
   expired(res) {
     if (res && res.status === 401) {
       store.drop(TOKEN_KEY);
+      // Deliberately keeps newP and draft: the owner gets bounced mid-edit, and
+      // throwing away what they had just typed makes a recoverable annoyance
+      // feel like data loss.
       this.setState({
-        role: null, screen: 'lock', code: '', codeErr: this.t().sessionOut,
+        role: null, screen: 'lock', pending: 'owner', code: '', codeErr: this.t().sessionOut,
         cart: [], orders: [], signups: [], codes: []
       });
       return true;
@@ -1643,7 +1676,16 @@ class Component extends DCLogic {
   }
 
   resume(role, name) {
-    if (role === 'owner') return this.loadOwner().then(() => this.setState({ role: 'owner', screen: 'dash' }));
+    if (role === 'owner') {
+      return this.loadOwner().then((live) => {
+        // If the session turned out to be dead, loadOwner has already sent us
+        // back to the keypad. Forcing the dashboard on top of that is what made
+        // an expired session look like a working shop with no data in it —
+        // every read had failed and every write came back "session timed out".
+        if (!live) return;
+        this.setState({ role: 'owner', screen: 'dash' });
+      });
+    }
     return this.loadMenu().then(() => this.setState({ role: 'client', clientName: name, screen: 'home' }));
   }
 
@@ -1679,13 +1721,21 @@ class Component extends DCLogic {
       this.api('signups', 'list'),
       this.api('codes', 'list')
     ]).then(([cfg, ord, sig, cod]) => {
-      if (this.expired(cfg)) return;
-      if (cfg && cfg.ok) {
-        this.setState({ cfg: cfg.config, products: cfg.products, telegram: !!cfg.telegram, draft: null });
+      // Any 401 here means the token is no longer good; bounce once and tell
+      // the caller not to carry on as though we were signed in.
+      if ([cfg, ord, sig, cod].some((r) => r && r.status === 401)) {
+        this.expired({ status: 401 });
+        return false;
       }
+      if (!cfg || !cfg.ok) {
+        this.setState({ fatal: (cfg && cfg.error) || this.t().offline, screen: 'down' });
+        return false;
+      }
+      this.setState({ cfg: cfg.config, products: cfg.products, telegram: !!cfg.telegram, draft: null });
       if (ord && ord.ok) this.setState({ orders: ord.orders, stops: ord.stops });
       if (sig && sig.ok) this.setState({ signups: sig.signups });
       if (cod && cod.ok) this.setState({ codes: cod.codes });
+      return true;
     });
   }
 
@@ -1889,13 +1939,16 @@ class Component extends DCLogic {
   addToBag() {
     const p = this.catalog().find(x => x.id === this.state.selId);
     if (!p) return;
-    const w = p.weights[Math.min(this.state.weightIdx, p.weights.length - 1)];
+    const idx = Math.min(this.state.weightIdx, p.tiers.length - 1);
+    const w = p.tiers[idx];
     const cart = this.state.cart.slice();
-    const hit = cart.find(l => l.pid === p.id && l.weightIdx === this.state.weightIdx);
+    // Same strain at a different weight is its own line, which is how a 4g
+    // order works: 3.5g and 1g sit side by side and the totals add up.
+    const hit = cart.find(l => l.pid === p.id && l.weightIdx === idx);
     if (hit) hit.qty += 1;
     else cart.push({
-      pid: p.id, name: p.name, label: w[0], price: w[1], qty: 1,
-      weightIdx: this.state.weightIdx, bg: p.bg, initials: this.initials(p.name)
+      pid: p.id, name: p.name, label: w.label, price: w.price, grams: w.grams, qty: 1,
+      weightIdx: idx, bg: p.bg, initials: this.initials(p.name)
     });
     this.setState({ cart, screen: 'bag' });
   }
@@ -1942,7 +1995,37 @@ class Component extends DCLogic {
   // ── owner actions ────────────────────────────────────────────────────────
 
   setNewP(k, v) { this.setState({ newP: Object.assign({}, this.state.newP, { [k]: v }) }); }
-  addReady() { const n = this.state.newP; return n.name.trim().length > 1 && +n.price > 0; }
+
+  // Changing category changes how many tiers there are, so the price list is
+  // resized rather than carried over at the wrong length.
+  setSection(sec) {
+    const n = this.state.newP;
+    const len = tiersFor(sec).length;
+    const prices = Array.from({ length: len }, (_, i) => n.prices[i] || '');
+    this.setState({ newP: Object.assign({}, n, { sec, prices }) });
+  }
+
+  // Typing the base price fills the rest in as a starting point — but only the
+  // ones still blank, so an ounce deal the owner already typed is never
+  // overwritten.
+  setPrice(i, v) {
+    const n = this.state.newP;
+    const prices = n.prices.slice();
+    prices[i] = v;
+    if (i === (BASE_INDEX[n.sec] ?? 1) && +v > 0) {
+      const suggested = suggestPrices(n.sec, +v);
+      suggested.forEach((sv, j) => { if (j !== i && !prices[j]) prices[j] = sv; });
+    }
+    this.setState({ newP: Object.assign({}, n, { prices }) });
+  }
+
+  addReady() {
+    const n = this.state.newP;
+    const need = tiersFor(n.sec).length;
+    return n.name.trim().length > 1 &&
+      n.prices.length >= need &&
+      tiersFor(n.sec).every((_, i) => +n.prices[i] > 0);
+  }
 
   addProduct() {
     if (!this.addReady() || this.state.busy) return;
@@ -1951,7 +2034,8 @@ class Component extends DCLogic {
     this.api('shop', 'saveProduct', {
       product: {
         name: n.name.trim(), sec: n.sec, type: n.type, thc: n.thc.trim(),
-        price: +n.price, stock: +n.stock || 0, note: n.note.trim()
+        prices: tiersFor(n.sec).map((_, i) => +n.prices[i]),
+        stock: +n.stock || 0, note: n.note.trim()
       }
     }).then(res => {
       this.setState({ busy: false });
@@ -1963,7 +2047,7 @@ class Component extends DCLogic {
       // carries the new catalogue, and the server keeps setupComplete current.
       this.setState({
         products: res.products, showAdd: false,
-        newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', price: '', stock: '', note: '' }
+        newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', prices: ['', '', '', '', ''], stock: '', note: '' }
       });
     });
   }
@@ -2044,7 +2128,7 @@ class Component extends DCLogic {
 
     const sel = cat.find(p => p.id === s.selId) || cat[0] || {
       id: '', name: '', sec: 'Indoors', type: '', thc: '—', cbd: '—', bg: '#f9f4ed',
-      notes: '', effects: [], weights: [['—', 0]], foot: '', stock: 0
+      notes: '', effects: [], tiers: [{ label: '—', grams: 1, price: 0 }], unit: 'g', foot: '', stock: 0
     };
     const sub = s.cart.reduce((a, l) => a + l.price * l.qty, 0);
     const fee = this.feeAmount();
@@ -2056,9 +2140,18 @@ class Component extends DCLogic {
     const pay = this.payObj();
     const holdOn = this.holdActive();
 
-    const stockOf = id => { const p = cat.find(x => x.id === id); return p ? (p.stock || 0) : 0; };
-    const stockNote = id => { const n = stockOf(id); return n === 0 ? t.soldOut : n <= 3 ? t.onlyLeft(n) : t.inStock(n); };
-    const stockFg = id => { const n = stockOf(id); return n === 0 ? '#8c491a' : n <= 3 ? '#b2622d' : '#56633f'; };
+    const prodOf = id => cat.find(x => x.id === id) || null;
+    const stockOf = id => { const p = prodOf(id); return p ? (p.stock || 0) : 0; };
+    // Grams for flower and concentrates, whole carts for vapes — so "low" is a
+    // different number for each, and the label has to carry its unit.
+    const unitOf = id => { const p = prodOf(id); return (p && p.unit) || 'g'; };
+    const lowAt = id => (unitOf(id) === 'ea' ? 3 : 7);
+    const fmtQty = (n, unit) => (unit === 'ea' ? String(n) : (Math.round(n * 10) / 10) + 'g');
+    const stockNote = id => {
+      const n = stockOf(id), u = unitOf(id);
+      return n === 0 ? t.soldOut : n <= lowAt(id) ? t.onlyLeft(fmtQty(n, u)) : t.inStock(fmtQty(n, u));
+    };
+    const stockFg = id => { const n = stockOf(id); return n === 0 ? '#8c491a' : n <= lowAt(id) ? '#b2622d' : '#56633f'; };
 
     const secs = SECS.filter(n => cat.some(p => p.sec === n));
     const secTitle = {
@@ -2278,7 +2371,7 @@ class Component extends DCLogic {
         items: cat.filter(p => p.sec === name).map(p => ({
           name: p.name, notes: this.tx(p.notes), thc: p.thc, type: p.type,
           initials: this.initials(p.name), stickerBg: p.bg,
-          fromPrice: cash(Math.min.apply(null, p.weights.map(w => w[1]))),
+          fromPrice: cash(Math.min.apply(null, p.tiers.map(w => w.price))),
           stockLabel: stockNote(p.id), stockFg: stockFg(p.id),
           open: () => this.setState({ selId: p.id, weightIdx: 0, screen: 'product' })
         }))
@@ -2288,10 +2381,10 @@ class Component extends DCLogic {
       selName: sel.name, selNotes: this.tx(sel.notes), selThc: sel.thc, selCbd: sel.cbd,
       selType: sel.type, selInitials: this.initials(sel.name || '?'), selBg: sel.bg,
       selEffects: this.txa(sel.effects), selFootnote: this.tx(sel.foot),
-      selStock: String(sel.stock || 0), selStockFg: stockFg(sel.id),
-      selPrice: cash(sel.weights[Math.min(s.weightIdx, sel.weights.length - 1)][1]),
-      selWeights: sel.weights.map((w, i) => ({
-        label: w[0], price: cash(w[1]),
+      selStock: fmtQty(sel.stock || 0, sel.unit || 'g'), selStockFg: stockFg(sel.id),
+      selPrice: cash(sel.tiers[Math.min(s.weightIdx, sel.tiers.length - 1)].price),
+      selWeights: sel.tiers.map((w, i) => ({
+        label: w.label, price: cash(w.price),
         bg: i === s.weightIdx ? '#ffe1d0' : '#f9f4ed',
         dotBg: i === s.weightIdx ? '#c67139' : 'transparent',
         dotIn: i === s.weightIdx ? '#f5ead8' : 'transparent',
@@ -2377,7 +2470,7 @@ class Component extends DCLogic {
 
       suggestions: cat.slice(0, 3).map(p => ({
         name: p.name, initials: this.initials(p.name), bg: p.bg,
-        stockLabel: stockNote(p.id), fromPrice: cash(Math.min.apply(null, p.weights.map(w => w[1]))),
+        stockLabel: stockNote(p.id), fromPrice: cash(Math.min.apply(null, p.tiers.map(w => w.price))),
         open: () => this.setState({ selId: p.id, weightIdx: 0, screen: 'product' })
       })),
       repeat: () => this.setState({ screen: cat.length ? 'product' : 'home', selId: cat.length ? cat[0].id : null, weightIdx: 0 }),
@@ -2424,7 +2517,7 @@ class Component extends DCLogic {
       pushText: newest
         ? t.newOrderPush(newest.total, newest.client, newest.mode === 'delivery' ? t.howDelivery : t.howPickup)
         : t.noOrdersYet,
-      lowStock: cat.filter(p => (p.stock || 0) <= 3).map(p => ({ name: p.name, left: t.leftN(p.stock || 0) })),
+      lowStock: cat.filter(p => (p.stock || 0) <= lowAt(p.id)).map(p => ({ name: p.name, left: t.leftN(fmtQty(p.stock || 0, p.unit || 'g')) })),
       bestSellers: best,
 
       // ── owner queue ───────────────────────────────────────────────────────
@@ -2469,7 +2562,7 @@ class Component extends DCLogic {
 
       // ── owner inventory ───────────────────────────────────────────────────
       invRows: cat.map(p => ({
-        name: p.name, initials: this.initials(p.name), bg: p.bg, stock: String(p.stock || 0),
+        name: p.name, initials: this.initials(p.name), bg: p.bg, stock: fmtQty(p.stock || 0, p.unit || 'g'),
         note: secTitle[p.sec] + ' · ' + stockNote(p.id), fg: stockFg(p.id),
         inc: () => this.restock(p.id, 1), dec: () => this.restock(p.id, -1),
         remove: () => this.removeProduct(p.id)
@@ -2479,7 +2572,16 @@ class Component extends DCLogic {
       addFormDisplay: s.showAdd ? 'block' : 'none',
       openAdd: () => this.set('showAdd', true),
       closeAdd: () => this.set('showAdd', false),
-      npName: s.newP.name, npThc: s.newP.thc, npPrice: s.newP.price, npStock: s.newP.stock, npNote: s.newP.note,
+      npName: s.newP.name, npThc: s.newP.thc, npStock: s.newP.stock, npNote: s.newP.note,
+      // One field per weight. Typing the base fills the blanks below it.
+      npPrices: tiersFor(s.newP.sec).map(([label], i) => ({
+        label,
+        value: s.newP.prices[i] || '',
+        isBase: i === (BASE_INDEX[s.newP.sec] ?? 1),
+        set: e => this.setPrice(i, e.target.value.replace(/[^0-9.]/g, ''))
+      })),
+      npStockLabel: unitFor(s.newP.sec) === 'ea' ? t.fStrainUnits : t.fStrainGrams,
+      npStockPh: unitFor(s.newP.sec) === 'ea' ? t.egStock : t.egGrams,
       setNpName: e => this.setNewP('name', e.target.value),
       setNpThc: e => this.setNewP('thc', e.target.value),
       setNpPrice: e => this.setNewP('price', e.target.value),
@@ -2489,7 +2591,7 @@ class Component extends DCLogic {
         label: secTitle[n],
         bg: s.newP.sec === n ? '#c67139' : '#f5ead8',
         fg: s.newP.sec === n ? '#f5ead8' : '#201e1d',
-        pick: () => this.setNewP('sec', n)
+        pick: () => this.setSection(n)
       })),
       npTypes: TYPES.map(n => ({
         label: n,
@@ -2497,11 +2599,12 @@ class Component extends DCLogic {
         fg: s.newP.type === n ? '#f5ead8' : '#201e1d',
         pick: () => this.setNewP('type', n)
       })),
-      npPriceHint: t.priceHint(s.newP.sec === 'Concentrated' ? '1g' : s.newP.sec === 'Vapes' ? (L === 'es' ? '1 cartucho' : '1 cart') : '3.5g'),
+      npPriceHint: t.perWeightHint.replace('{b}', tiersFor(s.newP.sec)[BASE_INDEX[s.newP.sec] ?? 1][0]),
       addMissing: (() => {
         const n = s.newP, miss = [];
         if (n.name.trim().length < 2) miss.push(t.fStrainName);
-        if (!(+n.price > 0)) miss.push(t.fStrainPrice);
+        const blank = tiersFor(n.sec).filter((_, i) => !(+n.prices[i] > 0)).map(([l]) => l);
+        if (blank.length) miss.push(t.fStrainPrice + ' (' + blank.join(', ') + ')');
         return miss.length ? t.stillNeed + miss.join(', ') : '';
       })(),
       addMissingDisplay: this.addReady() ? 'none' : 'block',

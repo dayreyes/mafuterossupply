@@ -11,13 +11,16 @@
 import { route, ok, fail, unauthorized, str, num } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
-import { defaultConfig, mileFee } from './lib/config.js';
+import { defaultConfig, mileFee, migrateProduct } from './lib/config.js';
 import { sendAsync, orderText, lowStockText } from './lib/notify.js';
 
 const money = (n) => '$' + Number(n).toLocaleString('en-US');
 const today = () => new Date().toISOString().slice(0, 10);
 
-const LOW_STOCK_AT = 3;
+// "Low" means something different per unit: three grams of flower is almost
+// gone, three carts is a normal shelf.
+const lowStockAt = (unit) => (unit === 'ea' ? 3 : 7);
+const fmtStock = (n, unit) => (unit === 'ea' ? String(n) : (Math.round(n * 10) / 10) + 'g');
 
 // Delivery capacity is derived from the orders actually taken today rather than
 // a counter someone has to remember to reset.
@@ -33,22 +36,35 @@ export default async (req) => route(req, {
     const cfg = await read(KEYS.config, defaultConfig());
     if (!cfg.setupComplete) return fail('This shop is not open yet.');
 
-    const products = await read(KEYS.products, []);
+    const products = (await read(KEYS.products, [])).map(migrateProduct);
     const lines = Array.isArray(body.items) ? body.items.slice(0, 40) : [];
     if (!lines.length) return fail('Your bag is empty.');
 
     // Price every line from the catalogue, and refuse anything out of stock.
     const priced = [];
     let subtotal = 0;
+    // Stock is held in grams (or whole carts for vapes), so a line takes
+    // tier.grams x qty off the shelf — an ounce removes 28, not 1. Totals per
+    // product are summed first, so 3.5g + 1g of the same strain is checked as
+    // 4.5g against what is actually there.
+    const needed = {};
     for (const raw of lines) {
       const p = products.find((x) => x.id === str(raw.pid, 40) && x.active);
       if (!p) return fail('Something in your bag is no longer available.');
-      const wIdx = num(raw.weightIdx, 0, p.weights.length - 1, 0);
+      const tIdx = num(raw.weightIdx, 0, p.tiers.length - 1, 0);
       const qty = num(raw.qty, 1, 99, 1);
-      const [label, unit] = p.weights[wIdx];
-      if ((p.stock || 0) < qty) return fail(p.name + ' does not have that many left.');
-      subtotal += unit * qty;
-      priced.push({ pid: p.id, name: p.name, label, unit, qty, line: qty + '× ' + p.name + ' · ' + label, price: money(unit * qty) });
+      const tier = p.tiers[tIdx];
+      needed[p.id] = (needed[p.id] || 0) + tier.grams * qty;
+      if ((p.stock || 0) < needed[p.id]) {
+        return fail(p.name + ' only has ' + fmtStock(p.stock || 0, p.unit) + ' left.');
+      }
+      subtotal += tier.price * qty;
+      priced.push({
+        pid: p.id, name: p.name, label: tier.label, unit: tier.price,
+        grams: tier.grams, qty,
+        line: qty + '× ' + p.name + ' · ' + tier.label,
+        price: money(tier.price * qty)
+      });
     }
 
     const mode = body.mode === 'delivery' ? 'delivery' : 'pickup';
@@ -106,11 +122,11 @@ export default async (req) => route(req, {
     // Commit the stock only once the order is safely stored.
     const low = [];
     await mutate(KEYS.products, [], (list) =>
-      list.map((p) => {
-        const taken = priced.filter((l) => l.pid === p.id).reduce((a, l) => a + l.qty, 0);
+      list.map(migrateProduct).map((p) => {
+        const taken = needed[p.id] || 0;
         if (!taken) return p;
         const left = Math.max(0, (p.stock || 0) - taken);
-        if (left <= LOW_STOCK_AT) low.push({ name: p.name, left });
+        if (left <= lowStockAt(p.unit)) low.push({ name: p.name, left: fmtStock(left, p.unit) });
         return { ...p, stock: left };
       })
     );
@@ -179,8 +195,9 @@ export default async (req) => route(req, {
     );
     if (restore.length) {
       await mutate(KEYS.products, [], (list) =>
-        list.map((p) => {
-          const back = restore.filter((l) => l.pid === p.id).reduce((a, l) => a + l.qty, 0);
+        list.map(migrateProduct).map((p) => {
+          const back = restore.filter((l) => l.pid === p.id)
+            .reduce((a, l) => a + (l.grams != null ? l.grams * l.qty : l.qty), 0);
           return back ? { ...p, stock: (p.stock || 0) + back } : p;
         })
       );

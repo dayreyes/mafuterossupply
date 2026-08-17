@@ -24,7 +24,15 @@ import { read, write, mutate, KEYS } from './store.js';
 export const OWNER_PIN_LEN = 6;
 export const CLIENT_CODE_LEN = 4;
 
-const SESSION_TTL = { owner: 12 * 60 * 60 * 1000, client: 30 * 24 * 60 * 60 * 1000 };
+// Idle timeouts, not absolute ones — see readSession, which slides the expiry
+// forward while someone is actually using the app. A 12-hour absolute cap
+// logged the owner out mid-shift with a page open, and they only found out when
+// a save came back 401 and lost what they had typed.
+const SESSION_TTL = { owner: 7 * 24 * 60 * 60 * 1000, client: 30 * 24 * 60 * 60 * 1000 };
+
+// Don't rewrite the sessions blob on every single request: only once the
+// session is more than halfway to expiring.
+const SLIDE_AFTER = 0.5;
 
 // Per-IP: 8 tries per 15 minutes. Global: 25 consecutive failures locks all
 // login attempts for 15 minutes, doubling up to an hour for a sustained attack.
@@ -69,9 +77,21 @@ export async function createSession(role, meta = {}) {
 
 export async function readSession(token) {
   if (!token) return null;
+  const key = sha256(token);
   const all = await read(KEYS.sessions, {});
-  const s = all[sha256(token)];
-  if (!s || s.exp <= Date.now()) return null;
+  const s = all[key];
+  const now = Date.now();
+  if (!s || s.exp <= now) return null;
+
+  // Slide the expiry forward for anyone still working. The owner should only
+  // ever be asked for their PIN again after genuinely being away.
+  const ttl = SESSION_TTL[s.role] || SESSION_TTL.client;
+  if (s.exp - now < ttl * SLIDE_AFTER) {
+    await mutate(KEYS.sessions, {}, (live) => {
+      if (live[key]) live[key] = { ...live[key], exp: now + ttl };
+      return live;
+    });
+  }
   return s;
 }
 

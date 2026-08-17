@@ -7,7 +7,7 @@
 import { route, ok, fail, unauthorized, str, num } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner } from './lib/session.js';
-import { defaultConfig, cleanConfig, cleanProduct, publicConfig, publicProduct } from './lib/config.js';
+import { defaultConfig, cleanConfig, cleanProduct, publicConfig, publicProduct, migrateProduct } from './lib/config.js';
 import { send, configured as telegramConfigured } from './lib/notify.js';
 
 const loadConfig = () => read(KEYS.config, defaultConfig());
@@ -22,7 +22,7 @@ export default async (req) => route(req, {
   // What a customer sees: enabled payment methods, live zones, in-stock items.
   async menu() {
     const cfg = await loadConfig();
-    const products = await read(KEYS.products, []);
+    const products = (await read(KEYS.products, [])).map(migrateProduct);
     return ok({
       config: publicConfig(cfg),
       products: products.filter((p) => p.active).map(publicProduct)
@@ -33,7 +33,7 @@ export default async (req) => route(req, {
   async config(body, req) {
     if (!(await requireOwner(req))) return unauthorized();
     const cfg = await loadConfig();
-    const products = await read(KEYS.products, []);
+    const products = (await read(KEYS.products, [])).map(migrateProduct);
     return ok({ config: cfg, products, telegram: telegramConfigured() });
   },
 
@@ -52,7 +52,8 @@ export default async (req) => route(req, {
     if (!(await requireOwner(req))) return unauthorized();
     const id = str(body.product && body.product.id, 40);
     let error = null;
-    const products = await mutate(KEYS.products, [], (list) => {
+    const products = await mutate(KEYS.products, [], (raw) => {
+      const list = raw.map(migrateProduct);
       const idx = id ? list.findIndex((p) => p.id === id) : -1;
       const built = cleanProduct(body.product || {}, idx > -1 ? idx : list.length, idx > -1 ? list[idx] : null);
       if (built.error) { error = built.error; return list; }
@@ -79,12 +80,12 @@ export default async (req) => route(req, {
   async setStock(body, req) {
     if (!(await requireOwner(req))) return unauthorized();
     const id = str(body.id, 40);
-    const products = await mutate(KEYS.products, [], (list) =>
-      list.map((p) => {
+    const products = await mutate(KEYS.products, [], (raw) =>
+      raw.map(migrateProduct).map((p) => {
         if (p.id !== id) return p;
         const next = body.to !== undefined
-          ? num(body.to, 0, 100000, p.stock)
-          : Math.max(0, (p.stock || 0) + num(body.delta, -10000, 10000, 0));
+          ? num(body.to, 0, 1000000, p.stock)
+          : Math.max(0, (p.stock || 0) + num(body.delta, -100000, 100000, 0));
         return { ...p, stock: next };
       })
     );
