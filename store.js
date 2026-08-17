@@ -14,8 +14,22 @@ import { getStore } from '@netlify/blobs';
 
 const STORE = 'mafuteros';
 
+// Strong consistency, deliberately.
+//
+// Netlify Blobs is EVENTUALLY consistent by default, which broke sign-in
+// outright: logging in writes the new session, and the four requests that fire
+// immediately afterwards could read a copy of the sessions blob that did not
+// have it yet. The owner signed in successfully and was told "session expired"
+// in the same breath, and every write after that failed the same way.
+//
+// The same hazard applies to everything else here — save a strain, reload,
+// and the catalogue read could still be the old one. This shop does a handful
+// of requests a day, so the extra read latency costs nothing next to being
+// correct.
+const CONSISTENCY = 'strong';
+
 let _store = null;
-let _factory = () => getStore(STORE);
+let _factory = () => getStore({ name: STORE, consistency: CONSISTENCY });
 
 function store() {
   if (!_store) _store = _factory();
