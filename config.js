@@ -110,8 +110,8 @@ export function mileFee(mi, fees) {
 // do not fit a fixed weight ladder, and pretending otherwise is what forced
 // "two separate products" workarounds.
 export const TIERS = {
-  Flower:       { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
-  Indoors:      { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
+  Flower:       { unit: 'g',  tiers: [['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
+  Indoors:      { unit: 'g',  tiers: [['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
   Concentrated: { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7]] },
   Vapes:        { unit: 'ea', tiers: [['1g cart', 1], ['4g cart', 1], ['2 x 1g cart', 2]] },
   Edibles:      { unit: 'ea', tiers: [['1 piece', 1], ['4 pieces', 4], ['10 pieces', 10]] }
@@ -125,11 +125,15 @@ export const unitFor = (sec) => (TIERS[sec] || TIERS.Indoors).unit;
 // Which tier the owner types first. The rest are pre-filled from it as a
 // starting point and stay editable, so an ounce deal can be priced below the
 // multiplier instead of being locked to it.
-export const BASE_INDEX = { Flower: 1, Indoors: 1, Concentrated: 0, Vapes: 0, Edibles: 0 };
+// Flower now starts at 3.5g — an eighth is the smallest serving the shop
+// actually deals in, and pricing a single gram off the same multiplier put the
+// ladder out of step with how it is sold. A gram can still be added back as a
+// row on any individual product.
+export const BASE_INDEX = { Flower: 0, Indoors: 0, Concentrated: 0, Vapes: 0, Edibles: 0 };
 
 const MULTIPLIERS = {
-  Flower:       [0.4, 1, 1.6, 3.2, 5.6],
-  Indoors:      [0.4, 1, 1.6, 3.2, 5.6],
+  Flower:       [1, 1.6, 3.2, 5.6],
+  Indoors:      [1, 1.6, 3.2, 5.6],
   Concentrated: [1, 3, 5],
   Vapes:        [1, 3, 1.9],
   Edibles:      [1, 3.6, 8]

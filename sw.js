@@ -14,7 +14,7 @@
 // API calls are never cached. Stale order and stock data would be worse than
 // an honest error, so anything under /.netlify/ bypasses the worker entirely.
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const SHELL = 'mafuteros-shell-' + VERSION;
 const ASSETS = 'mafuteros-assets-' + VERSION;
 
@@ -53,8 +53,27 @@ self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
     const keep = [SHELL, ASSETS];
     const keys = await caches.keys();
-    await Promise.all(keys.filter((k) => !keep.includes(k)).map((k) => caches.delete(k)));
+    const stale = keys.filter((k) => !keep.includes(k));
+    await Promise.all(stale.map((k) => caches.delete(k)));
     await self.clients.claim();
+
+    // Reload open pages when replacing an OLDER worker.
+    //
+    // The first worker was cache-first on index.html with a fixed cache name,
+    // so a phone that installed it kept serving a days-old build no matter what
+    // was deployed — the repo was current, the deploy was current, and the
+    // screen was not. Taking over from any previous worker now refreshes what
+    // is on screen, so nobody is left staring at a stale app.
+    //
+    // Guarded on there having been a stale cache to delete, so a first install
+    // (nothing to replace) does not reload, and this cannot loop: by the time
+    // the reload lands, this worker's caches are the only ones left.
+    if (stale.length) {
+      const clients = await self.clients.matchAll({ type: 'window' });
+      for (const client of clients) {
+        if ('navigate' in client) client.navigate(client.url).catch(() => {});
+      }
+    }
   })());
 });
 
