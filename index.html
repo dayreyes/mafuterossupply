@@ -623,7 +623,41 @@ input,textarea,select{font-size:16px}
 
               <div style="display:flex;flex-direction:column;gap:12px;margin-top:18px">
                 <div style="display:{{ emptyOrdersDisplay }};margin:4px 0 0;padding:22px 20px;background:#f9f4ed;border:2px dashed #a19786;border-radius:24px;text-align:center"><div style="font-family:'Caprasimo',serif;font-size:19px;color:#201e1d">{{ t.noOrdersYet }}</div><div style="font:500 12.5px/1.5 'Figtree';color:#645c50;margin-top:6px">{{ t.emptyOrders }}</div></div>
-                <sc-for list="{{ orders }}" as="o" hint-placeholder-count="3">
+                <div style="display:{ runDisplay };margin:0 0 16px;background:#2e2b25;border:2px solid #201e1d;border-radius:24px;padding:16px">
+                  <div style="font-family:'Caprasimo',serif;font-size:21px;color:#f5ead8">{{ t.runTitle }}</div>
+                  <div style="font:700 11.5px/1.3 'Figtree';color:#ccdbb2;margin-top:4px">{{ runSummary }}</div>
+                  <div style="font:500 11px/1.4 'Figtree';color:#a19786;margin-top:6px">{{ t.runHint }}</div>
+                  <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+                    <sc-for list="{{ runLegs }}" as="leg" hint-placeholder-count="3">
+                      <div style="background:rgba(245,234,216,.07);border:2px solid rgba(245,234,216,.25);border-radius:18px;padding:12px 13px">
+                        <div style="display:flex;align-items:center;gap:9px">
+                          <div style="flex:none;width:26px;height:26px;border-radius:50%;background:#c67139;border:2px solid #f5ead8;display:flex;align-items:center;justify-content:center;font-family:'Caprasimo',serif;font-size:13px;color:#f5ead8">{{ leg.step }}</div>
+                          <div style="flex:1;min-width:0">
+                            <div style="font:800 14px/1.2 'Figtree';color:#f5ead8">{{ leg.name }}</div>
+                            <div style="font:600 10.5px/1.3 'Figtree';color:#aebf92;margin-top:2px">{{ leg.meta }}</div>
+                          </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+                          <sc-for list="{{ leg.stops }}" as="st" hint-placeholder-count="2">
+                            <div style="background:#f9f4ed;border:2px solid #201e1d;border-radius:14px;padding:10px 11px">
+                              <div style="display:flex;align-items:baseline;gap:8px">
+                                <div style="flex:1;min-width:0;font:800 13.5px/1.2 'Figtree';color:#201e1d">{{ st.client }}</div>
+                                <div style="flex:none;font:800 13px/1 'Figtree';color:#201e1d">{{ st.total }}</div>
+                              </div>
+                              <div style="font:600 12px/1.4 'Figtree';color:#474238;margin-top:4px">{{ st.addr }}</div>
+                              <div style="display:flex;align-items:center;gap:7px;margin-top:7px;flex-wrap:wrap">
+                                <div style="font:600 11px/1 'Figtree';color:#645c50">{{ st.phone }}</div>
+                                <div style="font:600 11px/1 'Figtree';color:#645c50">{{ st.slot }}</div>
+                                <div style="padding:4px 9px;border-radius:999px;border:2px solid #201e1d;font:800 9px/1 'Figtree';text-transform:uppercase;letter-spacing:.04em;background:{{ st.payBg }};color:{{ st.payFg }}">{{ st.payTag }}</div>
+                              </div>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                                <sc-for list="{{ orders }}" as="o" hint-placeholder-count="3">
                   <div style="background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:15px 16px;box-shadow:3px 3px 0 rgba(32,30,29,.2)">
                     <div style="display:flex;align-items:center;gap:11px">
                       <div style="width:42px;height:42px;border-radius:50%;border:2px solid #201e1d;background:#e1eecc;display:flex;align-items:center;justify-content:center;font-family:'Caprasimo',serif;font-size:16px;color:#3d472b;flex:none">{{ o.initials }}</div>
@@ -715,16 +749,26 @@ input,textarea,select{font-size:16px}
                     </div>
                   </div>
                   <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.perWeight }}</div>
+                  <div style="display:flex;gap:8px;padding:0 2px 4px;font:700 9px/1 'Figtree';letter-spacing:.1em;text-transform:uppercase;color:#a19786">
+                    <div style="flex:1;min-width:0">{{ t.sizeName }}</div>
+                    <div style="flex:none;width:74px">$</div>
+                    <div style="flex:none;width:62px">{{ takesLabel }}</div>
+                    <div style="flex:none;width:28px"></div>
+                  </div>
                   <div style="display:flex;flex-direction:column;gap:8px">
-                    <sc-for list="{{ npPrices }}" as="w" hint-placeholder-count="5">
-                      <div style="display:flex;align-items:center;gap:10px">
-                        <div style="flex:none;width:76px;font:800 13px/1.2 'Figtree';color:#201e1d">{{ w.label }}</div>
-                        <div style="flex:none;font:800 15px/1 'Figtree';color:#8c491a">$</div>
-                        <input value="{{ w.value }}" onChange="{{ w.set }}" inputMode="decimal" placeholder="{{ t.egPrice }}" style="flex:1;min-width:0;box-sizing:border-box;height:46px;padding:0 14px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:700 14px/1 'Figtree';color:#201e1d;outline:none">
+                    <sc-for list="{{ npRows }}" as="w" hint-placeholder-count="5">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <input value="{{ w.label }}" onChange="{{ w.setLabel }}" placeholder="{{ t.sizeName }}" style="flex:1;min-width:0;box-sizing:border-box;height:46px;padding:0 12px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:700 13.5px/1 'Figtree';color:#201e1d;outline:none">
+                        <input value="{{ w.price }}" onChange="{{ w.setPrice }}" inputMode="decimal" placeholder="{{ t.egPrice }}" style="flex:none;width:74px;box-sizing:border-box;height:46px;padding:0 10px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:700 14px/1 'Figtree';color:#201e1d;outline:none;text-align:center">
+                        <input value="{{ w.takes }}" onChange="{{ w.setTakes }}" inputMode="decimal" style="flex:none;width:62px;box-sizing:border-box;height:46px;padding:0 8px;border-radius:999px;border:2px solid #a19786;background:#f9f4ed;font:600 13px/1 'Figtree';color:#645c50;outline:none;text-align:center">
+                        <div onClick="{{ w.remove }}" style="display:{{ w.removeDisplay }};flex:none;width:28px;height:28px;border-radius:50%;border:2px solid #a19786;background:#f9f4ed;align-items:center;justify-content:center;cursor:pointer">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18"></path><path d="M6 6l12 12"></path></svg>
+                        </div>
                       </div>
                     </sc-for>
                   </div>
-                  <div style="font:500 11.5px/1.4 'Figtree';color:#645c50;margin-top:2px">{{ npPriceHint }}</div>
+                  <div onClick="{{ addRow }}" style="display:{{ addRowDisplay }};margin-top:9px;height:40px;border-radius:999px;border:2px dashed #a19786;background:#f9f4ed;align-items:center;justify-content:center;cursor:pointer;font:700 12.5px/1 'Figtree';color:#645c50">{{ t.addSize }}</div>
+                  <div style="font:500 11.5px/1.4 'Figtree';color:#645c50;margin-top:8px">{{ npPriceHint }}</div>
                   <div style="display:flex;gap:9px;margin-top:4px">
                     <div style="flex:1">
                       <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ npStockLabel }}</div>
@@ -760,6 +804,7 @@ input,textarea,select{font-size:16px}
                       <div onClick="{{ r.dec }}" style="width:32px;height:32px;border-radius:50%;border:2px solid #201e1d;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 16px/1 'Figtree';color:#201e1d">&minus;</div>
                       <div style="font-family:'Caprasimo',serif;font-size:20px;min-width:26px;text-align:center;color:#201e1d">{{ r.stock }}</div>
                       <div onClick="{{ r.inc }}" style="width:32px;height:32px;border-radius:50%;border:2px solid #201e1d;background:#c67139;display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 16px/1 'Figtree';color:#f5ead8">+</div>
+                      <div onClick="{{ r.toggle }}" style="padding:5px 9px;border-radius:999px;border:2px solid #201e1d;font:800 9px/1 'Figtree';letter-spacing:.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;background:{{ r.onBg }};color:{{ r.onFg }}">{{ r.onLabel }}</div>
                       <div onClick="{{ r.remove }}" title="{{ t.removeStrain }}" style="width:32px;height:32px;border-radius:50%;border:2px solid #8c491a;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:#ffe1d0">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg>
                       </div>
@@ -1215,8 +1260,14 @@ const COPY = {
     setupWarn: 'Apunta este PIN. Sin él no entras al panel.',
     stillNeed: 'Todavía falta: ', nothingToSave: 'No has cambiado nada todavía.',
     egPrice: 'ej. 25', egStock: 'ej. 10', egGrams: 'ej. 112',
+    takesGrams: 'Gramos', takesUnits: 'Cuántos', sizeName: 'Tamaño', addSize: '+ Otro tamaño',
+    showing: 'A la venta', hidden: 'Escondida',
+    runTitle: 'La ruta de hoy', stopsN: n => n + (n === 1 ? ' parada' : ' paradas'),
+    runSummary: (n, mi) => n + (n === 1 ? ' parada' : ' paradas') + ' · hasta ' + mi + ' millas',
+    runHint: 'Por zona, la más cerca primero. Termina una zona antes de brincar a la otra.',
+    noAddress: 'Sin dirección — pregúntale',
     fStrainGrams: 'Gramos que tienes', fStrainUnits: 'Cartuchos que tienes',
-    perWeight: 'Precio por peso', perWeightHint: 'Escribe el de {b} y los demás se llenan solos. Puedes cambiar cualquiera.',
+    perWeight: 'Tamaños y precios', perWeightHint: 'Escribe el precio de {b} y los demás se llenan solos. Cambia el nombre, el precio o los gramos de cualquiera.',
     pickupOnlyToday: 'Solo recogido hoy.', noZones: 'No hay áreas de entrega todavía',
     payAtDoor: 'Le pagas cuando llegue', payOnPickup: m => 'Pagas al buscarlo · ' + m + ' min de hold',
     askForHandle: 'Pregunta cómo pagar',
@@ -1388,8 +1439,14 @@ const COPY = {
     setupWarn: 'Write this PIN down. Without it you cannot get into the dashboard.',
     stillNeed: 'Still needed: ', nothingToSave: 'Nothing changed yet.',
     egPrice: 'e.g. 25', egStock: 'e.g. 10', egGrams: 'e.g. 112',
+    takesGrams: 'Grams', takesUnits: 'How many', sizeName: 'Size', addSize: '+ Another size',
+    showing: 'On sale', hidden: 'Hidden',
+    runTitle: 'Today\u2019s run', stopsN: n => n + (n === 1 ? ' stop' : ' stops'),
+    runSummary: (n, mi) => n + (n === 1 ? ' stop' : ' stops') + ' · out to ' + mi + ' miles',
+    runHint: 'Grouped by area, nearest first. Finish one area before moving on.',
+    noAddress: 'No address — ask him',
     fStrainGrams: 'Grams on hand', fStrainUnits: 'Carts on hand',
-    perWeight: 'Price per weight', perWeightHint: 'Type the {b} price and the rest fill in. Change any of them.',
+    perWeight: 'Sizes and prices', perWeightHint: 'Type the {b} price and the rest fill in. Rename any row, change its price, or change how much it takes off stock.',
     pickupOnlyToday: 'Pickup only today.', noZones: 'No delivery areas set up yet',
     payAtDoor: 'Pay him at the door', payOnPickup: m => 'Pay on pickup · ' + m + '-min hold',
     askForHandle: 'Ask how to pay',
@@ -1421,7 +1478,7 @@ const COPY = {
   }
 };
 
-const SECS = ['Flower', 'Indoors', 'Concentrated', 'Vapes'];
+const SECS = ['Flower', 'Indoors', 'Concentrated', 'Vapes', 'Edibles'];
 
 // Mirrors TIERS in netlify/functions/lib/config.js. Stock is grams for flower
 // and concentrates, whole carts for vapes, so a sale can take 28 off for an
@@ -1430,16 +1487,20 @@ const TIERS = {
   Flower:       { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
   Indoors:      { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
   Concentrated: { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7]] },
-  Vapes:        { unit: 'ea', tiers: [['1 cart', 1], ['2 carts', 2], ['4 carts', 4]] }
+  Vapes:        { unit: 'ea', tiers: [['1g cart', 1], ['4g cart', 1], ['2 x 1g cart', 2]] },
+  Edibles:      { unit: 'ea', tiers: [['1 piece', 1], ['4 pieces', 4], ['10 pieces', 10]] }
 };
+const MAX_TIERS = 8;
 const tiersFor = sec => (TIERS[sec] || TIERS.Indoors).tiers;
 const unitFor = sec => (TIERS[sec] || TIERS.Indoors).unit;
 // Which tier the owner types first; the rest are suggested from it.
-const BASE_INDEX = { Flower: 1, Indoors: 1, Concentrated: 0, Vapes: 0 };
+const BASE_INDEX = { Flower: 1, Indoors: 1, Concentrated: 0, Vapes: 0, Edibles: 0 };
 const MULTIPLIERS = {
   Flower: [0.4, 1, 1.6, 3.2, 5.6], Indoors: [0.4, 1, 1.6, 3.2, 5.6],
-  Concentrated: [1, 3, 5], Vapes: [1, 1.9, 3]
+  Concentrated: [1, 3, 5], Vapes: [1, 3, 1.9], Edibles: [1, 3.6, 8]
 };
+// A fresh row set for a category — labels and amounts the owner can rewrite.
+const rowsFor = sec => tiersFor(sec).map(([label, grams]) => ({ label, grams: String(grams), price: '', touched: false }));
 const suggestPrices = (sec, base) =>
   (MULTIPLIERS[sec] || MULTIPLIERS.Indoors).map(m => String(Math.max(1, Math.round(base * m))));
 const TYPES = ['Hybrid', 'Indica', 'Sativa', 'Cart'];
@@ -1487,6 +1548,7 @@ class Component extends DCLogic {
     signups: [],
     codes: [],
     stops: 0,
+    run: null,
     telegram: false,
 
     // ── client shopping ────────────────────────────────────────────────────
@@ -1498,7 +1560,7 @@ class Component extends DCLogic {
 
     // ── owner editing ──────────────────────────────────────────────────────
     showAdd: false,
-    newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', prices: ['', '', '', '', ''], stock: '', note: '' },
+    newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', rows: [], stock: '', note: '' },
     draft: null,          // working copy of config on the settings screen
     newZone: { name: '', mi: '' },
     settingsMsg: '',
@@ -1732,7 +1794,7 @@ class Component extends DCLogic {
         return false;
       }
       this.setState({ cfg: cfg.config, products: cfg.products, telegram: !!cfg.telegram, draft: null });
-      if (ord && ord.ok) this.setState({ orders: ord.orders, stops: ord.stops });
+      if (ord && ord.ok) this.setState({ orders: ord.orders, stops: ord.stops, run: ord.run || null });
       if (sig && sig.ok) this.setState({ signups: sig.signups });
       if (cod && cod.ok) this.setState({ codes: cod.codes });
       return true;
@@ -1999,32 +2061,49 @@ class Component extends DCLogic {
   // Changing category changes how many tiers there are, so the price list is
   // resized rather than carried over at the wrong length.
   setSection(sec) {
+    // Category presets are a starting point, so switching category loads its
+    // rows — unless the owner has already typed their own, which are theirs.
     const n = this.state.newP;
-    const len = tiersFor(sec).length;
-    const prices = Array.from({ length: len }, (_, i) => n.prices[i] || '');
-    this.setState({ newP: Object.assign({}, n, { sec, prices }) });
+    const typed = n.rows.some(r => r.touched || r.price);
+    this.setState({ newP: Object.assign({}, n, { sec, rows: typed ? n.rows : rowsFor(sec) }) });
   }
 
-  // Typing the base price fills the rest in as a starting point — but only the
-  // ones still blank, so an ounce deal the owner already typed is never
-  // overwritten.
-  setPrice(i, v) {
+  setRow(i, field, v) {
     const n = this.state.newP;
-    const prices = n.prices.slice();
-    prices[i] = v;
-    if (i === (BASE_INDEX[n.sec] ?? 1) && +v > 0) {
-      const suggested = suggestPrices(n.sec, +v);
-      suggested.forEach((sv, j) => { if (j !== i && !prices[j]) prices[j] = sv; });
+    const rows = n.rows.map(r => Object.assign({}, r));
+    rows[i][field] = v;
+    if (field === 'price') rows[i].touched = true;
+
+    // Re-suggest from the base price on every keystroke, for rows the owner
+    // has not priced themselves.
+    if (field === 'price' && i === (BASE_INDEX[n.sec] ?? 1) && +v > 0) {
+      const mult = MULTIPLIERS[n.sec] || MULTIPLIERS.Indoors;
+      rows.forEach((r, j) => {
+        if (j !== i && !r.touched && mult[j] != null) r.price = String(Math.max(1, Math.round(+v * mult[j])));
+      });
     }
-    this.setState({ newP: Object.assign({}, n, { prices }) });
+    this.setState({ newP: Object.assign({}, n, { rows }) });
   }
+
+  addRow() {
+    const n = this.state.newP;
+    if (n.rows.length >= MAX_TIERS) return;
+    this.setState({ newP: Object.assign({}, n, {
+      rows: n.rows.concat([{ label: '', grams: '1', price: '', touched: true }])
+    }) });
+  }
+
+  removeRow(i) {
+    const n = this.state.newP;
+    if (n.rows.length <= 1) return;
+    this.setState({ newP: Object.assign({}, n, { rows: n.rows.filter((_, j) => j !== i) }) });
+  }
+
+  rowOk(r) { return !!(String(r.label).trim() && +r.price > 0 && +r.grams > 0); }
 
   addReady() {
     const n = this.state.newP;
-    const need = tiersFor(n.sec).length;
-    return n.name.trim().length > 1 &&
-      n.prices.length >= need &&
-      tiersFor(n.sec).every((_, i) => +n.prices[i] > 0);
+    return n.name.trim().length > 1 && n.rows.length > 0 && n.rows.every(r => this.rowOk(r));
   }
 
   addProduct() {
@@ -2034,7 +2113,7 @@ class Component extends DCLogic {
     this.api('shop', 'saveProduct', {
       product: {
         name: n.name.trim(), sec: n.sec, type: n.type, thc: n.thc.trim(),
-        prices: tiersFor(n.sec).map((_, i) => +n.prices[i]),
+        tiers: n.rows.map(r => ({ label: r.label.trim(), price: +r.price, grams: +r.grams })),
         stock: +n.stock || 0, note: n.note.trim()
       }
     }).then(res => {
@@ -2047,8 +2126,18 @@ class Component extends DCLogic {
       // carries the new catalogue, and the server keeps setupComplete current.
       this.setState({
         products: res.products, showAdd: false,
-        newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', prices: ['', '', '', '', ''], stock: '', note: '' }
+        newP: { name: '', sec: this.state.newP.sec, type: 'Hybrid', thc: '', rows: rowsFor(this.state.newP.sec), stock: '', note: '' }
       });
+    });
+  }
+
+  // Hide rather than delete: an occasional item keeps its prices and notes for
+  // the next time he cooks.
+  toggleProduct(id, active) {
+    this.setState({ products: this.state.products.map(p => p.id === id ? Object.assign({}, p, { active }) : p) });
+    this.api('shop', 'toggleProduct', { id, active }).then(res => {
+      if (this.expired(res)) return;
+      if (res && res.ok) this.setState({ products: res.products });
     });
   }
 
@@ -2074,13 +2163,13 @@ class Component extends DCLogic {
   orderAction(id, action) {
     this.api('orders', action, { id }).then(res => {
       if (this.expired(res)) return;
-      if (res && res.ok) this.setState({ orders: res.orders });
+      if (res && res.ok) this.setState({ orders: res.orders, run: res.run || this.state.run });
     });
   }
   patchOrder(id, payOk) {
     this.api('orders', 'patch', { id, payOk }).then(res => {
       if (this.expired(res)) return;
-      if (res && res.ok) this.setState({ orders: res.orders });
+      if (res && res.ok) this.setState({ orders: res.orders, run: res.run || this.state.run });
     });
   }
 
@@ -2560,26 +2649,58 @@ class Component extends DCLogic {
       }),
       emptyOrdersDisplay: s.orders.length ? 'none' : 'block',
 
+      // Today's run, grouped by area so he drives one part of town at a time
+      // instead of criss-crossing it in the order the orders happened to land.
+      runLegs: ((s.run && s.run.legs) || []).map((leg, i) => ({
+        step: String(i + 1),
+        name: leg.name,
+        meta: leg.mi + ' mi · ' + t.stopsN(leg.stops.length),
+        stops: leg.stops.map(st => ({
+          client: st.client,
+          addr: st.addr || t.noAddress,
+          phone: st.phone || '',
+          slot: st.slot || '',
+          total: st.total,
+          payTag: st.paid ? t.payTagPaid(st.payLabel) : t.payPending,
+          payBg: st.paid ? '#e1eecc' : '#ffe1d0',
+          payFg: st.paid ? '#3d472b' : '#8c491a'
+        }))
+      })),
+      runDisplay: s.run && s.run.legs && s.run.legs.length ? 'block' : 'none',
+      runSummary: s.run ? t.runSummary(s.run.stops, s.run.miles) : '',
+
       // ── owner inventory ───────────────────────────────────────────────────
       invRows: cat.map(p => ({
         name: p.name, initials: this.initials(p.name), bg: p.bg, stock: fmtQty(p.stock || 0, p.unit || 'g'),
         note: secTitle[p.sec] + ' · ' + stockNote(p.id), fg: stockFg(p.id),
         inc: () => this.restock(p.id, 1), dec: () => this.restock(p.id, -1),
-        remove: () => this.removeProduct(p.id)
+        remove: () => this.removeProduct(p.id),
+        onLabel: p.active === false ? t.hidden : t.showing,
+        onBg: p.active === false ? '#eee7db' : '#e1eecc',
+        onFg: p.active === false ? '#82796a' : '#3d472b',
+        toggle: () => this.toggleProduct(p.id, p.active === false)
       })),
       emptyInvDisplay: cat.length ? 'none' : 'block',
       showAdd: s.showAdd,
       addFormDisplay: s.showAdd ? 'block' : 'none',
-      openAdd: () => this.set('showAdd', true),
+      openAdd: () => this.setState({ showAdd: true, newP: Object.assign({}, s.newP, { rows: s.newP.rows.length ? s.newP.rows : rowsFor(s.newP.sec) }) }),
       closeAdd: () => this.set('showAdd', false),
       npName: s.newP.name, npThc: s.newP.thc, npStock: s.newP.stock, npNote: s.newP.note,
-      // One field per weight. Typing the base fills the blanks below it.
-      npPrices: tiersFor(s.newP.sec).map(([label], i) => ({
-        label,
-        value: s.newP.prices[i] || '',
-        isBase: i === (BASE_INDEX[s.newP.sec] ?? 1),
-        set: e => this.setPrice(i, e.target.value.replace(/[^0-9.]/g, ''))
+      // Rows the owner owns: their name for the size, their price, and how
+      // much it takes off the shelf.
+      npRows: s.newP.rows.map((r, i) => ({
+        label: r.label,
+        price: r.price,
+        takes: r.grams,
+        setLabel: e => this.setRow(i, 'label', e.target.value.slice(0, 24)),
+        setPrice: e => this.setRow(i, 'price', e.target.value.replace(/[^0-9.]/g, '')),
+        setTakes: e => this.setRow(i, 'grams', e.target.value.replace(/[^0-9.]/g, '')),
+        remove: () => this.removeRow(i),
+        removeDisplay: s.newP.rows.length > 1 ? 'flex' : 'none'
       })),
+      addRow: () => this.addRow(),
+      addRowDisplay: s.newP.rows.length < MAX_TIERS ? 'flex' : 'none',
+      takesLabel: unitFor(s.newP.sec) === 'ea' ? t.takesUnits : t.takesGrams,
       npStockLabel: unitFor(s.newP.sec) === 'ea' ? t.fStrainUnits : t.fStrainGrams,
       npStockPh: unitFor(s.newP.sec) === 'ea' ? t.egStock : t.egGrams,
       setNpName: e => this.setNewP('name', e.target.value),
@@ -2599,12 +2720,12 @@ class Component extends DCLogic {
         fg: s.newP.type === n ? '#f5ead8' : '#201e1d',
         pick: () => this.setNewP('type', n)
       })),
-      npPriceHint: t.perWeightHint.replace('{b}', tiersFor(s.newP.sec)[BASE_INDEX[s.newP.sec] ?? 1][0]),
+      npPriceHint: t.perWeightHint.replace('{b}', (s.newP.rows[BASE_INDEX[s.newP.sec] ?? 1] || s.newP.rows[0] || { label: '' }).label),
       addMissing: (() => {
         const n = s.newP, miss = [];
         if (n.name.trim().length < 2) miss.push(t.fStrainName);
-        const blank = tiersFor(n.sec).filter((_, i) => !(+n.prices[i] > 0)).map(([l]) => l);
-        if (blank.length) miss.push(t.fStrainPrice + ' (' + blank.join(', ') + ')');
+        const bad = n.rows.filter(r => !this.rowOk(r));
+        if (bad.length) miss.push(t.fStrainPrice + ' (' + bad.map(r => r.label || '?').join(', ') + ')');
         return miss.length ? t.stillNeed + miss.join(', ') : '';
       })(),
       addMissingDisplay: this.addReady() ? 'none' : 'block',

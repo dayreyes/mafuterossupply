@@ -68,6 +68,21 @@ export default async (req) => route(req, {
     return ok({ products });
   },
 
+  // Show or hide without deleting. A tray he only cooks occasionally gets
+  // switched off between times, keeping its prices and description for next
+  // time; hidden items never reach the customer menu.
+  async toggleProduct(body, req) {
+    if (!(await requireOwner(req))) return unauthorized();
+    const id = str(body.id, 40);
+    const products = await mutate(KEYS.products, [], (raw) =>
+      raw.map(migrateProduct).map((p) => (p.id === id ? { ...p, active: body.active === true } : p))
+    );
+    const cfg = await loadConfig();
+    const complete = isComplete(cfg, products);
+    if (complete !== cfg.setupComplete) await write(KEYS.config, { ...cfg, setupComplete: complete });
+    return ok({ products });
+  },
+
   async removeProduct(body, req) {
     if (!(await requireOwner(req))) return unauthorized();
     const id = str(body.id, 40);

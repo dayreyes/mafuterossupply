@@ -28,7 +28,7 @@ export const defaultConfig = () => ({
   setupComplete: false
 });
 
-export const SECTIONS = ['Flower', 'Indoors', 'Concentrated', 'Vapes'];
+export const SECTIONS = ['Flower', 'Indoors', 'Concentrated', 'Vapes', 'Edibles'];
 export const TYPES = ['Hybrid', 'Indica', 'Sativa', 'Cart'];
 const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
 
@@ -105,12 +105,19 @@ export function mileFee(mi, fees) {
 // `grams` is what a sale actually takes off the shelf, which is the whole point
 // of tracking stock in grams: selling an ounce has to remove 28, not 1. Vapes
 // are counted in whole carts instead, so the unit is per category too.
+// Starting points only. The owner can rename any row, change what it takes off
+// stock, and add or remove rows — a 4g cart, a 10mg gummy and a tray of twelve
+// do not fit a fixed weight ladder, and pretending otherwise is what forced
+// "two separate products" workarounds.
 export const TIERS = {
   Flower:       { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
   Indoors:      { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7], ['1/2 oz', 14], ['1 oz', 28]] },
   Concentrated: { unit: 'g',  tiers: [['1g', 1], ['3.5g', 3.5], ['7g', 7]] },
-  Vapes:        { unit: 'ea', tiers: [['1 cart', 1], ['2 carts', 2], ['4 carts', 4]] }
+  Vapes:        { unit: 'ea', tiers: [['1g cart', 1], ['4g cart', 1], ['2 x 1g cart', 2]] },
+  Edibles:      { unit: 'ea', tiers: [['1 piece', 1], ['4 pieces', 4], ['10 pieces', 10]] }
 };
+
+export const MAX_TIERS = 8;
 
 export const tiersFor = (sec) => (TIERS[sec] || TIERS.Indoors).tiers;
 export const unitFor = (sec) => (TIERS[sec] || TIERS.Indoors).unit;
@@ -118,13 +125,14 @@ export const unitFor = (sec) => (TIERS[sec] || TIERS.Indoors).unit;
 // Which tier the owner types first. The rest are pre-filled from it as a
 // starting point and stay editable, so an ounce deal can be priced below the
 // multiplier instead of being locked to it.
-export const BASE_INDEX = { Flower: 1, Indoors: 1, Concentrated: 0, Vapes: 0 };
+export const BASE_INDEX = { Flower: 1, Indoors: 1, Concentrated: 0, Vapes: 0, Edibles: 0 };
 
 const MULTIPLIERS = {
   Flower:       [0.4, 1, 1.6, 3.2, 5.6],
   Indoors:      [0.4, 1, 1.6, 3.2, 5.6],
   Concentrated: [1, 3, 5],
-  Vapes:        [1, 1.9, 3]
+  Vapes:        [1, 3, 1.9],
+  Edibles:      [1, 3.6, 8]
 };
 
 export const suggestPrices = (sec, base) =>
@@ -159,18 +167,28 @@ export function cleanProduct(inp, index = 0, existing = null) {
   if (name.length < 2) return { error: 'name too short' };
   const sec = SECTIONS.includes(inp.sec) ? inp.sec : 'Indoors';
   const type = TYPES.includes(inp.type) ? inp.type : 'Hybrid';
-  const spec = tiersFor(sec);
 
-  // Every tier needs its own price. Validate the raw values BEFORE clamping:
-  // num() would quietly lift a 0 up to the minimum, turning "no price given"
-  // into a real product priced at $1.
-  const given = Array.isArray(inp.prices) ? inp.prices : null;
-  if (!given || given.length !== spec.length) return { error: 'a price is missing' };
-  const prices = [];
+  // Rows are the owner's: their label, their price, and how much each one takes
+  // off the shelf. Validate raw values BEFORE clamping — num() would lift a 0
+  // up to the minimum, turning "no price given" into a real product at $1.
+  const given = Array.isArray(inp.tiers) ? inp.tiers : null;
+  if (!given || !given.length) return { error: 'add at least one size' };
+  if (given.length > MAX_TIERS) return { error: 'too many sizes' };
+
+  const tiers = [];
   for (const raw of given) {
-    const v = Number(raw);
-    if (!Number.isFinite(v) || v < 1) return { error: 'a price is missing' };
-    prices.push(num(v, 1, 100000, 1));
+    if (!raw || typeof raw !== 'object') return { error: 'a size is missing' };
+    const label = str(raw.label, 24);
+    if (!label) return { error: 'a size needs a name' };
+    const price = Number(raw.price);
+    if (!Number.isFinite(price) || price < 1) return { error: 'a price is missing' };
+    const grams = Number(raw.grams);
+    if (!Number.isFinite(grams) || grams <= 0) return { error: 'a size needs an amount' };
+    tiers.push({
+      label,
+      grams: num(grams, 0.01, 100000, 1),
+      price: num(price, 1, 100000, 1)
+    });
   }
 
   return {
@@ -185,10 +203,12 @@ export function cleanProduct(inp, index = 0, existing = null) {
       bg: (existing && existing.bg) || STICKERS[index % STICKERS.length],
       notes: str(inp.note ?? inp.notes, 240),
       effects: Array.isArray(inp.effects) ? inp.effects.slice(0, 6).map((e) => str(e, 24)).filter(Boolean) : [],
-      tiers: spec.map(([label, grams], i) => ({ label, grams, price: prices[i] })),
+      tiers,
       foot: str(inp.foot, 160),
-      // Grams on hand for flower and concentrates, whole carts for vapes.
+      // Grams for flower and concentrates, whole items for everything else.
       stock: num(inp.stock, 0, 1000000, existing ? existing.stock : 0),
+      // Occasional items — a tray he only cooks sometimes — are switched off
+      // rather than deleted, so the recipe and prices survive until next time.
       active: inp.active !== false,
       at: (existing && existing.at) || new Date().toISOString()
     }

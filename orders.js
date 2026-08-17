@@ -27,6 +27,43 @@ const fmtStock = (n, unit) => (unit === 'ea' ? String(n) : (Math.round(n * 10) /
 const stopsToday = (orders) =>
   orders.filter((o) => o.mode === 'delivery' && !o.cancelled && String(o.at || '').slice(0, 10) === today()).length;
 
+// Today's delivery run, grouped so he drives one area at a time.
+//
+// Orders arrive in the sequence they were placed, which sends him back and
+// forth across town. Stops are grouped by area and the areas ordered by
+// distance, nearest first, so a run is one outward sweep rather than a
+// zigzag. Within an area the original order is kept, which roughly follows
+// the promised time slots.
+//
+// Deliberately not a real route optimiser: that needs a maps API, a paid key,
+// and every customer's home address handed to a third party. Grouping by area
+// removes the crossing-town problem, which is the expensive part.
+function buildRun(orders, cfg) {
+  const day = today();
+  const live = orders.filter((o) =>
+    o.mode === 'delivery' && !o.cancelled && (o.step || 0) < 3 &&
+    String(o.at || '').slice(0, 10) === day);
+
+  const zones = cfg.zones || [];
+  const byZone = new Map();
+  for (const o of live) {
+    const zone = zones.find((z) => z.id === o.zone);
+    const key = zone ? zone.id : '__none';
+    if (!byZone.has(key)) {
+      byZone.set(key, { id: key, name: zone ? zone.name : '—', mi: zone ? zone.mi : 9999, stops: [] });
+    }
+    byZone.get(key).stops.push({
+      id: o.id, no: o.no, client: o.client, addr: o.addr || '', phone: o.phone || '',
+      slot: o.slot || '', total: o.total, step: o.step || 0,
+      paid: o.payOk === true, payLabel: o.payLabel || ''
+    });
+  }
+
+  const legs = [...byZone.values()].sort((a, b) => a.mi - b.mi);
+  legs.forEach((leg) => leg.stops.reverse());  // oldest order first within an area
+  return { legs, stops: live.length, miles: legs.length ? Math.max(...legs.map((l) => l.mi)) : 0 };
+}
+
 export default async (req) => route(req, {
 
   async place(body, req) {
@@ -89,6 +126,11 @@ export default async (req) => route(req, {
       where = 'Pickup' + (slot ? ' ' + slot : '');
     }
 
+    // Snapshot the customer's contact details onto the order. The owner needs
+    // them in hand to actually drive the run, and a later change of address
+    // must not rewrite where an earlier order was sent.
+    const customer = (await read(KEYS.codes, [])).find((x) => x.code === session.code) || {};
+
     const hold = mode === 'pickup' && !payment.fast ? cfg.holdMinutes : null;
     const counters = await read(KEYS.counters, { orderSeq: 1000 });
     const seq = (counters.orderSeq || 1000) + 1;
@@ -97,8 +139,10 @@ export default async (req) => route(req, {
     const order = {
       id: 'o' + Date.now().toString(36),
       no: '#' + seq,
-      client: session.name || 'Customer',
+      client: session.name || customer.name || 'Customer',
       clientCode: session.code || '',
+      phone: customer.phone || '',
+      addr: mode === 'delivery' ? (customer.addr || '') : '',
       at: new Date().toISOString(),
       mode,
       pay: payment.id,
@@ -149,7 +193,12 @@ export default async (req) => route(req, {
     if (!(await requireOwner(req))) return unauthorized();
     const orders = await read(KEYS.orders, []);
     const cfg = await read(KEYS.config, defaultConfig());
-    return ok({ orders: orders.slice(0, 300), stops: stopsToday(orders), max: cfg.run.max });
+    return ok({
+      orders: orders.slice(0, 300),
+      stops: stopsToday(orders),
+      max: cfg.run.max,
+      run: buildRun(orders, cfg)
+    });
   },
 
   async advance(body, req) {

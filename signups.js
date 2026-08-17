@@ -92,7 +92,7 @@ export default async (req) => route(req, {
     const hit = list.find((r) => r.id === id);
     if (!hit) return fail('That request is no longer there.');
 
-    const { code, codes } = await mintCode(hit.name);
+    const { code, codes } = await mintCode(hit.name, { phone: hit.phone, addr: hit.addr, age: hit.age });
     const signups = await mutate(KEYS.signups, [], (all) => all.filter((r) => r.id !== id));
     sendAsync(codeText(hit.name, code));
     return ok({ code, codes, signups });

@@ -14,13 +14,21 @@ export const genCode = () =>
   String(randomInt(0, 10 ** CLIENT_CODE_LEN)).padStart(CLIENT_CODE_LEN, '0');
 
 // Mints a unique, active code and returns it with the updated list.
-export async function mintCode(name) {
+// Keeps the customer's phone and address alongside the code.
+//
+// Approving used to delete the signup request and store the name alone, which
+// left the owner with a delivery run and nowhere to drive to. This is a
+// delivery shop: the address IS the record.
+export async function mintCode(name, contact = {}) {
   let code = '';
   const codes = await mutate(KEYS.codes, [], (list) => {
     do { code = genCode(); } while (list.some((c) => c.code === code));
     return [{
       id: 'c' + Date.now().toString(36),
       name: str(name, 60),
+      phone: str(contact.phone, 32),
+      addr: str(contact.addr, 160),
+      age: Number.isFinite(Number(contact.age)) ? Number(contact.age) : null,
       code,
       active: true,
       uses: 0,
