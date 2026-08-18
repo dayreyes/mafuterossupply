@@ -578,6 +578,10 @@ input,textarea,select{font-size:16px}
                 <div style="display:flex;gap:14px;margin-top:10px;font:700 12px/1.3 'Figtree';color:#402310;flex-wrap:wrap">
                   <span>{{ placedToday }}</span><span>&middot;</span><span>{{ avgTicketLabel }}</span>
                 </div>
+                <div style="display:{{ pendingDisplay }};align-items:center;gap:7px;margin-top:9px;padding:6px 11px;border-radius:999px;background:#f9f4ed;border:2px solid #8c491a;width:fit-content">
+                  <div style="font:700 10px/1 'Figtree';letter-spacing:.08em;text-transform:uppercase;color:#8c491a">{{ pendingLabel }}</div>
+                  <div style="font:800 13px/1 'Figtree';color:#402310">{{ pendingToday }}</div>
+                </div>
                 <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
                   <sc-for list="{{ payMix }}" as="p" hint-placeholder-count="4">
                     <div style="padding:6px 10px;border-radius:999px;background:#f9f4ed;border:2px solid #201e1d;font:800 10.5px/1 'Figtree';color:#402310">{{ p.label }} {{ p.value }}</div>
@@ -637,6 +641,10 @@ input,textarea,select{font-size:16px}
               </div>
 
               <div style="display:flex;flex-direction:column;gap:12px;margin-top:18px">
+                <div onClick="{{ toggleArchived }}" style="display:{ archiveBarDisplay };margin:0 0 14px;height:44px;border-radius:999px;border:2px solid #a19786;background:#f9f4ed;align-items:center;justify-content:center;gap:8px;cursor:pointer;font:700 12.5px/1 'Figtree';color:#645c50">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
+                  {{ archiveToggleLabel }}
+                </div>
                 <div style="display:{{ emptyOrdersDisplay }};margin:4px 0 0;padding:22px 20px;background:#f9f4ed;border:2px dashed #a19786;border-radius:24px;text-align:center"><div style="font-family:'Caprasimo',serif;font-size:19px;color:#201e1d">{{ t.noOrdersYet }}</div><div style="font:500 12.5px/1.5 'Figtree';color:#645c50;margin-top:6px">{{ t.emptyOrders }}</div></div>
                 <div style="display:{ runDisplay };margin:0 0 16px;background:#2e2b25;border:2px solid #201e1d;border-radius:24px;padding:16px">
                   <div style="font-family:'Caprasimo',serif;font-size:21px;color:#f5ead8">{{ t.runTitle }}</div>
@@ -721,6 +729,8 @@ input,textarea,select{font-size:16px}
                       <div onClick="{{ o.revoke }}" title="{{ o.revokeLabel }}" style="width:46px;height:46px;border-radius:50%;border:2px solid #8c491a;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" style-hover="background:#ffe1d0">
                         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
                       </div>
+                        <div onClick="{{ o.archive }}" style="display:{{ o.archiveDisplay }};padding:0 13px;height:38px;border-radius:999px;border:2px solid #56633f;background:#e1eecc;align-items:center;justify-content:center;cursor:pointer;font:700 11.5px/1 'Figtree';color:#3d472b">{{ o.archiveLabel }}</div>
+                        <div onClick="{{ o.del }}" style="padding:0 13px;height:38px;border-radius:999px;border:2px solid #8c491a;background:{{ o.deleteBg }};display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 11.5px/1 'Figtree';color:{{ o.deleteFg }};white-space:nowrap">{{ o.deleteLabel }}</div>
                     </div>
                   </div>
                 </sc-for>
@@ -882,6 +892,7 @@ input,textarea,select{font-size:16px}
                     </div>
                     <div style="font-family:'Caprasimo',serif;font-size:20px;letter-spacing:.1em;color:#402310;padding:5px 11px;border-radius:12px;background:#ffe1d0;border:2px solid #201e1d;flex:none">{{ c.code }}</div>
                     <div onClick="{{ c.toggle }}" style="padding:7px 11px;border-radius:999px;border:2px solid #201e1d;font:800 10.5px/1 'Figtree';letter-spacing:.06em;text-transform:uppercase;cursor:pointer;flex:none;white-space:nowrap;background:{{ c.bg }};color:{{ c.fg }}">{{ c.state }}</div>
+                    <div onClick="{{ c.del }}" style="padding:7px 10px;border-radius:999px;border:2px solid #8c491a;font:800 10px/1 'Figtree';letter-spacing:.04em;text-transform:uppercase;cursor:pointer;flex:none;white-space:nowrap;background:{{ c.delBg }};color:{{ c.delFg }}">{{ c.delLabel }}</div>
                   </div>
                 </sc-for>
               </div>
@@ -1201,7 +1212,7 @@ const COPY = {
     navMenu: 'Menú', navBag: 'Bolsa', navOut: 'Salir',
     confirmTitle: 'Confirma que te llegó el pago',
     confirmSub: 'Hasta que lo confirmes, esto no está separado.',
-    revokeLabel: 'Cancelar la orden', cancelled: 'Cancelada', archived: 'Archivar',
+    revokeLabel: 'Cancelar la orden', cancelled: 'Cancelada',
     noPay: 'Nadie pagó',
     holdClockTitle: 'Tienes 30 minutos',
     holdClockBody: 'Llega antes de que llegue a cero. Si se pasa, se suelta y si se vendió, se vendió.',
@@ -1282,6 +1293,10 @@ const COPY = {
     takesGrams: 'Gramos', takesUnits: 'Cuántos', sizeName: 'Tamaño', addSize: '+ Otro tamaño',
     showing: 'A la venta', hidden: 'Escondida', buildLabel: 'Versión',
     editStrain: 'Editar la mata', saveChangesStrain: 'Guardar los cambios', editOne: 'Editar',
+    archive: 'Archivar', unarchive: 'Sacar del archivo',
+    showArchived: 'Ver archivadas', hideArchived: 'Ver las activas',
+    deleteOne: 'Borrar', confirmDelete: '¿Seguro? Toca otra vez',
+    stillOwed: 'Falta por cobrar',
     runTitle: 'La ruta de hoy', stopsN: n => n + (n === 1 ? ' parada' : ' paradas'),
     runSummary: (n, mi) => n + (n === 1 ? ' parada' : ' paradas') + ' · hasta ' + mi + ' millas',
     runHint: 'Por zona, la más cerca primero. Termina una zona antes de brincar a la otra.',
@@ -1381,7 +1396,7 @@ const COPY = {
     navMenu: 'Menu', navBag: 'Bag', navOut: 'Sign out',
     confirmTitle: 'Confirm the payment landed',
     confirmSub: 'Until you confirm, nothing is held.',
-    revokeLabel: 'Cancel this order', cancelled: 'Cancelled', archived: 'Archive',
+    revokeLabel: 'Cancel this order', cancelled: 'Cancelled',
     noPay: 'Never paid',
     holdClockTitle: 'You’ve got 30 minutes',
     holdClockBody: 'Get here before it hits zero. Past that it releases, and if it sold, it sold.',
@@ -1462,6 +1477,10 @@ const COPY = {
     takesGrams: 'Grams', takesUnits: 'How many', sizeName: 'Size', addSize: '+ Another size',
     showing: 'On sale', hidden: 'Hidden', buildLabel: 'Version',
     editStrain: 'Edit strain', saveChangesStrain: 'Save changes', editOne: 'Edit',
+    archive: 'Archive', unarchive: 'Unarchive',
+    showArchived: 'View archived', hideArchived: 'View active',
+    deleteOne: 'Delete', confirmDelete: 'Sure? Tap again',
+    stillOwed: 'Still to collect',
     runTitle: 'Today\u2019s run', stopsN: n => n + (n === 1 ? ' stop' : ' stops'),
     runSummary: (n, mi) => n + (n === 1 ? ' stop' : ' stops') + ' · out to ' + mi + ' miles',
     runHint: 'Grouped by area, nearest first. Finish one area before moving on.',
@@ -1531,7 +1550,7 @@ const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = '2026-08-17.1840';
+const BUILD = '2026-08-18.1210';
 
 // Tap feedback for the keypad.
 //
@@ -1587,6 +1606,9 @@ class Component extends DCLogic {
     codes: [],
     stops: 0,
     run: null,
+    takings: null,
+    armed: null,
+    showArchived: false,
     telegram: false,
 
     // ── client shopping ────────────────────────────────────────────────────
@@ -1833,7 +1855,7 @@ class Component extends DCLogic {
         return false;
       }
       this.setState({ cfg: cfg.config, products: cfg.products, telegram: !!cfg.telegram, draft: null });
-      if (ord && ord.ok) this.setState({ orders: ord.orders, stops: ord.stops, run: ord.run || null });
+      if (ord && ord.ok) this.setState({ orders: ord.orders, stops: ord.stops, run: ord.run || null, takings: ord.takings || null });
       if (sig && sig.ok) this.setState({ signups: sig.signups });
       if (cod && cod.ok) this.setState({ codes: cod.codes });
       return true;
@@ -2220,16 +2242,43 @@ class Component extends DCLogic {
     });
   }
 
-  orderAction(id, action) {
-    this.api('orders', action, { id }).then(res => {
+  // Two taps before anything is destroyed. The first tap arms the button and
+  // turns it red; the second, within four seconds, does the deed. Nobody loses
+  // an order to a thumb brushing the screen in a car.
+  arm(key) {
+    if (this.state.armed === key) return true;
+    buzz(14);
+    clearTimeout(this._armT);
+    this._armT = setTimeout(() => this.setState({ armed: null }), 4000);
+    this.setState({ armed: key });
+    return false;
+  }
+  disarm() { clearTimeout(this._armT); this.setState({ armed: null }); }
+
+  // Every order action can move stock (cancel and delete put it back), the run
+  // (a stop disappears) and the day's takings, so take whatever the server
+  // hands back rather than only the order list. Not doing this is why deleting
+  // an order left the Stock tab showing the old count until a reload.
+  orderAction(id, action, extra) {
+    this.api('orders', action, Object.assign({ id }, extra || {})).then(res => {
       if (this.expired(res)) return;
-      if (res && res.ok) this.setState({ orders: res.orders, run: res.run || this.state.run });
+      if (!res || !res.ok) return;
+      const next = { orders: res.orders };
+      if (res.products) next.products = res.products;
+      if (res.run !== undefined) next.run = res.run;
+      if (typeof res.stops === 'number') next.stops = res.stops;
+      if (res.takings) next.takings = res.takings;
+      this.setState(next);
     });
   }
   patchOrder(id, payOk) {
     this.api('orders', 'patch', { id, payOk }).then(res => {
       if (this.expired(res)) return;
-      if (res && res.ok) this.setState({ orders: res.orders, run: res.run || this.state.run });
+      if (res && res.ok) this.setState({
+        orders: res.orders,
+        run: res.run !== undefined ? res.run : this.state.run,
+        takings: res.takings || this.state.takings
+      });
     });
   }
 
@@ -2242,6 +2291,15 @@ class Component extends DCLogic {
       if (res && res.ok) this.setState({ codes: res.codes });
     });
   }
+  deleteCode(code) {
+    if (!this.arm('code:' + code)) return;
+    this.disarm();
+    this.api('codes', 'remove', { code }).then(res => {
+      if (this.expired(res)) return;
+      if (res && res.ok) this.setState({ codes: res.codes });
+    });
+  }
+
   toggleCode(code, active) {
     this.api('codes', 'revoke', { code, active }).then(res => {
       if (this.expired(res)) return;
@@ -2344,9 +2402,14 @@ class Component extends DCLogic {
       soldQty[l.name] = (soldQty[l.name] || 0) + l.qty;
       soldTake[l.name] = (soldTake[l.name] || 0) + l.unit * l.qty;
     }));
-    const dayKey = new Date().toISOString().slice(0, 10);
-    const todays = live.filter(o => String(o.at || '').slice(0, 10) === dayKey);
-    const takenToday = todays.reduce((a, o) => a + (o.subtotal || 0) + (o.fee || 0), 0);
+    // Today's money is NOT computed here any more. The browser counted every
+    // order that had not been cancelled, so an unpaid order in the queue was
+    // already reported as cash taken. The server splits it into collected and
+    // still owed, and the screen shows what it is told.
+
+    // The queue shows one side or the other, never both: active orders by
+    // default, archived ones when he asks for them.
+    const queue = s.orders.filter(o => (s.showArchived ? o.archived : !o.archived));
 
     const best = Object.keys(soldQty)
       .sort((a, b) => soldQty[b] - soldQty[a])
@@ -2666,9 +2729,15 @@ class Component extends DCLogic {
       moreStops: () => this.set('screen', 'settings'),
       fewerStops: () => this.set('screen', 'settings'),
 
-      takenToday: cash(takenToday),
-      placedToday: t.ordersN(todays.length),
-      avgTicketLabel: t.avgTicket(cash(todays.length ? Math.round(takenToday / todays.length) : 0)),
+      // Only money actually in hand. Unpaid orders show separately rather than
+      // being counted as takings.
+      takenToday: cash(s.takings ? s.takings.collected : 0),
+      pendingToday: cash(s.takings ? s.takings.pending : 0),
+      pendingDisplay: s.takings && s.takings.pending > 0 ? 'flex' : 'none',
+      pendingLabel: t.stillOwed,
+      placedToday: t.ordersN(s.takings ? s.takings.count : 0),
+      avgTicketLabel: t.avgTicket(cash(
+        s.takings && s.takings.count ? Math.round(s.takings.collected / s.takings.count) : 0)),
 
       payMix: Object.keys(takeByPay).length
         ? Object.keys(takeByPay).map(k => ({ label: k, value: cash(takeByPay[k]) }))
@@ -2684,7 +2753,16 @@ class Component extends DCLogic {
       bestSellers: best,
 
       // ── owner queue ───────────────────────────────────────────────────────
-      orders: s.orders.map(o => {
+      showArchived: s.showArchived,
+      archiveToggleLabel: s.showArchived ? t.hideArchived : t.showArchived,
+      archivedCount: s.orders.filter(o => o.archived).length,
+      // Stays on screen while looking at the archive even after the last
+      // archived order is pulled back out — otherwise the way back disappears
+      // and he is stranded on an empty list.
+      archiveBarDisplay: s.showArchived || s.orders.some(o => o.archived) ? 'flex' : 'none',
+      toggleArchived: () => this.set('showArchived', !s.showArchived),
+
+      orders: queue.map(o => {
         const st = t.statuses[o.step || 0], stl = statusStyle[o.step || 0];
         const p = this.payObj(o.pay);
         const app = !!(p && p.fast);
@@ -2696,7 +2774,7 @@ class Component extends DCLogic {
           status: o.cancelled ? t.cancelled : st.label,
           statusBg: o.cancelled ? '#eee7db' : stl.bg,
           statusFg: o.cancelled ? '#8c491a' : stl.fg,
-          action: o.cancelled ? t.archived : st.action,
+          action: o.cancelled ? t.cancelled : st.action,
           actionBg: o.cancelled ? '#a19786' : '#56633f',
           actionCursor: o.cancelled ? 'default' : 'pointer',
           actionOp: o.cancelled ? '.6' : '1',
@@ -2718,10 +2796,19 @@ class Component extends DCLogic {
           stepBackLabel: t.stepBackLabel,
           revokeLabel: t.revokeLabel,
           revoke: () => this.orderAction(o.id, 'cancel'),
+          // Archive once it is done with; the record stays and still counts.
+          archiveLabel: o.archived ? t.unarchive : t.archive,
+          archive: () => this.orderAction(o.id, 'archive', { archived: !o.archived }),
+          archiveDisplay: o.cancelled || (o.step || 0) >= 3 ? 'flex' : 'none',
+          // Two taps to delete for good.
+          deleteLabel: s.armed === 'order:' + o.id ? t.confirmDelete : t.deleteOne,
+          deleteBg: s.armed === 'order:' + o.id ? '#8c2f1a' : '#f5ead8',
+          deleteFg: s.armed === 'order:' + o.id ? '#ffd9c7' : '#8c491a',
+          del: () => { if (this.arm('order:' + o.id)) { this.disarm(); this.orderAction(o.id, 'remove'); } },
           advance: () => { if (!o.cancelled) this.orderAction(o.id, 'advance'); }
         };
       }),
-      emptyOrdersDisplay: s.orders.length ? 'none' : 'block',
+      emptyOrdersDisplay: queue.length ? 'none' : 'block',
 
       // Today's run, grouped by area so he drives one part of town at a time
       // instead of criss-crossing it in the order the orders happened to land.
@@ -2821,7 +2908,12 @@ class Component extends DCLogic {
         meta: (L === 'es' ? 'Órdenes: ' : 'Orders: ') + (c.uses || 0),
         state: c.active ? t.active : t.revoked,
         bg: c.active ? '#e1eecc' : '#eee7db', fg: c.active ? '#3d472b' : '#82796a',
-        toggle: () => this.toggleCode(c.code, !c.active)
+        toggle: () => this.toggleCode(c.code, !c.active),
+        // Revoking keeps the customer's history; deleting removes them outright.
+        delLabel: s.armed === 'code:' + c.code ? t.confirmDelete : t.deleteOne,
+        delBg: s.armed === 'code:' + c.code ? '#8c2f1a' : '#f5ead8',
+        delFg: s.armed === 'code:' + c.code ? '#ffd9c7' : '#8c491a',
+        del: () => this.deleteCode(c.code)
       })),
       emptyCodesDisplay: s.codes.length ? 'none' : 'block',
       issueCode: () => this.issueCode(),
