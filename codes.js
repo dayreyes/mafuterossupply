@@ -6,7 +6,7 @@ import { route, ok, fail, unauthorized, str } from './lib/http.js';
 import { read, mutate, KEYS } from './lib/store.js';
 import { requireOwner } from './lib/session.js';
 import { mintCode } from './lib/invites.js';
-import { sendAsync, codeText } from './lib/notify.js';
+import { sendAll, codeText } from './lib/notify.js';
 
 export default async (req) => route(req, {
 
@@ -19,7 +19,7 @@ export default async (req) => route(req, {
     if (!(await requireOwner(req))) return unauthorized();
     const name = str(body.name, 60);
     const { code, codes } = await mintCode(name);
-    sendAsync(codeText(name || 'New customer', code));
+    await sendAll(codeText(name || 'New customer', code));
     return ok({ code, codes });
   },
 

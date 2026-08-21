@@ -12,7 +12,7 @@ import { read, mutate, KEYS } from './lib/store.js';
 import { requireOwner, checkThrottle, recordFailure } from './lib/session.js';
 import { defaultConfig } from './lib/config.js';
 import { mintCode } from './lib/invites.js';
-import { sendAsync, signupText, codeText } from './lib/notify.js';
+import { sendAll, signupText, codeText } from './lib/notify.js';
 
 const MIN_AGE = 21;
 
@@ -75,7 +75,7 @@ export default async (req) => route(req, {
       return [request].concat(list).slice(0, 500);
     });
 
-    sendAsync(signupText({ ...request, when: 'just now' }));
+    await sendAll(signupText({ ...request, when: 'just now' }));
     return ok();
   },
 
@@ -94,7 +94,7 @@ export default async (req) => route(req, {
 
     const { code, codes } = await mintCode(hit.name, { phone: hit.phone, addr: hit.addr, age: hit.age });
     const signups = await mutate(KEYS.signups, [], (all) => all.filter((r) => r.id !== id));
-    sendAsync(codeText(hit.name, code));
+    await sendAll(codeText(hit.name, code));
     return ok({ code, codes, signups });
   },
 

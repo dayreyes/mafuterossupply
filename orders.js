@@ -13,7 +13,7 @@ import { route, ok, fail, unauthorized, str, num } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { defaultConfig, mileFee, migrateProduct } from './lib/config.js';
-import { sendAsync, orderText, lowStockText } from './lib/notify.js';
+import { sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText } from './lib/notify.js';
 
 const money = (n) => '$' + Number(n).toLocaleString('en-US');
 const today = () => new Date().toISOString().slice(0, 10);
@@ -219,13 +219,18 @@ export default async (req) => route(req, {
         const taken = needed[p.id] || 0;
         if (!taken) return p;
         const left = Math.max(0, (p.stock || 0) - taken);
-        if (left <= lowStockAt(p.unit)) low.push({ name: p.name, left: fmtStock(left, p.unit) });
+        if (left <= lowStockAt(p.unit)) low.push({ name: p.name, left: fmtStock(left, p.unit), out: left <= 0 });
         return { ...p, stock: left };
       })
     );
 
-    sendAsync(orderText({ ...order, when: 'just now' }, cfg.shopName));
-    for (const l of low) sendAsync(lowStockText(l.name, l.left));
+    // Awaited, not fired and forgotten — see the note in lib/notify.js. The
+    // order is already stored by this point, so a Telegram problem can delay
+    // the confirmation screen but can never lose the sale.
+    await sendAll([
+      orderText({ ...order, when: 'just now' }, cfg.shopName),
+      ...low.map((l) => (l.out ? soldOutText(l.name) : lowStockText(l.name, l.left)))
+    ]);
 
     return ok({ order });
   },
@@ -267,9 +272,13 @@ export default async (req) => route(req, {
   async patch(body, req) {
     if (!(await requireOwner(req))) return unauthorized();
     const id = str(body.id, 40);
+    const was = (await read(KEYS.orders, [])).find((o) => o.id === id);
     const orders = await mutate(KEYS.orders, [], (list) =>
       list.map((o) => (o.id === id ? { ...o, payOk: body.payOk === true } : o))
     );
+    // Only on the transition into paid: un-confirming is a correction, and
+    // re-confirming an already-paid order should not fire a second time.
+    if (was && body.payOk === true && was.payOk !== true) await sendAll(paidText(was));
     return ok(await snapshot(orders));
   },
 
@@ -283,14 +292,17 @@ export default async (req) => route(req, {
     if (!(await requireOwner(req))) return unauthorized();
     const id = str(body.id, 40);
     let restore = [];
+    let hit = null;
     const orders = await mutate(KEYS.orders, [], (list) =>
       list.map((o) => {
         if (o.id !== id || o.cancelled) return o;
         restore = o.items || [];
+        hit = o;
         return { ...o, cancelled: true, payOk: false };
       })
     );
     const products = await returnStock(restore);
+    if (hit) await sendAll(cancelText(hit));
     return ok({ ...(await snapshot(orders)), products });
   },
 
@@ -320,6 +332,7 @@ export default async (req) => route(req, {
     const products = target.cancelled
       ? (await read(KEYS.products, [])).map(migrateProduct)
       : await returnStock(target.items || []);
+    await sendAll(removedText(target, !target.cancelled));
     return ok({ ...(await snapshot(orders)), products });
   }
 
