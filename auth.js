@@ -2,8 +2,8 @@
 //
 // Actions: status · setup · login · unlock · session · logout
 
-import { route, ok, fail, tooMany, clientIp, str } from './lib/http.js';
-import { read, write, mutate, available, KEYS } from './lib/store.js';
+import { route, json, ok, fail, tooMany, clientIp, str } from './lib/http.js';
+import { read, write, mutate, available, diagnose, KEYS } from './lib/store.js';
 import { defaultConfig } from './lib/config.js';
 import {
   OWNER_PIN_LEN, CLIENT_CODE_LEN, hashPin, verifyPin, isOwnerPin, isClientCode,
@@ -26,7 +26,20 @@ async function configured() {
   return !!(auth && auth.hash) || !!envPin();
 }
 
-export default async (req) => route(req, {
+export default async (req) => {
+  // GET .../auth?diag=1 — storage health, openable in a phone browser.
+  //
+  // Everything else here is POST-only, but when the shop is down the owner has
+  // no working screen to press a button on, and the alternative is scrolling a
+  // truncated function log sideways on a phone. A URL they can tap answers it.
+  //
+  // Deliberately unauthenticated: signing in needs storage, so an endpoint that
+  // required a session would be useless precisely when it is needed. It returns
+  // key names, sizes and error text — never a stored value.
+  if (req.method === 'GET' && new URL(req.url).searchParams.has('diag')) {
+    return json(await diagnose(), 200);
+  }
+  return route(req, {
 
   // Public health check the app calls on boot to decide which screen to show.
   async status() {
@@ -158,4 +171,5 @@ export default async (req) => route(req, {
     return ok();
   }
 
-});
+  });
+};

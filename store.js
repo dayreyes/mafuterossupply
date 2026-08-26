@@ -62,6 +62,56 @@ export async function available() {
   }
 }
 
+// A readable answer to "why is the shop down?".
+//
+// The health probe reads a raw value while every real read parses JSON, so the
+// two can disagree — a reachable store with one unreadable record looks exactly
+// like a dead store from the outside, and the difference decides whether the fix
+// is "wait" or "repair that record". Chasing that distinction through a phone
+// screen full of truncated log lines is miserable, so this reports it directly.
+//
+// Names and error text only. No stored values ever leave here: what is in these
+// records is customers' names, phones and addresses.
+export async function diagnose() {
+  const out = { store: STORE, consistency: CONSISTENCY, opened: false, probe: null, keys: [] };
+  try {
+    store();
+    out.opened = true;
+  } catch (err) {
+    out.probe = 'could not open the store: ' + (err && err.message);
+    return out;
+  }
+  try {
+    await store().get('__probe');
+    out.probe = 'ok';
+  } catch (err) {
+    out.probe = 'failed: ' + (err && err.message);
+    return out;
+  }
+  for (const key of Object.values(KEYS)) {
+    const row = { key };
+    try {
+      const raw = await store().get(key);
+      row.exists = raw != null;
+      row.bytes = raw == null ? 0 : String(raw).length;
+    } catch (err) {
+      row.readable = false;
+      row.error = 'raw read failed: ' + (err && err.message);
+      out.keys.push(row);
+      continue;
+    }
+    try {
+      await store().get(key, { type: 'json' });
+      row.readable = true;
+    } catch (err) {
+      row.readable = false;
+      row.error = 'not valid JSON: ' + (err && err.message);
+    }
+    out.keys.push(row);
+  }
+  return out;
+}
+
 export async function read(key, dflt) {
   try {
     const v = await store().get(key, { type: 'json' });

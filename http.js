@@ -68,7 +68,20 @@ export async function route(req, handlers) {
     // Checked by name rather than instanceof so this module stays free of a
     // circular import back into store.js.
     if (err && err.name === 'StorageDown') {
-      return fail('Storage is unavailable — the shop cannot save right now. See DEPLOY.md.', 503);
+      // Say WHY, on the screen.
+      //
+      // This used to read "See DEPLOY.md", which is no use at all to someone
+      // standing in the street holding a phone with a dead shop. The underlying
+      // failure is an infrastructure message from the blob store — "the
+      // environment has not been configured", a 401, a timeout — and knowing
+      // which one is the entire difference between a two-minute fix and an
+      // evening lost to log archaeology.
+      //
+      // Only the cause's message, never a stack, and only for this class of
+      // error: a storage outage is an operational fact, not a secret. Generic
+      // 500s stay opaque because those can carry application detail.
+      const why = String((err.cause && (err.cause.message || err.cause.name)) || '').slice(0, 200);
+      return fail('Storage is unavailable — the shop cannot save right now.' + (why ? ' (' + why + ')' : ''), 503);
     }
     return fail('server error', 500);
   }

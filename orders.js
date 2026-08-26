@@ -161,7 +161,12 @@ export default async (req) => route(req, {
     let fee = 0;
     let where = '';
     let zoneId = '';
-    const slot = str(body.slot, 40);
+    // Cash pickup is always ASAP, decided here rather than taken from the
+    // browser. Nothing is set aside for money that has not arrived, so a cash
+    // order promising a time hours away is a promise the shop cannot keep —
+    // and it contradicted the hold clock on the very same order.
+    const cashPickup = mode === 'pickup' && !payment.fast;
+    const slot = cashPickup ? 'ASAP' : str(body.slot, 40);
 
     if (mode === 'delivery') {
       if (!cfg.run.on) return fail('Delivery is off today.');
@@ -180,7 +185,7 @@ export default async (req) => route(req, {
     // must not rewrite where an earlier order was sent.
     const customer = (await read(KEYS.codes, [])).find((x) => x.code === session.code) || {};
 
-    const hold = mode === 'pickup' && !payment.fast ? cfg.holdMinutes : null;
+    const hold = cashPickup ? cfg.holdMinutes : null;
     const counters = await read(KEYS.counters, { orderSeq: 1000 });
     const seq = (counters.orderSeq || 1000) + 1;
     await write(KEYS.counters, { ...counters, orderSeq: seq });
