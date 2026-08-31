@@ -918,6 +918,7 @@ input,textarea,select{font-size:16px}
                     <div style="flex:1;min-width:0">
                       <div style="font:800 14.5px/1.2 'Figtree';color:#201e1d">{{ c.name }}</div>
                       <div style="font:500 11.5px/1.35 'Figtree';color:#645c50;margin-top:3px">{{ c.meta }}</div>
+                      <div style="font:500 11px/1.35 'Figtree';color:#82796a;margin-top:2px">{{ c.last }}</div>
                     </div>
                     <div style="font-family:'Caprasimo',serif;font-size:20px;letter-spacing:.1em;color:#402310;padding:5px 11px;border-radius:12px;background:#ffe1d0;border:2px solid #201e1d;flex:none">{{ c.code }}</div>
                     <div onClick="{{ c.toggle }}" style="padding:7px 11px;border-radius:999px;border:2px solid #201e1d;font:800 10.5px/1 'Figtree';letter-spacing:.06em;text-transform:uppercase;cursor:pointer;flex:none;white-space:nowrap;background:{{ c.bg }};color:{{ c.fg }}">{{ c.state }}</div>
@@ -1259,7 +1260,7 @@ const COPY = {
     takenToday: 'Chavos de hoy', avgTicket: v => v + ' promedio',
     waiting: n => n + (n === 1 ? ' orden esperando' : ' órdenes esperando') + ' por ti',
     newest: 'La última: ', runningLow: 'Se está acabando', leftN: n => 'quedan ' + n,
-    fastest: 'Lo que más se mueve', ordersN: n => n + ' órdenes',
+    fastest: 'Lo que más se mueve', ordersN: n => n + (n === 1 ? ' orden' : ' órdenes'),
     ordersTitle: 'Órdenes', ordersSub: 'Toca el botón pa’ moverla.',
     now: 'ahora', newOrderPush: (total, who, how) => 'Orden nueva · ' + total + ' · ' + who + ' quiere ' + how + '.',
     howDelivery: 'delivery', howPickup: 'recogerlo',
@@ -1327,6 +1328,8 @@ const COPY = {
     deleteOne: 'Borrar', confirmDelete: '¿Seguro? Toca otra vez',
     stillOwed: 'Falta por cobrar',
     runTitle: 'La ruta de hoy', stopsN: n => n + (n === 1 ? ' parada' : ' paradas'),
+    today: 'Hoy', yesterday: 'Ayer',
+    lastOrder: w => 'Última: ' + w, neverOrdered: 'Todavía no ha ordenado',
     pickupOnlyNote: 'Ahora mismo todo es recogido. Añade un área en Ajustes para prender las entregas.',
     runSummary: (n, mi) => n + (n === 1 ? ' parada' : ' paradas') + ' · hasta ' + mi + ' millas',
     runHint: 'Por zona, la más cerca primero. Termina una zona antes de brincar a la otra.',
@@ -1445,7 +1448,7 @@ const COPY = {
     takenToday: 'Taken today', avgTicket: v => v + ' average',
     waiting: n => n + (n === 1 ? ' order' : ' orders') + ' waiting on you',
     newest: 'Newest: ', runningLow: 'Running low', leftN: n => n + ' left',
-    fastest: 'Moving fastest', ordersN: n => n + ' orders',
+    fastest: 'Moving fastest', ordersN: n => n + (n === 1 ? ' order' : ' orders'),
     ordersTitle: 'Orders', ordersSub: 'Tap the button to move an order along.',
     now: 'now', newOrderPush: (total, who, how) => 'New order · ' + total + ' · ' + who + ' wants ' + how + '.',
     howDelivery: 'delivery', howPickup: 'pickup',
@@ -1513,6 +1516,8 @@ const COPY = {
     deleteOne: 'Delete', confirmDelete: 'Sure? Tap again',
     stillOwed: 'Still to collect',
     runTitle: 'Today\u2019s run', stopsN: n => n + (n === 1 ? ' stop' : ' stops'),
+    today: 'Today', yesterday: 'Yesterday',
+    lastOrder: w => 'Last: ' + w, neverOrdered: 'No orders yet',
     pickupOnlyNote: 'Pickup only right now. Add an area in Settings to switch delivery on.',
     runSummary: (n, mi) => n + (n === 1 ? ' stop' : ' stops') + ' · out to ' + mi + ' miles',
     runHint: 'Grouped by area, nearest first. Finish one area before moving on.',
@@ -1583,7 +1588,7 @@ const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = '2026-08-26.2210';
+const BUILD = '2026-08-26.2340';
 
 // Tap feedback for the keypad.
 //
@@ -2379,6 +2384,26 @@ class Component extends DCLogic {
     const cash = n => this.money(n);
     const cfg = this.cfg();
 
+    // A time with no day on it.
+    //
+    // Every order stamp read "7:12 PM" and nothing else, so a queue holding
+    // three days of orders looked like one evening — and two orders from the
+    // same customer an hour apart were indistinguishable from two a week apart.
+    // Today and yesterday are named rather than dated, because that is how
+    // anyone reads a list they are working through.
+    const loc = L === 'es' ? 'es-PR' : 'en-US';
+    const stamp = (iso) => {
+      const d = new Date(iso);
+      if (isNaN(d)) return '';
+      const time = d.toLocaleTimeString(loc, { hour: 'numeric', minute: '2-digit' });
+      const day = new Date(); day.setHours(0, 0, 0, 0);
+      const then = new Date(d); then.setHours(0, 0, 0, 0);
+      const days = Math.round((day - then) / 86400000);
+      if (days === 0) return t.today + ' ' + time;
+      if (days === 1) return t.yesterday + ' ' + time;
+      return d.toLocaleDateString(loc, { month: 'short', day: 'numeric' }) + ' · ' + time;
+    };
+
     const sel = cat.find(p => p.id === s.selId) || cat[0] || {
       id: '', name: '', sec: 'Indoors', type: '', thc: '—', cbd: '—', bg: '#f9f4ed',
       notes: '', effects: [], tiers: [{ label: '—', grams: 1, price: 0 }], unit: 'g', foot: '', stock: 0
@@ -2610,7 +2635,7 @@ class Component extends DCLogic {
       // ── owner: new customer requests ──────────────────────────────────────
       newReqs: s.signups.map(r => ({
         name: r.name, phone: r.phone, addr: r.addr,
-        when: new Date(r.at).toLocaleTimeString(L === 'es' ? 'es-PR' : 'en-US', { hour: 'numeric', minute: '2-digit' }),
+        when: stamp(r.at),
         meta: t.yearsOld(r.age) + ' · ' + t.idOk + (r.pay ? ' · ' + r.pay : ''),
         initials: this.initials(r.name),
         approve: () => this.approveReq(r.id),
@@ -2827,7 +2852,7 @@ class Component extends DCLogic {
         const pend = app && !o.payOk && !o.cancelled;
         return {
           client: o.client, no: o.no, total: o.total, items: o.items,
-          when: new Date(o.at).toLocaleTimeString(L === 'es' ? 'es-PR' : 'en-US', { hour: 'numeric', minute: '2-digit' }),
+          when: stamp(o.at),
           initials: this.initials(o.client),
           status: o.cancelled ? t.cancelled : st.label,
           statusBg: o.cancelled ? '#eee7db' : stl.bg,
@@ -2966,7 +2991,10 @@ class Component extends DCLogic {
       codeRows: s.codes.map(c => ({
         name: c.name || t.newClient,
         code: c.code,
-        meta: (L === 'es' ? 'Órdenes: ' : 'Orders: ') + (c.uses || 0),
+        // Counted from the orders themselves by the server. This used to show
+        // `uses`, which counts sign-ins, under the word "Orders".
+        meta: t.ordersN(c.orders || 0) + ' · ' + cash(c.spent || 0),
+        last: c.lastOrder ? t.lastOrder(stamp(c.lastOrder)) : t.neverOrdered,
         state: c.active ? t.active : t.revoked,
         bg: c.active ? '#e1eecc' : '#eee7db', fg: c.active ? '#3d472b' : '#82796a',
         toggle: () => this.toggleCode(c.code, !c.active),

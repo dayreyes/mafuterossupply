@@ -6,7 +6,7 @@
 // realistic way to guess the next one.
 
 import { randomInt } from 'node:crypto';
-import { mutate, KEYS } from './store.js';
+import { read, mutate, KEYS } from './store.js';
 import { str } from './http.js';
 import { CLIENT_CODE_LEN } from './session.js';
 
@@ -36,4 +36,36 @@ export async function mintCode(name, contact = {}) {
     }].concat(list);
   });
   return { code, codes };
+}
+
+// What a customer has actually bought, counted from the orders themselves.
+//
+// The Codes screen showed `uses` under the heading "Orders". `uses` counts how
+// many times a code was typed into the lock screen — and sessions last weeks,
+// so a regular signs in once and then orders from the same session for a month.
+// Somebody with four orders sat there reading "Orders: 1", which made the whole
+// screen useless for telling a regular from a stranger.
+//
+// Counted fresh from the order list on every read rather than kept as a running
+// tally on the code, because a tally drifts: delete an order, archive one, and
+// a counter that was incremented at checkout is quietly wrong forever with
+// nothing to reconcile it against.
+//
+// Cancelled orders are left out — the sale did not happen — while archived ones
+// count, since archiving only tidies the queue.
+export async function withHistory(codes) {
+  const orders = await read(KEYS.orders, []);
+  const byCode = new Map();
+  for (const o of orders) {
+    if (!o.clientCode || o.cancelled) continue;
+    const row = byCode.get(o.clientCode) || { orders: 0, spent: 0, lastOrder: '' };
+    row.orders += 1;
+    row.spent += (o.subtotal || 0) + (o.fee || 0);
+    if (!row.lastOrder || String(o.at) > row.lastOrder) row.lastOrder = String(o.at || '');
+    byCode.set(o.clientCode, row);
+  }
+  return codes.map((c) => ({
+    ...c,
+    ...(byCode.get(c.code) || { orders: 0, spent: 0, lastOrder: '' })
+  }));
 }

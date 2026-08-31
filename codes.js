@@ -5,14 +5,14 @@
 import { route, ok, fail, unauthorized, str } from './lib/http.js';
 import { read, mutate, KEYS } from './lib/store.js';
 import { requireOwner } from './lib/session.js';
-import { mintCode } from './lib/invites.js';
+import { mintCode, withHistory } from './lib/invites.js';
 import { sendAll, codeText } from './lib/notify.js';
 
 export default async (req) => route(req, {
 
   async list(body, req) {
     if (!(await requireOwner(req))) return unauthorized();
-    return ok({ codes: await read(KEYS.codes, []) });
+    return ok({ codes: await withHistory(await read(KEYS.codes, [])) });
   },
 
   async issue(body, req) {
@@ -20,7 +20,7 @@ export default async (req) => route(req, {
     const name = str(body.name, 60);
     const { code, codes } = await mintCode(name);
     await sendAll(codeText(name || 'New customer', code));
-    return ok({ code, codes });
+    return ok({ code, codes: await withHistory(codes) });
   },
 
   // Revoking is a flag rather than a delete so the owner keeps the history of
@@ -37,14 +37,14 @@ export default async (req) => route(req, {
       })
     );
     if (!found) return fail('No such code.');
-    return ok({ codes });
+    return ok({ codes: await withHistory(codes) });
   },
 
   async remove(body, req) {
     if (!(await requireOwner(req))) return unauthorized();
     const code = str(body.code, 16);
     const codes = await mutate(KEYS.codes, [], (list) => list.filter((c) => c.code !== code));
-    return ok({ codes });
+    return ok({ codes: await withHistory(codes) });
   }
 
 });

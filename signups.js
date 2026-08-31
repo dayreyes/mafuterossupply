@@ -11,7 +11,7 @@ import { route, ok, fail, unauthorized, tooMany, clientIp, str } from './lib/htt
 import { read, mutate, KEYS } from './lib/store.js';
 import { requireOwner, checkThrottle, recordFailure } from './lib/session.js';
 import { defaultConfig } from './lib/config.js';
-import { mintCode } from './lib/invites.js';
+import { mintCode, withHistory } from './lib/invites.js';
 import { sendAll, signupText, codeText } from './lib/notify.js';
 
 const MIN_AGE = 21;
@@ -95,7 +95,7 @@ export default async (req) => route(req, {
     const { code, codes } = await mintCode(hit.name, { phone: hit.phone, addr: hit.addr, age: hit.age });
     const signups = await mutate(KEYS.signups, [], (all) => all.filter((r) => r.id !== id));
     await sendAll(codeText(hit.name, code));
-    return ok({ code, codes, signups });
+    return ok({ code, codes: await withHistory(codes), signups });
   },
 
   async ignore(body, req) {
