@@ -5,7 +5,7 @@
 // here as owner-editable config instead. A brand new shop starts EMPTY: no
 // products, no zones, no payment handles. Nothing fake ever reaches a customer.
 
-import { str, num } from './http.js';
+import { str, num, newId } from './http.js';
 
 export const defaultConfig = () => ({
   shopName: '',
@@ -25,6 +25,21 @@ export const defaultConfig = () => ({
   // farStepFee for every farStepMiles beyond midMiles.
   fees: { freeMiles: 5, midMiles: 10, midFee: 5, farBase: 6, farStepMiles: 5, farStepFee: 1 },
   holdMinutes: 30,
+  // Opening hours, so the shop closes itself.
+  //
+  // The owner was leaving it open because after a long day he is not thinking
+  // about the app — and an open shop means customers ordering at 3am expecting
+  // an answer. A schedule keeps that promise honest without him touching
+  // anything. `on: false` keeps the old always-open behaviour for shops that
+  // want it, and `paused` is the manual override for a day off.
+  hours: {
+    on: false,
+    open: '10:00',
+    close: '22:00',
+    days: [0, 1, 2, 3, 4, 5, 6],
+    tz: 'America/Puerto_Rico',
+    paused: false
+  },
   setupComplete: false
 });
 
@@ -56,7 +71,7 @@ export function cleanConfig(incoming, current) {
       .filter((z) => z && str(z.name, 60))
       .slice(0, 40)
       .map((z, i) => ({
-        id: str(z.id, 24) || 'z' + i + '-' + Date.now().toString(36),
+        id: str(z.id, 24) || newId('z'),
         name: str(z.name, 60),
         mi: num(z.mi, 0, 200, 5)
       }));
@@ -76,6 +91,23 @@ export function cleanConfig(incoming, current) {
     c.run = { ...c.run, zones: c.run.zones.filter((z) => c.zones.some((x) => x.id === z)) };
   }
 
+  if (inp.hours && typeof inp.hours === 'object') {
+    const h = inp.hours;
+    const days = Array.isArray(h.days)
+      ? [...new Set(h.days.map((d) => num(d, 0, 6, 0)))].sort()
+      : c.hours.days;
+    c.hours = {
+      on: h.on === true,
+      open: isTime(h.open) ? h.open : c.hours.open,
+      close: isTime(h.close) ? h.close : c.hours.close,
+      // Every day switched off would be a shop that never opens again with no
+      // obvious way back, so an empty list means open every day.
+      days: days.length ? days : [0, 1, 2, 3, 4, 5, 6],
+      tz: str(h.tz, 64) || c.hours.tz,
+      paused: h.paused === true
+    };
+  }
+
   if (inp.fees && typeof inp.fees === 'object') {
     const f = inp.fees;
     c.fees = {
@@ -91,6 +123,61 @@ export function cleanConfig(incoming, current) {
   // A shop counts as set up once it can actually take money and has something
   // to sell — checked by the caller, which knows the product count.
   return c;
+}
+
+// What time it is where the shop is.
+//
+// These functions run on UTC servers. "Open until 10pm" means ten at night in
+// the shop's own town, and a shop that shuts at the wrong hour is worse than a
+// shop with no hours at all — so the weekday and the clock both come from the
+// configured zone, never from the server's idea of now.
+export function shopClock(cfg, at = new Date()) {
+  const tz = (cfg && cfg.hours && cfg.hours.tz) || defaultConfig().hours.tz;
+  const fmt = (zone) => new Intl.DateTimeFormat('en-US', {
+    timeZone: zone, hour12: false, weekday: 'short', hour: '2-digit', minute: '2-digit'
+  }).formatToParts(at);
+  let parts;
+  // An unknown zone must not take the shop down; fall back to server time.
+  try { parts = fmt(tz); } catch { parts = fmt(undefined); }
+  const get = (type) => ((parts.find((p) => p.type === type) || {}).value || '');
+  const DAYS = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const day = DAYS[get('weekday')];
+  // "24" appears at midnight in some ICU builds.
+  const hour = Number(get('hour')) % 24;
+  return { day: day === undefined ? at.getDay() : day, minutes: hour * 60 + Number(get('minute')) };
+}
+
+const toMinutes = (hhmm) => {
+  const [h, m] = String(hhmm || '').split(':').map(Number);
+  return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
+};
+
+// Is the shop taking orders right now, and if not, when does it open again?
+//
+// Closing times after midnight are the normal case here, not an edge case — a
+// run that goes 6pm to 2am is a Friday. So a window whose close is at or before
+// its open wraps into the next morning, and the small hours still belong to the
+// day the window started on.
+export function shopOpen(cfg, at = new Date()) {
+  const h = { ...defaultConfig().hours, ...((cfg && cfg.hours) || {}) };
+  if (h.paused) return { open: false, why: 'paused', opensAt: h.open };
+  if (!h.on) return { open: true, why: 'always' };
+
+  const { day, minutes } = shopClock(cfg, at);
+  const days = Array.isArray(h.days) && h.days.length ? h.days : [0, 1, 2, 3, 4, 5, 6];
+  const open = toMinutes(h.open);
+  const close = toMinutes(h.close);
+  const overnight = close <= open;
+
+  const openToday = days.includes(day);
+  const openYesterday = days.includes((day + 6) % 7);
+  const withinToday = overnight ? minutes >= open : (minutes >= open && minutes < close);
+  const trailingFromYesterday = overnight && minutes < close;
+
+  if ((openToday && withinToday) || (openYesterday && trailingFromYesterday)) {
+    return { open: true, why: 'hours' };
+  }
+  return { open: false, why: 'hours', opensAt: h.open };
 }
 
 export function mileFee(mi, fees) {
@@ -197,7 +284,7 @@ export function cleanProduct(inp, index = 0, existing = null) {
 
   return {
     product: {
-      id: (existing && existing.id) || 'p' + Date.now().toString(36) + index,
+      id: (existing && existing.id) || newId('p'),
       name,
       sec,
       type,
@@ -211,6 +298,13 @@ export function cleanProduct(inp, index = 0, existing = null) {
       foot: str(inp.foot, 160),
       // Grams for flower and concentrates, whole items for everything else.
       stock: num(inp.stock, 0, 1000000, existing ? existing.stock : 0),
+      // What he paid, per gram or per unit — the same measure as stock, so
+      // profit is just (what it sold for) minus (cost x amount that left the
+      // shelf). Zero means not recorded, and the app says so rather than
+      // reporting the whole sale as profit.
+      cost: num(inp.cost, 0, 100000, existing ? existing.cost || 0 : 0),
+      // Where it came from, so re-upping stops depending on memory.
+      supplier: str(inp.supplier, 60) || (existing ? existing.supplier || '' : ''),
       // Occasional items — a tray he only cooks sometimes — are switched off
       // rather than deleted, so the recipe and prices survive until next time.
       active: inp.active !== false,
@@ -228,6 +322,9 @@ export const publicProduct = (p) => ({
 
 export const publicConfig = (c) => ({
   shopName: c.shopName,
+  // Only when it opens and whether it is open — never the day list, the
+  // timezone or the paused flag, which are the owner's business.
+  hours: { on: !!(c.hours && c.hours.on), open: (c.hours || {}).open || '', close: (c.hours || {}).close || '' },
   pickupNote: c.pickupNote,
   contact: c.contact,
   payments: c.payments.filter((p) => p.enabled).map((p) => ({

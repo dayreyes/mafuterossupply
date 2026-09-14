@@ -7,7 +7,7 @@
 
 import { randomInt } from 'node:crypto';
 import { read, mutate, KEYS } from './store.js';
-import { str } from './http.js';
+import { str, newId } from './http.js';
 import { CLIENT_CODE_LEN } from './session.js';
 
 export const genCode = () =>
@@ -24,7 +24,7 @@ export async function mintCode(name, contact = {}) {
   const codes = await mutate(KEYS.codes, [], (list) => {
     do { code = genCode(); } while (list.some((c) => c.code === code));
     return [{
-      id: 'c' + Date.now().toString(36),
+      id: newId('c'),
       name: str(name, 60),
       phone: str(contact.phone, 32),
       addr: str(contact.addr, 160),

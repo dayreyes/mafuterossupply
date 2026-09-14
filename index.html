@@ -218,6 +218,15 @@ input,textarea,select{font-size:16px}
               </sc-for>
             </div>
 
+            <div style="display:{{ shutDisplay }};align-items:center;gap:12px;margin:14px 22px 0;padding:14px 16px;background:#ffe1d0;border:2px solid #8c491a;border-radius:22px">
+              <div style="flex:none;width:38px;height:38px;border-radius:50%;background:#f9f4ed;border:2px solid #8c491a;display:flex;align-items:center;justify-content:center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8c491a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font:800 13.5px/1.25 'Figtree';color:#402310">{{ shutTitle }}</div>
+                <div style="font:500 11.5px/1.4 'Figtree';color:#8c491a;margin-top:3px">{{ shutBody }}</div>
+              </div>
+            </div>
             <div style="display:{{ emptyMenuDisplay }};margin:18px 22px 0;padding:22px 20px;background:#f9f4ed;border:2px dashed #a19786;border-radius:24px;text-align:center"><div style="font-family:'Caprasimo',serif;font-size:19px;color:#201e1d">{{ t.emptyMenuTitle }}</div><div style="font:500 12.5px/1.5 'Figtree';color:#645c50;margin-top:6px">{{ t.emptyMenuBody }}</div></div>
             <sc-for list="{{ sections }}" as="s" hint-placeholder-count="4">
               <div style="padding:0 22px 26px">
@@ -436,7 +445,7 @@ input,textarea,select{font-size:16px}
             </div>
 
             <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;margin-top:auto;padding-top:26px;padding:14px 22px 40px;background:#f5ead8;border-top:2px solid #201e1d">
-              <div onClick="{{ place }}" style="height:56px;border-radius:999px;background:#56633f;border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:18px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.sendOrder }}</div>
+              <div onClick="{{ place }}" style="height:56px;border-radius:999px;background:{{ placeBg }};border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:{{ placeCursor }};color:#f5ead8;font-family:'Caprasimo',serif;font-size:18px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ placeLabel }}</div>
             </div>
           </div>
         </sc-if>
@@ -587,8 +596,18 @@ input,textarea,select{font-size:16px}
               </div>
 
               <div style="margin-top:16px;background:#c67139;background-image:radial-gradient(rgba(32,30,29,.2) 1.2px,transparent 1.4px);background-size:7px 7px;border:2px solid #201e1d;border-radius:26px;padding:18px 20px;box-shadow:4px 4px 0 rgba(32,30,29,.3)">
-                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#402310">{{ t.takenToday }}</div>
+                <div style="display:flex;align-items:center;gap:6px;background:rgba(249,244,237,.35);border:2px solid #402310;border-radius:999px;padding:3px;width:fit-content;margin-bottom:12px">
+                  <sc-for list="{{ windowTabs }}" as="w" hint-placeholder-count="3">
+                    <div onClick="{{ w.pick }}" style="padding:7px 13px;border-radius:999px;cursor:pointer;font:800 11px/1 'Figtree';white-space:nowrap;background:{{ w.bg }};color:{{ w.fg }}">{{ w.label }}</div>
+                  </sc-for>
+                </div>
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#402310">{{ takenLabel }}</div>
                 <div style="font-family:'Caprasimo',serif;font-size:46px;line-height:1.02;color:#f9f4ed;margin-top:6px">{{ takenToday }}</div>
+                <div style="display:{{ profitDisplay }};align-items:baseline;gap:8px;margin-top:8px">
+                  <div style="font:700 10px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:#402310">{{ profitLabel }}</div>
+                  <div style="font-family:'Caprasimo',serif;font-size:24px;line-height:1;color:#f9f4ed">{{ profitValue }}</div>
+                </div>
+                <div style="display:{{ costGapDisplay }};font:600 10.5px/1.4 'Figtree';color:#402310;margin-top:6px;opacity:.85">{{ costGapNote }}</div>
                 <div style="display:flex;gap:14px;margin-top:10px;font:700 12px/1.3 'Figtree';color:#402310;flex-wrap:wrap">
                   <span>{{ placedToday }}</span><span>&middot;</span><span>{{ avgTicketLabel }}</span>
                 </div>
@@ -623,6 +642,117 @@ input,textarea,select{font-size:16px}
                     <div style="font:800 12.5px/1 'Figtree';color:#8c491a;flex:none;white-space:nowrap">{{ s.left }}</div>
                   </div>
                 </sc-for>
+              </div>
+
+              <!-- The three lists that turn a figure into something to do.
+                   Each one disappears entirely when it has nothing in it, so a
+                   quiet shop shows a short screen rather than a wall of
+                   encouraging zeroes. -->
+              <div style="display:{{ owedDisplay }}">
+                <div style="margin-top:22px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                  <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.owedTitle }}</div>
+                  <div style="font-family:'Caprasimo',serif;font-size:17px;color:#8c491a">{{ owedTotal }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px;margin-top:11px">
+                  <sc-for list="{{ owedRows }}" as="o" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:11px;background:#ffe1d0;border:2px solid #8c491a;border-radius:18px;padding:11px 14px">
+                      <div style="flex:1;min-width:0">
+                        <div style="font:800 13.5px/1.25 'Figtree';color:#402310;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.name }}</div>
+                        <div style="font:600 11px/1.35 'Figtree';color:#8c491a;margin-top:2px">{{ o.meta }}</div>
+                      </div>
+                      <div style="flex:none;text-align:right">
+                        <div style="font-family:'Caprasimo',serif;font-size:17px;color:#402310">{{ o.amount }}</div>
+                        <div style="font:600 10px/1.3 'Figtree';color:#8c491a;margin-top:2px">{{ o.age }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="display:{{ reupDisplay }}">
+                <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.reupTitle }}</div>
+                <div style="display:flex;flex-direction:column;gap:9px;margin-top:11px">
+                  <sc-for list="{{ reupRows }}" as="r" hint-placeholder-count="3">
+                    <div style="background:{{ r.bg }};border:2px solid {{ r.border }};border-radius:18px;padding:11px 14px">
+                      <div style="display:flex;align-items:baseline;gap:10px">
+                        <div style="flex:1;min-width:0;font:800 13.5px/1.25 'Figtree';color:#402310;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div>
+                        <div style="flex:none;font-family:'Caprasimo',serif;font-size:15px;color:#8c491a">{{ r.days }}</div>
+                      </div>
+                      <div style="font:600 11px/1.4 'Figtree';color:#645c50;margin-top:4px">{{ r.left }} &middot; {{ r.pace }}</div>
+                      <div style="font:600 11px/1.4 'Figtree';color:#82796a;margin-top:2px">{{ r.from }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="display:{{ quietDisplay }}">
+                <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.quietTitle }}</div>
+                <div style="display:flex;flex-direction:column;gap:9px;margin-top:11px">
+                  <sc-for list="{{ quietRows }}" as="q" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:11px;background:#f9f4ed;border:2px solid #a19786;border-radius:18px;padding:11px 14px">
+                      <div style="flex:1;min-width:0">
+                        <div style="font:800 13.5px/1.25 'Figtree';color:#201e1d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ q.name }}</div>
+                        <div style="font:600 11px/1.35 'Figtree';color:#645c50;margin-top:2px">{{ q.meta }}</div>
+                      </div>
+                      <div style="flex:none;text-align:right">
+                        <div style="font:700 11px/1.3 'Figtree';color:#8c491a">{{ q.last }}</div>
+                        <div style="font:600 11px/1.3 'Figtree';color:#645c50;margin-top:2px">{{ q.phone }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="display:{{ deadDisplay }}">
+                <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.deadTitle }}</div>
+                <div style="display:flex;flex-direction:column;gap:9px;margin-top:11px">
+                  <sc-for list="{{ deadRows }}" as="d" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;gap:11px;background:#eee7db;border:2px solid #a19786;border-radius:18px;padding:11px 14px">
+                      <div style="flex:1;min-width:0;font:700 13px/1.25 'Figtree';color:#645c50;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.name }}</div>
+                      <div style="flex:none;text-align:right">
+                        <div style="font:700 11.5px/1.3 'Figtree';color:#645c50">{{ d.left }}</div>
+                        <div style="font:600 10px/1.3 'Figtree';color:#82796a;margin-top:2px">{{ d.note }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <!-- Patterns stay hidden until there is enough trading to mean
+                   anything; three orders make a very confident bar chart out of
+                   nothing at all. -->
+              <div style="display:{{ patternsDisplay }}">
+                <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.patternsTitle }}</div>
+                <div style="margin-top:11px;background:#f9f4ed;border:2px solid #201e1d;border-radius:22px;padding:14px 16px">
+                  <div style="font:700 9.5px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:#82796a">{{ t.peakHours }}</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:9px">
+                    <sc-for list="{{ hourRows }}" as="h" hint-placeholder-count="3">
+                      <div style="padding:7px 11px;border-radius:999px;background:#ffe1d0;border:2px solid #201e1d;font:800 11.5px/1 'Figtree';color:#402310">{{ h.label }} &middot; {{ h.value }}</div>
+                    </sc-for>
+                  </div>
+                  <div style="font:700 9.5px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:#82796a;margin-top:16px">{{ t.peakDays }}</div>
+                  <div style="display:flex;align-items:flex-end;gap:6px;margin-top:9px;height:62px">
+                    <sc-for list="{{ dayRows }}" as="d" hint-placeholder-count="7">
+                      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end">
+                        <div style="font:700 9.5px/1 'Figtree';color:#645c50">{{ d.value }}</div>
+                        <div style="width:100%;border-radius:6px 6px 0 0;border:2px solid #201e1d;background:{{ d.bg }};height:{{ d.pct }}"></div>
+                        <div style="font:800 9.5px/1 'Figtree';color:#645c50">{{ d.label }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="font:700 9.5px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:#82796a;margin-top:16px">{{ t.sizesTitle }}</div>
+                  <div style="display:flex;flex-direction:column;gap:7px;margin-top:9px">
+                    <sc-for list="{{ sizeRows }}" as="z" hint-placeholder-count="4">
+                      <div style="display:flex;align-items:center;gap:9px">
+                        <div style="flex:none;width:62px;font:700 11.5px/1 'Figtree';color:#201e1d">{{ z.label }}</div>
+                        <div style="flex:1;height:14px;border-radius:999px;background:#eee7db;border:2px solid #a19786;overflow:hidden">
+                          <div style="height:100%;background:#56633f;width:{{ z.pct }}"></div>
+                        </div>
+                        <div style="flex:none;font:800 11px/1 'Figtree';color:#645c50;width:38px;text-align:right">{{ z.value }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
               </div>
 
               <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.fastest }}</div>
@@ -824,6 +954,22 @@ input,textarea,select{font-size:16px}
                       <input value="{{ npThc }}" onChange="{{ setNpThc }}" placeholder="{{ t.fStrainThcPh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
                     </div>
                   </div>
+                  <!-- What he paid, and who he got it from. Both were living
+                       on paper, which is why the app could report takings but
+                       never profit, and why re-upping meant remembering. Cost is
+                       optional: left blank, the app says profit reads high
+                       rather than quietly treating the whole sale as margin. -->
+                  <div style="display:flex;gap:9px;margin-top:4px">
+                    <div style="flex:1">
+                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ npCostLabel }}</div>
+                      <input value="{{ npCost }}" onChange="{{ setNpCost }}" inputMode="decimal" placeholder="{{ npCostPh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+                    </div>
+                    <div style="flex:1">
+                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.fStrainSupplier }}</div>
+                      <input value="{{ npSupplier }}" onChange="{{ setNpSupplier }}" placeholder="{{ t.fStrainSupplierPh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+                    </div>
+                  </div>
+                  <div style="display:{{ npMarginDisplay }};font:600 11.5px/1.4 'Figtree';color:#3d472b;margin-top:2px">{{ npMarginNote }}</div>
                   <div>
                     <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.fStrainNote }}</div>
                     <input value="{{ npNote }}" onChange="{{ setNpNote }}" placeholder="{{ t.fStrainNotePh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
@@ -1030,6 +1176,52 @@ input,textarea,select{font-size:16px}
                       <input value="{{ p.handle }}" onChange="{{ p.setHandle }}" placeholder="{{ p.handlePh }}" style="display:{{ p.handleDisplay }};width:100%;box-sizing:border-box;height:42px;margin-top:10px;padding:0 14px;border-radius:999px;border:2px solid #a19786;background:#f9f4ed;font:600 13px/1 'Figtree';color:#201e1d;outline:none">
                     </div>
                   </sc-for>
+                </div>
+              </div>
+
+              <!-- STORE hours — not the delivery run.
+                   Two different schedules that were being treated as one. These
+                   decide whether the shop takes an order at all; the run below
+                   is the narrower window for when he is actually driving. A
+                   delivery needs both. He was leaving the shop open around the
+                   clock because after a long day he is not thinking about the
+                   app, so people ordered at 3am expecting an answer. -->
+              <div style="margin-top:16px;background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:16px">
+                <div style="display:flex;align-items:center;gap:11px">
+                  <div style="flex:1;font-family:'Caprasimo',serif;font-size:19px;color:#201e1d">{{ t.stHoursTitle }}</div>
+                  <div onClick="{{ toggleStHours }}" style="width:62px;height:32px;border-radius:999px;border:2px solid #201e1d;background:{{ stHoursBg }};display:flex;align-items:center;justify-content:{{ stHoursJustify }};padding:3px;cursor:pointer;box-sizing:border-box">
+                    <div style="width:24px;height:24px;border-radius:50%;background:#f5ead8;border:2px solid #201e1d;box-sizing:border-box"></div>
+                  </div>
+                  <div style="font:800 10.5px/1 'Figtree';letter-spacing:.08em;color:#645c50;width:26px">{{ stHoursLabel }}</div>
+                </div>
+                <div style="font:500 11.5px/1.45 'Figtree';color:#645c50;margin-top:7px">{{ t.stHoursSub }}</div>
+                <div style="display:{{ stHoursDetail }};flex-direction:column">
+                  <div style="display:flex;gap:11px;margin-top:13px">
+                    <div style="flex:1">
+                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.stOpenLabel }}</div>
+                      <input value="{{ stOpen }}" onChange="{{ setStOpen }}" type="time" style="width:100%;box-sizing:border-box;height:46px;padding:0 12px;border-radius:14px;border:2px solid #201e1d;background:#f5ead8;font:700 14px/1 'Figtree';color:#201e1d;outline:none">
+                    </div>
+                    <div style="flex:1">
+                      <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:6px">{{ t.stCloseLabel }}</div>
+                      <input value="{{ stClose }}" onChange="{{ setStClose }}" type="time" style="width:100%;box-sizing:border-box;height:46px;padding:0 12px;border-radius:14px;border:2px solid #201e1d;background:#f5ead8;font:700 14px/1 'Figtree';color:#201e1d;outline:none">
+                    </div>
+                  </div>
+                  <div style="font:600 11px/1.4 'Figtree';color:#645c50;margin-top:8px">{{ stHoursWindow }}</div>
+                  <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin:14px 0 8px">{{ t.stDaysLabel }}</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:7px">
+                    <sc-for list="{{ stDayChips }}" as="d" hint-placeholder-count="7">
+                      <div onClick="{{ d.toggle }}" style="min-width:42px;text-align:center;padding:9px 11px;border-radius:14px;border:2px solid {{ d.border }};background:{{ d.bg }};color:{{ d.fg }};cursor:pointer;font:800 11.5px/1 'Figtree'">{{ d.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div onClick="{{ toggleStPaused }}" style="margin-top:14px;display:flex;align-items:center;gap:11px;background:{{ stPausedBg }};border:2px solid {{ stPausedBorder }};border-radius:18px;padding:12px 14px;cursor:pointer">
+                  <div style="flex:1">
+                    <div style="font:800 12.5px/1.25 'Figtree';color:{{ stPausedFg }}">{{ stPausedTitle }}</div>
+                    <div style="font:500 11px/1.4 'Figtree';color:#645c50;margin-top:3px">{{ t.stPausedSub }}</div>
+                  </div>
+                  <div style="flex:none;width:52px;height:28px;border-radius:999px;border:2px solid #201e1d;background:{{ stPausedSwitch }};display:flex;align-items:center;justify-content:{{ stPausedJustify }};padding:3px;box-sizing:border-box">
+                    <div style="width:20px;height:20px;border-radius:50%;background:#f5ead8;border:2px solid #201e1d;box-sizing:border-box"></div>
+                  </div>
                 </div>
               </div>
 
@@ -1329,6 +1521,27 @@ const COPY = {
     stillOwed: 'Falta por cobrar',
     runTitle: 'La ruta de hoy', stopsN: n => n + (n === 1 ? ' parada' : ' paradas'),
     today: 'Hoy', yesterday: 'Ayer',
+    shutTitle: 'La tienda está cerrada',
+    shutUntil: t2 => 'Abre otra vez a las ' + t2 + '. Puedes mirar el menú mientras.',
+    shutNoTime: 'Ahora mismo no está cogiendo órdenes.',
+    windowName: { today: 'Hoy', week: 'Esta semana', month: 'Este mes' },
+    takenIn: w => 'Cobrado · ' + w,
+    profitLabel: 'Ganancia',
+    costGap: names => 'Falta el costo de ' + names + ', así que la ganancia sale alta.',
+    daysAgo: n => n === 0 ? 'hoy' : n === 1 ? 'hace 1 día' : 'hace ' + n + ' días',
+    onHand: 'en mano',
+    perDay: q => 'se van ' + q + ' al día',
+    daysLeft: n => n <= 0 ? 'se acaba hoy' : n === 1 ? 'queda 1 día' : 'quedan ' + n + ' días',
+    fromWho: w => 'de ' + w,
+    lastSeen: w => 'Última: ' + w,
+    lastSold: w => 'Última venta: ' + w,
+    neverSold: 'Nunca se ha vendido',
+    dayShort: ['D', 'L', 'M', 'X', 'J', 'V', 'S'],
+    owedTitle: 'Quién te debe', reupTitle: 'Hay que buscar más',
+    quietTitle: 'Se desaparecieron', deadTitle: 'Ahí cogiendo polvo',
+    patternsTitle: 'Cómo se mueve la tienda',
+    peakHours: 'Las horas buenas', peakDays: 'Los días buenos', sizesTitle: 'Lo que más piden',
+    owedNone: 'Nadie te debe nada.',
     lastOrder: w => 'Última: ' + w, neverOrdered: 'Todavía no ha ordenado',
     pickupOnlyNote: 'Ahora mismo todo es recogido. Añade un área en Ajustes para prender las entregas.',
     runSummary: (n, mi) => n + (n === 1 ? ' parada' : ' paradas') + ' · hasta ' + mi + ' millas',
@@ -1353,6 +1566,18 @@ const COPY = {
     stPaysTitle: 'Cómo cobras', stHandlePh: 'Tu número o usuario', stCashPh: '',
     stOn: 'Prendido', stOff: 'Apagado',
     stRunTitle: 'El run de delivery', stStartLabel: 'Empieza', stEndLabel: 'Termina',
+    stHoursTitle: 'Horario de la tienda',
+    stHoursSub: 'Cuándo la tienda coge órdenes. El run de delivery es aparte, ahí abajo.',
+    stOpenLabel: 'Abre', stCloseLabel: 'Cierra', stDaysLabel: 'Qué días',
+    dayNames: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+    plainWindow: (o, c) => 'Abierto de ' + o + ' a ' + c + '.',
+    overnightWindow: (o, c) => 'Abre a las ' + o + ' y cierra a las ' + c + ' de la madrugada.',
+    stPausedOn: 'Cerrada ahora mismo', stPausedOff: 'Cerrar la tienda ahora',
+    stPausedSub: 'Para un día libre, sin tocar el horario.',
+    fCostGram: 'Costo por gramo', fCostEach: 'Costo por unidad',
+    egCost: 'ej. 4.50',
+    fStrainSupplier: 'De quién', fStrainSupplierPh: 'ej. Rico',
+    marginNote: (label, made, pct) => 'En ' + label + ' ganas ' + made + ' (' + pct + '%).',
     stMaxLabel: 'Paradas máximas',
     stZonesTitle: 'Áreas', stInRun: 'En el run', stOutRun: 'Fuera',
     stZonePh: 'Nombre del área', stMiPh: 'Millas', stAddZone: 'Añadir área',
@@ -1517,6 +1742,27 @@ const COPY = {
     stillOwed: 'Still to collect',
     runTitle: 'Today\u2019s run', stopsN: n => n + (n === 1 ? ' stop' : ' stops'),
     today: 'Today', yesterday: 'Yesterday',
+    shutTitle: 'The shop is closed',
+    shutUntil: t2 => 'Opens again at ' + t2 + '. Have a look around meanwhile.',
+    shutNoTime: 'Not taking orders right now.',
+    windowName: { today: 'Today', week: 'This week', month: 'This month' },
+    takenIn: w => 'Taken · ' + w,
+    profitLabel: 'Profit',
+    costGap: names => 'No cost recorded for ' + names + ', so profit reads high.',
+    daysAgo: n => n === 0 ? 'today' : n === 1 ? '1 day ago' : n + ' days ago',
+    onHand: 'on hand',
+    perDay: q => q + ' a day',
+    daysLeft: n => n <= 0 ? 'out today' : n === 1 ? '1 day left' : n + ' days left',
+    fromWho: w => 'from ' + w,
+    lastSeen: w => 'Last: ' + w,
+    lastSold: w => 'Last sold: ' + w,
+    neverSold: 'Never sold',
+    dayShort: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+    owedTitle: 'Who owes you', reupTitle: 'Re-up soon',
+    quietTitle: 'Gone quiet', deadTitle: 'Sitting there',
+    patternsTitle: 'How the shop moves',
+    peakHours: 'Busiest hours', peakDays: 'Busiest days', sizesTitle: 'What they buy',
+    owedNone: 'Nobody owes you anything.',
     lastOrder: w => 'Last: ' + w, neverOrdered: 'No orders yet',
     pickupOnlyNote: 'Pickup only right now. Add an area in Settings to switch delivery on.',
     runSummary: (n, mi) => n + (n === 1 ? ' stop' : ' stops') + ' · out to ' + mi + ' miles',
@@ -1541,6 +1787,18 @@ const COPY = {
     stPaysTitle: 'How you get paid', stHandlePh: 'Your number or username', stCashPh: '',
     stOn: 'On', stOff: 'Off',
     stRunTitle: 'Delivery run', stStartLabel: 'Starts', stEndLabel: 'Ends',
+    stHoursTitle: 'Store hours',
+    stHoursSub: 'When the shop takes orders at all. The delivery run below is separate.',
+    stOpenLabel: 'Opens', stCloseLabel: 'Closes', stDaysLabel: 'Which days',
+    dayNames: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    plainWindow: (o, c) => 'Open ' + o + ' to ' + c + '.',
+    overnightWindow: (o, c) => 'Opens ' + o + ' and closes ' + c + ' the next morning.',
+    stPausedOn: 'Closed right now', stPausedOff: 'Close the shop now',
+    stPausedSub: 'For a day off, without touching the schedule.',
+    fCostGram: 'Cost per gram', fCostEach: 'Cost each',
+    egCost: 'e.g. 4.50',
+    fStrainSupplier: 'From who', fStrainSupplierPh: 'e.g. Rico',
+    marginNote: (label, made, pct) => 'On ' + label + ' you make ' + made + ' (' + pct + '%).',
     stMaxLabel: 'Max stops',
     stZonesTitle: 'Areas', stInRun: 'In the run', stOutRun: 'Out',
     stZonePh: 'Area name', stMiPh: 'Miles', stAddZone: 'Add area',
@@ -1588,7 +1846,7 @@ const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = '2026-08-26.2340';
+const BUILD = '2026-09-14.1200';
 
 // Tap feedback for the keypad.
 //
@@ -1647,6 +1905,9 @@ class Component extends DCLogic {
     takings: null,
     armed: null,
     showArchived: false,
+    window: 'today',
+    shopOpen: true,
+    opensAt: '',
     telegram: false,
 
     // ── client shopping ────────────────────────────────────────────────────
@@ -1659,7 +1920,7 @@ class Component extends DCLogic {
     // ── owner editing ──────────────────────────────────────────────────────
     showAdd: false,
     editingId: null,
-    newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', rows: rowsFor('Indoors'), stock: '', note: '' },
+    newP: { name: '', sec: 'Indoors', type: 'Hybrid', thc: '', rows: rowsFor('Indoors'), stock: '', note: '', cost: '', supplier: '' },
     draft: null,          // working copy of config on the settings screen
     newZone: { name: '', mi: '' },
     settingsMsg: '',
@@ -1881,6 +2142,10 @@ class Component extends DCLogic {
       this.setState({
         cfg,
         products: res.products,
+        // Whether the shop is taking orders right now, decided by the server so
+        // a phone with the wrong clock cannot argue with it.
+        shopOpen: res.open !== false,
+        opensAt: res.opensAt || '',
         pay: this.state.pay || firstPay,
         zone: this.state.zone || firstZone,
         form: Object.assign({}, this.state.form, { pay: this.state.form.pay || firstPay })
@@ -2210,6 +2475,10 @@ class Component extends DCLogic {
         name: p.name, sec: p.sec, type: p.type, thc: p.thc === '—' ? '' : p.thc,
         note: typeof p.notes === 'string' ? p.notes : '',
         stock: String(p.stock || 0),
+        // Blank rather than "0" when no cost was recorded, so an untouched
+        // field stays untouched instead of asserting the goods were free.
+        cost: p.cost > 0 ? String(p.cost) : '',
+        supplier: p.supplier || '',
         rows: (p.tiers || []).map(t => ({
           label: t.label, grams: String(t.grams), price: String(t.price), touched: true
         }))
@@ -2247,7 +2516,8 @@ class Component extends DCLogic {
         id: this.state.editingId || undefined,
         name: n.name.trim(), sec: n.sec, type: n.type, thc: n.thc.trim(),
         tiers: n.rows.map(r => ({ label: r.label.trim(), price: +r.price, grams: +r.grams })),
-        stock: +n.stock || 0, note: n.note.trim()
+        stock: +n.stock || 0, note: n.note.trim(),
+        cost: +n.cost || 0, supplier: (n.supplier || '').trim()
       }
     }).then(res => {
       this.setState({ busy: false });
@@ -2259,7 +2529,7 @@ class Component extends DCLogic {
       // carries the new catalogue, and the server keeps setupComplete current.
       this.setState({
         products: res.products, showAdd: false, editingId: null,
-        newP: { name: '', sec: this.state.newP.sec, type: 'Hybrid', thc: '', rows: rowsFor(this.state.newP.sec), stock: '', note: '' }
+        newP: { name: '', sec: this.state.newP.sec, type: 'Hybrid', thc: '', rows: rowsFor(this.state.newP.sec), stock: '', note: '', cost: '', supplier: '' }
       });
     });
   }
@@ -2481,6 +2751,103 @@ class Component extends DCLogic {
     // The queue shows one side or the other, never both: active orders by
     // default, archived ones when he asks for them.
     const queue = s.orders.filter(o => (s.showArchived ? o.archived : !o.archived));
+
+    // ── a month of trading, read back ────────────────────────────────────
+    //
+    // Every figure on this screen was scoped to today. Today is the right
+    // number to act on and the wrong one to learn from — one slow Tuesday
+    // looks like a failing shop, and four weeks of takings were invisible.
+    //
+    // Worse, they were not even consistently today: the payment mix inside the
+    // card headed "Taken today" was computed over all orders ever, so the card
+    // could read $0 taken with $350 of cash underneath it.
+    const DAY = 86400000;
+    const nowMs = Date.now();
+    const midnight = new Date(); midnight.setHours(0, 0, 0, 0);
+    const WINDOWS = { today: midnight.getTime(), week: nowMs - 7 * DAY, month: nowMs - 30 * DAY };
+    const period = WINDOWS[s.window] === undefined ? 'today' : s.window;
+    const ms = (o) => new Date(o.at).getTime();
+    const windowOrders = live.filter(o => ms(o) >= WINDOWS[period]);
+
+    // Money in hand, by the same rule the server uses: a cash order counts once
+    // it has been handed over, an app payment once he confirms it landed.
+    const isCollected = (o) => o.payOk === true || (o.step || 0) >= 3;
+    const totalOf = (o) => (o.subtotal || 0) + (o.fee || 0);
+    const banked = windowOrders.filter(isCollected);
+
+    // Profit needs what he paid. Cost is per gram (or per unit), the same
+    // measure as stock, so a line costs cost x grams x qty.
+    const productOf = (pid) => cat.find(x => x.id === pid) || null;
+    const costOf = (pid) => { const p = productOf(pid); return p && p.cost > 0 ? p.cost : 0; };
+    const lineCost = (l) => costOf(l.pid) * (l.grams || 0) * (l.qty || 0);
+    const revenue = banked.reduce((a, o) => a + totalOf(o), 0);
+    const cogs = banked.reduce((a, o) => a + (o.items || []).reduce((b, l) => b + lineCost(l), 0), 0);
+    // Anything sold without a cost recorded would otherwise be counted as pure
+    // profit, which is the one number worth being careful about.
+    const costGaps = [...new Set(banked.flatMap(o => (o.items || [])
+      .filter(l => costOf(l.pid) === 0).map(l => l.name)))];
+
+    const payWin = {};
+    banked.forEach(o => { const k = o.payLabel || o.pay || '—'; payWin[k] = (payWin[k] || 0) + totalOf(o); });
+
+    // ── the three lists worth acting on ──────────────────────────────────
+    // Owed: handed over or promised, not paid for. Oldest first, because the
+    // longer it sits the less likely it is to arrive.
+    const owedRows = live
+      .filter(o => !isCollected(o))
+      .sort((a, b) => ms(a) - ms(b));
+
+    // Re-up: how fast each strain is actually leaving, not whether it has
+    // crossed a fixed threshold. "Below 7g" tells him nothing about whether
+    // that is a week of stock or an afternoon.
+    const BURN_DAYS = 14;
+    const soldLately = {};
+    live.filter(o => ms(o) >= nowMs - BURN_DAYS * DAY)
+      .forEach(o => (o.items || []).forEach(l => {
+        soldLately[l.pid] = (soldLately[l.pid] || 0) + (l.grams || 0) * (l.qty || 0);
+      }));
+    const reupRows = cat
+      .filter(p => p.active !== false)
+      .map(p => {
+        const perDay = (soldLately[p.id] || 0) / BURN_DAYS;
+        return { p, perDay, daysLeft: perDay > 0 ? (p.stock || 0) / perDay : Infinity };
+      })
+      .filter(x => x.perDay > 0 && x.daysLeft <= 10)
+      .sort((a, b) => a.daysLeft - b.daysLeft);
+
+    // Dead stock: on the shelf, on the menu, and nobody has touched it.
+    const DEAD_DAYS = 21;
+    const lastSold = {};
+    live.forEach(o => (o.items || []).forEach(l => {
+      lastSold[l.pid] = Math.max(lastSold[l.pid] || 0, ms(o));
+    }));
+    const deadRows = cat.filter(p =>
+      p.active !== false && (p.stock || 0) > 0 && (lastSold[p.id] || 0) < nowMs - DEAD_DAYS * DAY);
+
+    // Gone quiet: someone who bought more than once and then stopped. A
+    // one-off customer going quiet is not news; a regular going quiet is.
+    const QUIET_DAYS = 14;
+    const quietRows = (s.codes || [])
+      .filter(c => c.active && (c.orders || 0) >= 2 && c.lastOrder &&
+        nowMs - new Date(c.lastOrder).getTime() > QUIET_DAYS * DAY)
+      .sort((a, b) => new Date(a.lastOrder) - new Date(b.lastOrder));
+
+    // ── when the work actually happens ───────────────────────────────────
+    const byHour = new Array(24).fill(0);
+    const byDay = new Array(7).fill(0);
+    live.forEach(o => { const d = new Date(o.at); byHour[d.getHours()]++; byDay[d.getDay()]++; });
+    const dayPeak = Math.max(1, ...byDay);
+    const hourLabel = (h) => (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? 'am' : 'pm');
+    const busiestHours = byHour
+      .map((n, h) => ({ h, n })).filter(x => x.n > 0)
+      .sort((a, b) => b.n - a.n).slice(0, 3);
+
+    // Which size people actually buy, which is what says whether the ladder is
+    // priced right.
+    const bySize = {};
+    live.forEach(o => (o.items || []).forEach(l => { bySize[l.label] = (bySize[l.label] || 0) + l.qty; }));
+    const sizeTotal = Object.values(bySize).reduce((a, b) => a + b, 0) || 1;
+    const sizeRows = Object.entries(bySize).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
     const best = Object.keys(soldQty)
       .sort((a, b) => soldQty[b] - soldQty[a])
@@ -2716,6 +3083,12 @@ class Component extends DCLogic {
       zoneNote: zone ? (zone.mi <= (cfg.fees.freeMiles || 5) ? t.zoneFree(zone.name) : t.zonePaid(zone.name, zone.mi, this.mileFee(zone.mi))) : '',
       runNoteClient: zonesLabel,
 
+      // Closed is said plainly at the top of the menu and again on the button,
+      // rather than letting somebody fill a bag and find out at the end.
+      shutDisplay: s.shopOpen === false ? 'flex' : 'none',
+      shutTitle: t.shutTitle,
+      shutBody: s.opensAt ? t.shutUntil(s.opensAt) : t.shutNoTime,
+
       fulfilLabel: s.mode === 'delivery' ? t.deliverTo : t.pickUpAt,
       fulfilValue: s.mode === 'delivery'
         ? (zone ? zone.name + ' — ' + t.addrDelivery : t.addrDelivery)
@@ -2753,7 +3126,10 @@ class Component extends DCLogic {
       fee: fee ? cash(fee) : t.free,
       dueLabel: pay && !pay.fast ? t.dueCash : t.duePaid(this.payLabel()),
       total: cash(sub + fee),
-      place: () => this.place(),
+      place: () => { if (s.shopOpen !== false) this.place(); },
+      placeLabel: s.shopOpen === false ? t.shutTitle : t.sendOrder,
+      placeBg: s.shopOpen === false ? '#a19786' : '#56633f',
+      placeCursor: s.shopOpen === false ? 'default' : 'pointer',
       orderErr: s.orderErr || '',
       orderErrDisplay: s.orderErr ? 'block' : 'none',
 
@@ -2802,6 +3178,50 @@ class Component extends DCLogic {
         bg: '#c67139', fg: '#f5ead8', border: '#f5ead8',
         toggle: () => this.set('screen', 'settings')
       })),
+      // ── store hours (not the delivery run) ──────────────────────────────
+      stHoursBg: d.hours && d.hours.on ? '#56633f' : '#a19786',
+      stHoursJustify: d.hours && d.hours.on ? 'flex-end' : 'flex-start',
+      stHoursLabel: d.hours && d.hours.on ? t.on : t.off,
+      stHoursDetail: d.hours && d.hours.on ? 'flex' : 'none',
+      toggleStHours: () => this.editDraft(x => {
+        x.hours = { ...(x.hours || {}), on: !(x.hours && x.hours.on) };
+      }),
+      stOpen: (d.hours && d.hours.open) || '10:00',
+      stClose: (d.hours && d.hours.close) || '22:00',
+      setStOpen: e => this.editDraft(x => { x.hours = { ...(x.hours || {}), open: e.target.value }; }),
+      setStClose: e => this.editDraft(x => { x.hours = { ...(x.hours || {}), close: e.target.value }; }),
+      // Says out loud when a window runs past midnight, because "22:00 to
+      // 02:00" otherwise looks like a mistake rather than a late Friday.
+      stHoursWindow: (() => {
+        const o = (d.hours && d.hours.open) || '10:00';
+        const c = (d.hours && d.hours.close) || '22:00';
+        return c <= o ? t.overnightWindow(o, c) : t.plainWindow(o, c);
+      })(),
+      stDayChips: (t.dayNames || []).map((name, i) => {
+        const on = ((d.hours && d.hours.days) || [0, 1, 2, 3, 4, 5, 6]).includes(i);
+        return {
+          label: name,
+          bg: on ? '#e1eecc' : '#eee7db',
+          fg: on ? '#3d472b' : '#82796a',
+          border: on ? '#56633f' : '#a19786',
+          toggle: () => this.editDraft(x => {
+            const days = [...((x.hours && x.hours.days) || [0, 1, 2, 3, 4, 5, 6])];
+            const at = days.indexOf(i);
+            if (at >= 0) days.splice(at, 1); else days.push(i);
+            x.hours = { ...(x.hours || {}), days: days.sort() };
+          })
+        };
+      }),
+      stPausedTitle: d.hours && d.hours.paused ? t.stPausedOn : t.stPausedOff,
+      stPausedBg: d.hours && d.hours.paused ? '#ffe1d0' : '#f5ead8',
+      stPausedBorder: d.hours && d.hours.paused ? '#8c491a' : '#a19786',
+      stPausedFg: d.hours && d.hours.paused ? '#8c491a' : '#201e1d',
+      stPausedSwitch: d.hours && d.hours.paused ? '#8c491a' : '#a19786',
+      stPausedJustify: d.hours && d.hours.paused ? 'flex-end' : 'flex-start',
+      toggleStPaused: () => this.editDraft(x => {
+        x.hours = { ...(x.hours || {}), paused: !(x.hours && x.hours.paused) };
+      }),
+
       runZonesMeta: t.zonesPicked(allowed.length),
       // Nowhere to deliver to means the run panel has nothing to configure.
       runDetailDisplay: this.zones().length ? 'flex' : 'none',
@@ -2812,17 +3232,89 @@ class Component extends DCLogic {
 
       // Only money actually in hand. Unpaid orders show separately rather than
       // being counted as takings.
-      takenToday: cash(s.takings ? s.takings.collected : 0),
+      //
+      // Today still comes from the server, which is authoritative about the
+      // day's takings; week and month are worked out here from the order list.
+      takenToday: cash(period === 'today' && s.takings ? s.takings.collected : revenue),
+      takenLabel: t.takenIn(t.windowName[period]),
       pendingToday: cash(s.takings ? s.takings.pending : 0),
       pendingDisplay: s.takings && s.takings.pending > 0 ? 'flex' : 'none',
       pendingLabel: t.stillOwed,
-      placedToday: t.ordersN(s.takings ? s.takings.count : 0),
-      avgTicketLabel: t.avgTicket(cash(
-        s.takings && s.takings.count ? Math.round(s.takings.collected / s.takings.count) : 0)),
+      placedToday: t.ordersN(period === 'today' && s.takings ? s.takings.count : banked.length),
+      avgTicketLabel: t.avgTicket(cash(banked.length ? Math.round(revenue / banked.length) : 0)),
 
-      payMix: Object.keys(takeByPay).length
-        ? Object.keys(takeByPay).map(k => ({ label: k, value: cash(takeByPay[k]) }))
+      // Profit, not just takings — the figure he was keeping on paper.
+      profitValue: cash(Math.max(0, Math.round(revenue - cogs))),
+      profitLabel: t.profitLabel,
+      profitDisplay: revenue > 0 ? 'flex' : 'none',
+      costGapDisplay: costGaps.length ? 'block' : 'none',
+      costGapNote: costGaps.length ? t.costGap(costGaps.slice(0, 3).join(', ')) : '',
+
+      windowTabs: ['today', 'week', 'month'].map(k => ({
+        label: t.windowName[k],
+        bg: period === k ? '#402310' : 'transparent',
+        fg: period === k ? '#f9f4ed' : '#402310',
+        pick: () => this.set('window', k)
+      })),
+
+      // Scoped to the window on screen. This was computed over every order ever
+      // while sitting inside a card headed "Taken today", so the card could read
+      // $0 with $350 of cash listed underneath it.
+      payMix: Object.keys(payWin).length
+        ? Object.keys(payWin).map(k => ({ label: k, value: cash(payWin[k]) }))
         : [{ label: t.noSalesYet, value: '$0' }],
+
+      // ── the lists that turn a number into something to do ───────────────
+      owedRows: owedRows.map(o => ({
+        name: o.client,
+        meta: o.no + ' · ' + stamp(o.at),
+        amount: cash(totalOf(o)),
+        age: t.daysAgo(Math.max(0, Math.floor((nowMs - ms(o)) / DAY)))
+      })),
+      owedTotal: cash(owedRows.reduce((a, o) => a + totalOf(o), 0)),
+      owedDisplay: owedRows.length ? 'block' : 'none',
+
+      reupRows: reupRows.map(({ p, perDay, daysLeft }) => ({
+        name: p.name,
+        left: fmtQty(p.stock || 0, p.unit || 'g') + ' ' + t.onHand,
+        pace: t.perDay(fmtQty(Math.round(perDay * 10) / 10, p.unit || 'g')),
+        days: t.daysLeft(Math.floor(daysLeft)),
+        urgent: daysLeft <= 3,
+        bg: daysLeft <= 3 ? '#ffe1d0' : '#f9f4ed',
+        border: daysLeft <= 3 ? '#8c491a' : '#a19786',
+        from: p.supplier ? t.fromWho(p.supplier) : ''
+      })),
+      reupDisplay: reupRows.length ? 'block' : 'none',
+
+      quietRows: quietRows.map(c => ({
+        name: c.name || t.newClient,
+        meta: t.ordersN(c.orders || 0) + ' · ' + cash(c.spent || 0),
+        last: t.lastSeen(stamp(c.lastOrder)),
+        phone: c.phone || ''
+      })),
+      quietDisplay: quietRows.length ? 'block' : 'none',
+
+      deadRows: deadRows.map(p => ({
+        name: p.name,
+        left: fmtQty(p.stock || 0, p.unit || 'g') + ' ' + t.onHand,
+        note: lastSold[p.id] ? t.lastSold(stamp(new Date(lastSold[p.id]).toISOString())) : t.neverSold
+      })),
+      deadDisplay: deadRows.length ? 'block' : 'none',
+
+      // ── when the work actually happens ──────────────────────────────────
+      hourRows: busiestHours.map(x => ({ label: hourLabel(x.h), value: t.ordersN(x.n) })),
+      dayRows: byDay.map((n, i) => ({
+        label: t.dayShort[i],
+        pct: Math.round((n / dayPeak) * 100) + '%',
+        bg: n === dayPeak && n > 0 ? '#c67139' : '#a19786',
+        value: String(n)
+      })),
+      patternsDisplay: live.length >= 5 ? 'block' : 'none',
+      sizeRows: sizeRows.map(([label, n]) => ({
+        label,
+        value: Math.round((n / sizeTotal) * 100) + '%',
+        pct: Math.round((n / sizeTotal) * 100) + '%'
+      })),
       waitingLine: t.waiting(waiting.length),
       newestLine: newest
         ? t.newest + newest.client + ' · ' + newest.total + ' · ' + (newest.mode === 'delivery' ? t.howDelivery : t.howPickup)
@@ -2933,13 +3425,30 @@ class Component extends DCLogic {
       addFormDisplay: s.showAdd ? 'block' : 'none',
       openAdd: () => this.setState({
         showAdd: true, editingId: null,
-        newP: { name: '', sec: s.newP.sec, type: 'Hybrid', thc: '', rows: rowsFor(s.newP.sec), stock: '', note: '' }
+        newP: { name: '', sec: s.newP.sec, type: 'Hybrid', thc: '', rows: rowsFor(s.newP.sec), stock: '', note: '', cost: '', supplier: '' }
       }),
       isEditing: !!s.editingId,
       addTitle: s.editingId ? t.editStrain : t.addTitle,
       saveLabelStrain: s.editingId ? t.saveChangesStrain : t.saveStrain,
       closeAdd: () => this.setState({ showAdd: false, editingId: null }),
       npName: s.newP.name, npThc: s.newP.thc, npStock: s.newP.stock, npNote: s.newP.note,
+      npCost: s.newP.cost, npSupplier: s.newP.supplier,
+      setNpCost: e => this.setNewP('cost', e.target.value),
+      setNpSupplier: e => this.setNewP('supplier', e.target.value),
+      npCostLabel: unitFor(s.newP.sec) === 'ea' ? t.fCostEach : t.fCostGram,
+      npCostPh: t.egCost,
+      // Margin on the first size, worked out as he types, so a cost that makes
+      // no sense is obvious before it is saved rather than a month later.
+      npMarginNote: (() => {
+        const c = Number(s.newP.cost);
+        const row = s.newP.rows[0];
+        const price = Number(row && row.price);
+        const grams = Number(row && row.grams);
+        if (!(c > 0) || !(price > 0) || !(grams > 0)) return '';
+        const made = price - c * grams;
+        return t.marginNote(row.label, cash(Math.round(made)), Math.round((made / price) * 100));
+      })(),
+      npMarginDisplay: Number(s.newP.cost) > 0 && Number(s.newP.rows[0] && s.newP.rows[0].price) > 0 ? 'block' : 'none',
       // Rows the owner owns: their name for the size, their price, and how
       // much it takes off the shelf.
       npRows: s.newP.rows.map((r, i) => ({

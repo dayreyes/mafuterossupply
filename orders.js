@@ -9,10 +9,10 @@
 // Actions: place · mine · list · advance · stepBack · patch · cancel ·
 //          archive · remove
 
-import { route, ok, fail, unauthorized, str, num } from './lib/http.js';
+import { route, ok, fail, unauthorized, str, num, newId } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
-import { defaultConfig, mileFee, migrateProduct } from './lib/config.js';
+import { defaultConfig, mileFee, migrateProduct, shopOpen } from './lib/config.js';
 import { sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText } from './lib/notify.js';
 
 const money = (n) => '$' + Number(n).toLocaleString('en-US');
@@ -122,6 +122,17 @@ export default async (req) => route(req, {
     const cfg = await read(KEYS.config, defaultConfig());
     if (!cfg.setupComplete) return fail('This shop is not open yet.');
 
+    // Closed is closed, decided here rather than in the browser. The menu hides
+    // the order button outside hours, but a hidden button is a suggestion — the
+    // point of the schedule is that nobody can place an order at 3am for a shop
+    // that is asleep.
+    const hours = shopOpen(cfg);
+    if (!hours.open) {
+      return fail(hours.why === 'paused'
+        ? 'The shop is closed right now.'
+        : 'The shop is closed right now — it opens again at ' + hours.opensAt + '.');
+    }
+
     const products = (await read(KEYS.products, [])).map(migrateProduct);
     const lines = Array.isArray(body.items) ? body.items.slice(0, 40) : [];
     if (!lines.length) return fail('Your bag is empty.');
@@ -191,7 +202,7 @@ export default async (req) => route(req, {
     await write(KEYS.counters, { ...counters, orderSeq: seq });
 
     const order = {
-      id: 'o' + Date.now().toString(36),
+      id: newId('o'),
       no: '#' + seq,
       client: session.name || customer.name || 'Customer',
       clientCode: session.code || '',
