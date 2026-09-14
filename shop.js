@@ -7,7 +7,7 @@
 import { route, ok, fail, unauthorized, str, num } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner } from './lib/session.js';
-import { defaultConfig, cleanConfig, cleanProduct, publicConfig, publicProduct, migrateProduct } from './lib/config.js';
+import { defaultConfig, cleanConfig, cleanProduct, publicConfig, publicProduct, migrateProduct, shopOpen } from './lib/config.js';
 import { send, configured as telegramConfigured } from './lib/notify.js';
 
 const loadConfig = () => read(KEYS.config, defaultConfig());
@@ -23,8 +23,13 @@ export default async (req) => route(req, {
   async menu() {
     const cfg = await loadConfig();
     const products = (await read(KEYS.products, [])).map(migrateProduct);
+    const hours = shopOpen(cfg);
     return ok({
       config: publicConfig(cfg),
+      // So the menu can say "closed, opens at 10:00" instead of letting someone
+      // fill a bag and only find out when they try to send it.
+      open: hours.open,
+      opensAt: hours.opensAt || '',
       products: products.filter((p) => p.active).map(publicProduct)
     });
   },

@@ -7,7 +7,7 @@
 //
 // Actions: submit · list · approve · ignore
 
-import { route, ok, fail, unauthorized, tooMany, clientIp, str } from './lib/http.js';
+import { route, ok, fail, unauthorized, tooMany, clientIp, str, newId } from './lib/http.js';
 import { read, mutate, KEYS } from './lib/store.js';
 import { requireOwner, checkThrottle, recordFailure } from './lib/session.js';
 import { defaultConfig } from './lib/config.js';
@@ -63,7 +63,7 @@ export default async (req) => route(req, {
     await recordFailure('signup', ip, false);
 
     const request = {
-      id: 's' + Date.now().toString(36),
+      id: newId('s'),
       name, phone, addr, age,
       pay: (cfg.payments.find((p) => p.id === pay) || {}).label || '',
       at: new Date().toISOString()

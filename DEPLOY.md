@@ -185,15 +185,129 @@ switched on, and at least one product. Until then customers see "not open yet".
 
 **Settings → Signup link → Copy.** That link is the whole customer funnel:
 
-1. A new person opens it and fills in name, phone, address, date of birth and
-   ticks the ID confirmation. Under-21 is rejected — the age is recalculated on
-   the server, so it can't be faked from the browser.
+1. A new person opens it and fills in name, phone, address and date of birth.
+   Under-21 is rejected — the age is recalculated on the server, so it can't be
+   faked from the browser.
 2. The request lands in the owner's **Codes** tab (and Telegram, if configured).
 3. The owner taps **Give a code** and reads out the 4-digit code.
 4. The customer enters that code and shops.
 
-Codes can be revoked at any time from the same tab; a revoked code stops working
-immediately, and the order history for that customer is kept.
+There's no ID upload. The link only goes to people he has already met, so a
+photo of a licence sitting on a server is a liability with nothing to show for
+it.
+
+Two ways to take a code out of circulation, and they differ:
+
+- **Revoke** turns it off. The code stops working, the customer stays in the
+  list, their order history is kept. This is the usual one.
+- **Delete** removes them entirely. Two taps, and it cannot be undone.
+
+Each row shows what that customer has actually bought — **"4 orders · $215"**
+with **"Last: Aug 27"** underneath — counted from the orders themselves.
+
+---
+
+## 7. Store hours (not the same as the delivery run)
+
+Two separate schedules doing different jobs:
+
+- **Store hours** — **Settings → Store hours.** Whether the shop takes an order
+  at all, pickup or delivery. Opening time, closing time, and which days. A
+  closing time earlier than the opening time runs past midnight, so 6pm–2am is
+  a normal Friday and the app says so out loud.
+- **Delivery run** — **Settings → Delivery run.** The narrower window inside
+  that, for when he is actually driving.
+
+A delivery needs **both**: the shop open *and* the run on. A pickup needs only
+the shop open. Neither setting stands in for the other.
+
+Outside hours the menu says "The shop is closed — opens again at 10:00" and the
+send button stops working. It is enforced on the server too, so nothing gets
+slipped through at 3am by a browser that disagrees.
+
+**Closed right now** underneath is the manual override for a day off; it
+ignores the schedule until switched back.
+
+Hours are **off by default**, which leaves the shop always-open exactly as
+before.
+
+---
+
+## 8. What he paid, and profit
+
+Each strain takes a **cost per gram** (or per unit) and a **supplier**, under
+Stock → add or edit. Both were living on paper, which is why the app could
+report takings but never margin.
+
+- The form works out the margin as he types, so a cost that makes no sense is
+  obvious before saving rather than a month later.
+- Sales shows **Profit** under the takings figure, for whichever window is
+  selected.
+- Cost left blank is not treated as free. The app says "No cost recorded for X,
+  so profit reads high" rather than reporting the whole sale as margin.
+- **Neither cost nor supplier ever reaches a customer.** The menu sends an
+  explicit allowlist of fields and they are not on it.
+
+---
+
+## 9. Reading the Sales screen
+
+The money card switches between **Today / This week / This month**. Underneath:
+
+| Block | What it is for |
+|---|---|
+| **Who owes you** | Named, with the amount and how long it has sat. Oldest first. |
+| **Re-up soon** | Days of stock left at the pace it is actually selling — "19g on hand · 5.5g a day · 3 days left" — and who to get it from. |
+| **Gone quiet** | Someone who bought more than once and then stopped, with their number. A one-off going quiet is not news; a regular is. |
+| **Sitting there** | On the shelf, on the menu, untouched for three weeks. |
+| **How the shop moves** | Busiest hours, busiest days, and which sizes people actually buy. |
+
+Each block disappears when empty, so a quiet week is a short screen rather than
+a wall of zeroes. Patterns stay hidden below five orders, because three orders
+make a very confident chart out of nothing.
+
+---
+
+## 10. Cash versus paying up front
+
+Not the same offer, and the app no longer pretends otherwise:
+
+- **Cash** is **ASAP only**. Nothing is set aside for money that has not
+  arrived, so it is come-and-get-it with the hold clock running. No time slots.
+- **Zelle / Venmo / CashApp** — money already in hand — **can pick a time**, and
+  that order is set aside under their name with no hold clock.
+
+Enforced on the server, so it cannot be worked around from a browser.
+
+---
+
+## 11. Cancelling, archiving and deleting orders
+
+Three buttons, three different things:
+
+- **Cancel** (the round ✕) — stays on the books marked cancelled, and everything
+  in it goes **back on the shelf**. Stops counting towards the day's money.
+- **Archive** — appears once an order is finished or cancelled. Leaves the queue
+  and the run but is still there under **View archived**, and still counts in
+  takings. This is how the queue gets cleared without throwing away the record.
+- **Delete** — gone for good, two taps. If it had not already been cancelled,
+  its stock comes back first.
+
+**Taken today** is money actually in hand. Anything still owed shows separately
+as **Still to collect**, so the figure is never inflated by unpaid orders.
+
+---
+
+## Testing it
+
+```bash
+npm test
+```
+
+One file, `selftest.mjs`, at the repo root. It assembles the backend folder the
+same way Netlify does at deploy time, then drives the real handlers against an
+in-memory store — no network, no deploy, about 140 checks. It is a single flat
+file on purpose: a `test/` folder does not survive the GitHub web uploader.
 
 ---
 

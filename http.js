@@ -8,6 +8,22 @@
 // functions, so an `access-control-allow-origin: *` would only let any other
 // website on the internet replay a stolen client code against this shop.
 
+import { randomBytes } from 'node:crypto';
+
+// Unique ids, not merely probably-unique ones.
+//
+// Every record used `prefix + Date.now().toString(36)`, which collides outright
+// whenever two are created in the same millisecond — and two orders a
+// millisecond apart is not hypothetical on a busy night; a customer
+// double-tapping does it.
+//
+// Duplicate order ids are silently destructive, which is what makes this worth
+// more than a tidy-up: cancel one and its twin is cancelled with it, delete one
+// and both vanish, and only one of the two ever gets its stock put back. The
+// owner sees stock and takings quietly disagree with reality and has no way to
+// tell why.
+export const newId = (prefix) => prefix + Date.now().toString(36) + randomBytes(3).toString('hex');
+
 const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
   'cache-control': 'no-store',
