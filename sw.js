@@ -14,7 +14,7 @@
 // API calls are never cached. Stale order and stock data would be worse than
 // an honest error, so anything under /.netlify/ bypasses the worker entirely.
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const SHELL = 'mafuteros-shell-' + VERSION;
 const ASSETS = 'mafuteros-assets-' + VERSION;
 
@@ -117,5 +117,40 @@ self.addEventListener('fetch', (e) => {
     } catch {
       return new Response('', { status: 504 });
     }
+  })());
+});
+
+// ── Automatic messages ──────────────────────────────────────────────────────
+//
+// The server sends a small JSON body; this turns it into the notification the
+// customer sees. A push event MUST end in a visible notification — browsers
+// revoke permission from sites that receive pushes and show nothing — so a
+// malformed or empty payload still puts something honest on screen rather than
+// silently swallowing it.
+self.addEventListener('push', (e) => {
+  let msg = {};
+  try { msg = e.data ? e.data.json() : {}; } catch { msg = {}; }
+  const title = msg.title || "Mafutero's Supply";
+  e.waitUntil(self.registration.showNotification(title, {
+    body: msg.body || '',
+    // `tag` collapses repeats: three strains landing in a minute should not
+    // stack three notifications on a lock screen.
+    tag: msg.tag || 'shop',
+    renotify: false,
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    data: { kind: msg.kind || '' }
+  }));
+});
+
+// Tapping it opens the shop rather than a new tab every time.
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of all) {
+      if (c.url.startsWith(self.location.origin) && 'focus' in c) return c.focus();
+    }
+    if (self.clients.openWindow) return self.clients.openWindow('./');
   })());
 });

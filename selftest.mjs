@@ -459,6 +459,132 @@ async function customerProfile() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// Automatic messages to customers
+//
+// The owner writes none of these, which is exactly why they have to be right:
+// a message sent to the wrong person, or one nobody asked for, is how a shop
+// gets its notifications switched off for good and never finds out.
+//
+// Two gates, both of which must say yes — the shop has the kind switched on,
+// and that customer asked for messages — and neither party can volunteer the
+// other into it.
+// ════════════════════════════════════════════════════════════════════════════
+async function automaticMessages() {
+  process.env.VAPID_PUBLIC_KEY = 'BK0H0vUxHbxqj2219ZCVKDTuTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTES';
+  process.env.VAPID_PRIVATE_KEY = 'testprivatekeytestprivatekeytestprivatekey1';
+
+  // Every push attempt is captured instead of leaving the machine.
+  const sentTo = [];
+  const webpush = (await import('web-push')).default;
+  const realSend = webpush.sendNotification;
+  webpush.sendNotification = async (sub, body) => {
+    sentTo.push({ endpoint: sub.endpoint, msg: JSON.parse(body) });
+    return { statusCode: 201 };
+  };
+  const during = async (fn) => { const from = sentTo.length; await fn(); return sentTo.slice(from); };
+  const SUB = (who) => ({ endpoint: 'https://push.test/' + who, keys: { p256dh: 'k'.repeat(87), auth: 'a'.repeat(22) } });
+
+  const s = await openShop({ hours: { on: false } }, { stock: 400 });
+  const join = async (name, wants) => {
+    const c = await call(codes, { action: 'issue', name }, s.token);
+    const tok = (await call(auth, { action: 'unlock', code: c.code })).token;
+    if (wants) await call(codes, { action: 'notify', on: true, sub: SUB(name) }, tok);
+    return { code: c.code, token: tok, name };
+  };
+  const ana = await join('ana', true);
+  const tito = await join('tito', true);
+  const quiet = await join('quiet', false);
+
+  section('only the people who asked');
+  let msgs = await during(() => call(shop, {
+    action: 'saveProduct',
+    product: { name: 'Blackberry Gelato', sec: 'Indoors', stock: 60, tiers: [{ label: '3.5g', grams: 3.5, price: 25 }] }
+  }, s.token));
+  ck('a new strain reaches the two who opted in', msgs.length === 2, msgs.map(m => m.endpoint));
+  ck('and never the one who did not',
+    !msgs.some(m => /quiet/.test(m.endpoint)), msgs.map(m => m.endpoint));
+  ck('the message names the strain', /Blackberry Gelato/.test(msgs[0].msg.body), msgs[0].msg);
+
+  section('editing is not news');
+  const prods = (await call(shop, { action: 'config' }, s.token)).products;
+  const bb = prods.find(p => p.name === 'Blackberry Gelato');
+  msgs = await during(() => call(shop, {
+    action: 'saveProduct',
+    product: { id: bb.id, name: 'Blackberry Gelato', sec: 'Indoors', stock: 90, tiers: bb.tiers }
+  }, s.token));
+  ck('changing an existing strain sends nothing', msgs.length === 0, msgs);
+
+  section('the owner can switch a kind off');
+  const cfg = (await call(shop, { action: 'config' }, s.token)).config;
+  await call(shop, { action: 'saveConfig', config: { ...cfg, notifs: { ...cfg.notifs, newStrain: false } } }, s.token);
+  msgs = await during(() => call(shop, {
+    action: 'saveProduct',
+    product: { name: 'Jelly Donut', sec: 'Indoors', stock: 60, tiers: [{ label: '3.5g', grams: 3.5, price: 25 }] }
+  }, s.token));
+  ck('with the kind off, nothing goes out', msgs.length === 0, msgs);
+
+  section('an order update goes to that customer only');
+  const placed = await call(orders, { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, ana.token);
+  msgs = await during(() => call(orders, { action: 'advance', id: placed.order.id }, s.token));
+  ck('one message, to the person who ordered', msgs.length === 1 && /ana/.test(msgs[0].endpoint), msgs.map(m => m.endpoint));
+  ck('and it says what happened', /packing/i.test(msgs[0].msg.body), msgs[0].msg);
+  // Walk it to the end: the last advance is a no-op and must stay silent.
+  await call(orders, { action: 'advance', id: placed.order.id }, s.token);
+  await call(orders, { action: 'advance', id: placed.order.id }, s.token);
+  msgs = await during(() => call(orders, { action: 'advance', id: placed.order.id }, s.token));
+  ck('a step that cannot move says nothing', msgs.length === 0, msgs);
+
+  section('switching off means off');
+  msgs = await during(() => call(codes, { action: 'notify', on: false }, tito.token));
+  const after = await call(codes, { action: 'me' }, tito.token);
+  ck('the switch is off', after.profile.notify === false, after.profile);
+  ck('and the devices are dropped with it', after.profile.devices === 0, after.profile);
+  const cfg2 = (await call(shop, { action: 'config' }, s.token)).config;
+  await call(shop, { action: 'saveConfig', config: { ...cfg2, notifs: { ...cfg2.notifs, newStrain: true } } }, s.token);
+  msgs = await during(() => call(shop, {
+    action: 'saveProduct',
+    product: { name: 'Gumbo', sec: 'Indoors', stock: 60, tiers: [{ label: '3.5g', grams: 3.5, price: 25 }] }
+  }, s.token));
+  ck('someone switched off hears nothing', !msgs.some(m => /tito/.test(m.endpoint)), msgs.map(m => m.endpoint));
+
+  section('a revoked customer is not a customer');
+  await call(codes, { action: 'revoke', code: ana.code, active: false }, s.token);
+  msgs = await during(() => call(shop, {
+    action: 'saveProduct',
+    product: { name: 'Zkittlez', sec: 'Indoors', stock: 60, tiers: [{ label: '3.5g', grams: 3.5, price: 25 }] }
+  }, s.token));
+  ck('revoking stops the messages too', !msgs.some(m => /ana/.test(m.endpoint)), msgs.map(m => m.endpoint));
+
+  section('a device that has gone is forgotten');
+  await call(codes, { action: 'revoke', code: ana.code, active: true }, s.token);
+  webpush.sendNotification = async (sub) => {
+    if (/ana/.test(sub.endpoint)) { const e = new Error('gone'); e.statusCode = 410; throw e; }
+    return { statusCode: 201 };
+  };
+  await call(shop, {
+    action: 'saveProduct',
+    product: { name: 'Runtz', sec: 'Indoors', stock: 60, tiers: [{ label: '3.5g', grams: 3.5, price: 25 }] }
+  }, s.token);
+  const anaNow = await call(codes, { action: 'me' }, ana.token);
+  ck('a subscription the push service rejects is pruned', anaNow.profile.devices === 0, anaNow.profile);
+
+  section('with no keys configured, nothing is attempted');
+  delete process.env.VAPID_PUBLIC_KEY;
+  delete process.env.VAPID_PRIVATE_KEY;
+  const r = await call(codes, { action: 'notify', on: true, sub: SUB('nope') }, quiet.token);
+  ck('subscribing is refused rather than half-working', r.ok === false, r);
+  ck('and the owner screen is told it cannot send',
+    (await call(shop, { action: 'config' }, s.token)).pushReady === false);
+
+  section('a malformed subscription is refused once, not every send');
+  process.env.VAPID_PUBLIC_KEY = 'x'; process.env.VAPID_PRIVATE_KEY = 'y';
+  const bad = await call(codes, { action: 'notify', on: true, sub: { endpoint: 'not-a-url' } }, quiet.token);
+  ck('a junk endpoint is rejected', bad.ok === false, bad);
+  delete process.env.VAPID_PUBLIC_KEY; delete process.env.VAPID_PRIVATE_KEY;
+  webpush.sendNotification = realSend;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // The storage diagnostic, and what it may not say
 //
 // GET .../auth?diag=1 separates a store that cannot be opened from a reachable
@@ -804,7 +930,7 @@ async function uniqueIds() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, diagnose, viewLayer]) {
+for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, automaticMessages, diagnose, viewLayer]) {
   await suite();
 }
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');

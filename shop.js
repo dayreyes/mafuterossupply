@@ -8,7 +8,10 @@ import { route, ok, fail, unauthorized, str, num } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner } from './lib/session.js';
 import { defaultConfig, cleanConfig, cleanProduct, publicConfig, publicProduct, migrateProduct, shopOpen } from './lib/config.js';
-import { send, configured as telegramConfigured } from './lib/notify.js';
+import {
+  send, configured as telegramConfigured,
+  pushTo, pushConfigured, everyoneListening, listenerCount, newStrainMsg, openedMsg, runMsg
+} from './lib/notify.js';
 
 const loadConfig = () => read(KEYS.config, defaultConfig());
 
@@ -39,7 +42,14 @@ export default async (req) => route(req, {
     if (!(await requireOwner(req))) return unauthorized();
     const cfg = await loadConfig();
     const products = (await read(KEYS.products, [])).map(migrateProduct);
-    return ok({ config: cfg, products, telegram: telegramConfigured() });
+    return ok({
+      config: cfg, products, telegram: telegramConfigured(),
+      // Whether this shop can send at all, and how many people would hear it.
+      // Without the VAPID keys the toggles are decoration, so the screen says so
+      // rather than letting him switch on something that cannot send.
+      pushReady: pushConfigured(),
+      listeners: await listenerCount()
+    });
   },
 
   async saveConfig(body, req) {
@@ -49,7 +59,29 @@ export default async (req) => route(req, {
     const next = cleanConfig(body.config, current);
     next.setupComplete = isComplete(next, products);
     await write(KEYS.config, next);
-    return ok({ config: next });
+
+    // Two transitions are genuine news; the rest of a settings save is not.
+    //
+    // Deliberately transitions, not states: saving the same settings twice must
+    // not tell everybody the shop opened twice. And both are read from what
+    // actually changed between the stored config and the new one, so a save
+    // that touches only the fee ladder says nothing to anyone.
+    const wasOpen = shopOpen(current).open;
+    const nowOpen = shopOpen(next).open;
+    const msgs = [];
+    if (!wasOpen && nowOpen && next.notifs && next.notifs.opened) {
+      msgs.push(openedMsg(next, next.hours && next.hours.on ? next.hours.close : ''));
+    }
+    const runWas = !!(current.run && current.run.on);
+    const runNow = !!(next.run && next.run.on);
+    if (!runWas && runNow && next.notifs && next.notifs.run) {
+      msgs.push(runMsg(next, next.run.start + '\u2013' + next.run.end));
+    }
+    if (msgs.length) {
+      const listeners = await everyoneListening();
+      for (const m of msgs) await pushTo(listeners, m);
+    }
+    return ok({ config: next, listeners: await listenerCount() });
   },
 
   // Creates when there's no id, updates in place when there is.
@@ -57,11 +89,17 @@ export default async (req) => route(req, {
     if (!(await requireOwner(req))) return unauthorized();
     const id = str(body.product && body.product.id, 40);
     let error = null;
+    // Whether this was an insert, and what came out of it — needed after the
+    // write to decide if there is any news to tell anyone.
+    let isNew = false;
+    let saved = null;
     const products = await mutate(KEYS.products, [], (raw) => {
       const list = raw.map(migrateProduct);
       const idx = id ? list.findIndex((p) => p.id === id) : -1;
       const built = cleanProduct(body.product || {}, idx > -1 ? idx : list.length, idx > -1 ? list[idx] : null);
       if (built.error) { error = built.error; return list; }
+      saved = built.product;
+      isNew = idx < 0;
       if (idx > -1) { const next = list.slice(); next[idx] = built.product; return next; }
       return list.concat([built.product]);
     });
@@ -70,6 +108,12 @@ export default async (req) => route(req, {
     const cfg = await loadConfig();
     const complete = isComplete(cfg, products);
     if (complete !== cfg.setupComplete) await write(KEYS.config, { ...cfg, setupComplete: complete });
+    // A strain landing on the menu is the one piece of shop news worth a
+    // message. Only when it is genuinely new and visible: an edit to something
+    // already listed is not news, and neither is one switched off.
+    if (isNew && saved && saved.active !== false && cfg.notifs && cfg.notifs.newStrain) {
+      await pushTo(await everyoneListening(), newStrainMsg(cfg, saved.name, saved.type));
+    }
     return ok({ products });
   },
 

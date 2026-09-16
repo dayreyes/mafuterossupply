@@ -110,6 +110,9 @@ Add these, then **trigger a redeploy** (env changes need one to take effect).
 | `TELEGRAM_BOT_TOKEN` | Optional | Order and signup alerts. From @BotFather. |
 | `TELEGRAM_CHAT_ID` | Optional | Where alerts are sent. See below. |
 | `OWNER_PIN` | Emergency only | Overrides the stored PIN so a locked-out owner can get back in. Delete it again straight after. |
+| `VAPID_PUBLIC_KEY` | Optional | Lets the shop send automatic messages to customers. See below. |
+| `VAPID_PRIVATE_KEY` | Optional | The other half of the pair. **This one is the password to send as your shop — never put it in the repo.** |
+| `VAPID_CONTACT` | Optional | An email a push service can complain to. Never shown to a customer. |
 
 **Never commit any of these to the repo.** They live only in the Netlify
 dashboard.
@@ -147,6 +150,55 @@ step 1 again.
 **To send alerts to a group** instead of a private chat: create the group, add
 the bot to it, send any message in the group, then re-open `getUpdates`. The
 group's id is **negative** (e.g. `-1001234567890`) — include the minus sign.
+
+---
+
+## 4b. Automatic messages to customers (optional)
+
+Separate from the Telegram alerts above: those go to the owner, these go to the
+people buying. He writes none of them.
+
+**Generate a key pair once**, on any machine with Node:
+
+```
+npx web-push generate-vapid-keys
+```
+
+Put the public key in `VAPID_PUBLIC_KEY`, the private one in
+`VAPID_PRIVATE_KEY`, then redeploy. Until both are set the app says so on the
+settings screen and offers customers nothing — it never shows a switch that
+cannot work.
+
+**Two switches have to agree before anything sends.** The owner picks which
+kinds the shop sends at all (**Settings → Automatic messages**), and each
+customer decides separately whether to receive any (**Profile → Want the heads
+up?**). Neither can volunteer the other.
+
+| Kind | When it fires | Who gets it |
+|---|---|---|
+| Something new landed | A strain is added to the menu — not edited, not hidden | Everyone opted in |
+| We opened | The shop goes from closed to open | Everyone opted in |
+| Delivery is rolling | Tonight's run is switched on | Everyone opted in |
+| Their order moved | An order is accepted, packed or handed over | Only that customer |
+| Something they buy is nearly gone | Stock drops low — off by default | Only people who have bought it before |
+
+Deliberate limits, so people do not switch these off:
+
+- An **edit** to an existing strain is not news, and neither is a hidden one.
+- Saving settings twice does not announce opening twice — it fires on the
+  transition, not the state.
+- Advancing an order already at the last step sends nothing.
+- "Nearly gone" never fires once it has actually run out; there is nothing to
+  come in for.
+- Revoking a code stops that person's messages along with everything else.
+
+> **iPhone:** Safari only allows these once the app has been **added to the home
+> screen**. In a normal tab there is no permission to grant, and the app says so
+> rather than leaving a dead switch. Android and desktop Chrome work from a tab.
+
+**What is not built yet:** a "closing soon" message. That needs something
+running on a timer rather than reacting to an action, which is a scheduled
+function — worth adding if the rest proves useful.
 
 ---
 
@@ -204,6 +256,12 @@ Two ways to take a code out of circulation, and they differ:
 
 Each row shows what that customer has actually bought — **"4 orders · $215"**
 with **"Last: Aug 27"** underneath — counted from the orders themselves.
+
+Customers have a **Profile** tab of their own: their recent orders, and their
+name, number and address to correct themselves. He was fixing misheard names
+and wrong doors by hand — the person who knows the address is the one standing
+at it. A customer can only ever reach their own record; the code is taken from
+their session, never from what the app sends.
 
 ---
 

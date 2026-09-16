@@ -13,7 +13,10 @@ import { route, ok, fail, unauthorized, str, num, newId } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { defaultConfig, mileFee, migrateProduct, shopOpen, shopDay } from './lib/config.js';
-import { sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText } from './lib/notify.js';
+import {
+  sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText,
+  pushTo, orderStatusMsg, lowStockCustomerMsg
+} from './lib/notify.js';
 
 const money = (n) => '$' + Number(n).toLocaleString('en-US');
 
@@ -235,7 +238,7 @@ export default async (req) => route(req, {
         const taken = needed[p.id] || 0;
         if (!taken) return p;
         const left = Math.max(0, (p.stock || 0) - taken);
-        if (left <= lowStockAt(p.unit)) low.push({ name: p.name, left: fmtStock(left, p.unit), out: left <= 0 });
+        if (left <= lowStockAt(p.unit)) low.push({ pid: p.id, name: p.name, left: fmtStock(left, p.unit), out: left <= 0 });
         return { ...p, stock: left };
       })
     );
@@ -247,6 +250,21 @@ export default async (req) => route(req, {
       orderText({ ...order, when: 'just now' }, cfg.shopName),
       ...low.map((l) => (l.out ? soldOutText(l.name) : lowStockText(l.name, l.left)))
     ]);
+
+    // "Something you buy is nearly gone" goes only to people who have actually
+    // bought that strain before — a shop-wide alert about someone else's
+    // favourite is the kind of message that gets notifications switched off.
+    // Never when it has already run out: nothing to come in for.
+    if (cfg.notifs && cfg.notifs.lowStock) {
+      for (const l of low.filter((x) => !x.out)) {
+        const past = (await read(KEYS.orders, []))
+          .filter((o) => !o.cancelled && o.clientCode &&
+            (o.items || []).some((i) => i.pid === l.pid))
+          .map((o) => o.clientCode);
+        const regulars = [...new Set(past)].filter((c) => c !== session.code);
+        if (regulars.length) await pushTo(regulars, lowStockCustomerMsg(l.name, l.left));
+      }
+    }
 
     return ok({ order });
   },
@@ -268,9 +286,23 @@ export default async (req) => route(req, {
   async advance(body, req) {
     if (!(await requireOwner(req))) return unauthorized();
     const id = str(body.id, 40);
+    // What it was before, so a step that did not actually move stays silent.
+    const before = (await read(KEYS.orders, [])).find((o) => o.id === id);
     const orders = await mutate(KEYS.orders, [], (list) =>
       list.map((o) => (o.id === id && !o.cancelled ? { ...o, step: Math.min(3, (o.step || 0) + 1) } : o))
     );
+    // The customer hears about their own order and nobody else's — and only
+    // when it really moved. Advancing an order already at the last step is a
+    // no-op, and "handed over" arriving twice is how somebody decides these
+    // messages are noise.
+    const now = orders.find((o) => o.id === id);
+    const moved = before && now && (now.step || 0) !== (before.step || 0);
+    const cfg = await read(KEYS.config, defaultConfig());
+    if (moved && now.clientCode && cfg.notifs && cfg.notifs.orderStatus) {
+      const STEPS = ['', 'He is packing it.', 'It is ready.', 'Handed over. Enjoy.'];
+      const line = STEPS[now.step || 0];
+      if (line) await pushTo([now.clientCode], orderStatusMsg(now, line));
+    }
     return ok(await snapshot(orders));
   },
 

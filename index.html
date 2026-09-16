@@ -470,6 +470,19 @@ input,textarea,select{font-size:16px}
               <div style="display:{{ pfMsgDisplay }};font:600 12px/1.45 'Figtree';color:{{ pfMsgFg }};margin-top:9px;text-align:center">{{ pfMsg }}</div>
             </div>
 
+            <div style="display:{{ pfNotifDisplay }};margin-top:16px;background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:16px">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="flex:1;min-width:0">
+                  <div style="font-family:'Caprasimo',serif;font-size:18px;color:#201e1d">{{ t.pushTitle }}</div>
+                  <div style="font:500 11.5px/1.45 'Figtree';color:#645c50;margin-top:5px">{{ t.pushBody }}</div>
+                </div>
+                <div onClick="{{ togglePush }}" style="flex:none;width:62px;height:32px;border-radius:999px;border:2px solid #201e1d;background:{{ pushBg }};display:flex;align-items:center;justify-content:{{ pushJustify }};padding:3px;cursor:pointer;box-sizing:border-box">
+                  <div style="width:24px;height:24px;border-radius:50%;background:#f5ead8;border:2px solid #201e1d;box-sizing:border-box"></div>
+                </div>
+              </div>
+              <div style="display:{{ pushMsgDisplay }};font:600 11.5px/1.45 'Figtree';color:{{ pushMsgFg }};margin-top:10px">{{ pushMsg }}</div>
+            </div>
+
             <div style="margin-top:22px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
               <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.pfOrders }}</div>
               <div style="font:600 11px/1 'Figtree';color:#645c50">{{ pfOrdersMeta }}</div>
@@ -495,6 +508,7 @@ input,textarea,select{font-size:16px}
                 </div>
               </sc-for>
             </div>
+            <div style="margin-top:26px;text-align:center;font:600 10.5px/1.4 'Figtree';color:#a19786">{{ buildStamp }}</div>
           </div>
         </sc-if>
 
@@ -1228,6 +1242,32 @@ input,textarea,select{font-size:16px}
                 </div>
               </div>
 
+              <!-- Automatic messages to customers.
+                   The owner picks the kinds; each customer opts in separately.
+                   Both have to say yes, so neither can be volunteered by the
+                   other. He writes nothing — that is the whole point. -->
+              <div style="margin-top:16px;background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:16px">
+                <div style="font-family:'Caprasimo',serif;font-size:19px;color:#201e1d">{{ t.stNotifTitle }}</div>
+                <div style="font:500 11.5px/1.45 'Figtree';color:#645c50;margin-top:7px">{{ t.stNotifSub }}</div>
+                <div style="display:{{ pushOffDisplay }};margin-top:11px;padding:11px 13px;background:#ffe1d0;border:2px solid #8c491a;border-radius:16px;font:600 11.5px/1.45 'Figtree';color:#8c491a">{{ t.stNotifKeys }}</div>
+                <div style="display:{{ pushOnDisplay }};flex-direction:column">
+                  <div style="font:700 11px/1 'Figtree';color:#645c50;margin-top:11px">{{ listenerLine }}</div>
+                  <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+                    <sc-for list="{{ notifRows }}" as="n" hint-placeholder-count="5">
+                      <div onClick="{{ n.toggle }}" style="display:flex;align-items:center;gap:11px;background:{{ n.bg }};border:2px solid {{ n.border }};border-radius:16px;padding:11px 13px;cursor:pointer">
+                        <div style="flex:1;min-width:0">
+                          <div style="font:800 12.5px/1.25 'Figtree';color:#201e1d">{{ n.label }}</div>
+                          <div style="font:500 11px/1.4 'Figtree';color:#645c50;margin-top:2px">{{ n.sub }}</div>
+                        </div>
+                        <div style="flex:none;width:48px;height:26px;border-radius:999px;border:2px solid #201e1d;background:{{ n.switchBg }};display:flex;align-items:center;justify-content:{{ n.justify }};padding:3px;box-sizing:border-box">
+                          <div style="width:18px;height:18px;border-radius:50%;background:#f5ead8;border:2px solid #201e1d;box-sizing:border-box"></div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+
               <!-- STORE hours — not the delivery run.
                    Two different schedules that were being treated as one. These
                    decide whether the shop takes an order at all; the run below
@@ -1378,7 +1418,6 @@ input,textarea,select{font-size:16px}
               <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:{{ navHomePill }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 10v10h14V10"></path></svg>
               </div>
-              <div style="margin-top:14px;text-align:center;font:600 10.5px/1.4 'Figtree';color:#a19786">{{ buildStamp }}</div>
               <div style="font:800 10.5px/1 'Figtree';letter-spacing:.04em">{{ t.navMenu }}</div>
             </div>
             <div onClick="{{ goBag }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:5px 0;color:{{ navBagFg }}">
@@ -1487,6 +1526,18 @@ const COPY = {
     saveStrain: 'Guardar la mata', cancelAdd: 'Cancelar',
     removeStrain: 'Quitar',
     navMenu: 'Menú', navBag: 'Bolsa', navOut: 'Salir', navProfile: 'Perfil',
+    stNotifTitle: 'Avisos automáticos',
+    stNotifSub: 'Estos se mandan solos. Tú no escribes nada.',
+    stNotifSubs: n => n === 1 ? '1 cliente los tiene prendidos' : n + ' clientes los tienen prendidos',
+    stNotifKeys: 'Faltan las llaves VAPID en Netlify. Sin ellas no se manda nada — mira DEPLOY.md.',
+    notifNames: { newStrain: 'Llegó algo nuevo', opened: 'Abrimos', run: 'Salió el delivery', orderStatus: 'Su orden se movió', lowStock: 'Se está acabando algo que compran' },
+    notifWhen: { newStrain: 'Cuando metes una mata nueva al menú.', opened: 'Cuando la tienda abre.', run: 'Cuando prendes el run de hoy.', orderStatus: 'Solo al cliente de esa orden.', lowStock: 'Solo a quien ya la ha comprado.' },
+    pushTitle: '¿Te avisamos?', pushBody: 'Cuando entra algo nuevo o abrimos, te llega un aviso. Nada más.',
+    pushOn: 'Listo, te avisamos.', pushOff: 'Ya no te avisamos.',
+    pushDenied: 'Tu teléfono no dio permiso. Búscalo en los ajustes del navegador.',
+    pushUnsupported: 'Este navegador no aguanta avisos. En iPhone tienes que añadir la app a la pantalla de inicio primero.',
+    pushNotSetUp: 'La tienda todavía no manda avisos.',
+    pushFailed: 'No se pudo prender. Trata otra vez.',
     pfWho: 'Tus datos', pfTitle: 'Tu perfil',
     pfName: 'Cómo te llamas', pfPhone: 'Tu teléfono', pfAddr: 'Dónde te entregamos',
     pfAddrSub: 'Si te mudaste o el número está mal, arréglalo aquí y El Mafu lo ve.',
@@ -1716,6 +1767,18 @@ const COPY = {
     saveStrain: 'Save strain', cancelAdd: 'Cancel',
     removeStrain: 'Remove',
     navMenu: 'Menu', navBag: 'Bag', navOut: 'Sign out', navProfile: 'Profile',
+    stNotifTitle: 'Automatic messages',
+    stNotifSub: 'These send themselves. You write nothing.',
+    stNotifSubs: n => n === 1 ? '1 customer has them on' : n + ' customers have them on',
+    stNotifKeys: 'The VAPID keys are missing in Netlify. Nothing can send without them — see DEPLOY.md.',
+    notifNames: { newStrain: 'Something new landed', opened: 'We opened', run: 'Delivery is rolling', orderStatus: 'Their order moved', lowStock: 'Something they buy is nearly gone' },
+    notifWhen: { newStrain: 'When you add a strain to the menu.', opened: 'When the shop opens.', run: 'When you switch tonight\u2019s run on.', orderStatus: 'Only to the customer on that order.', lowStock: 'Only to people who have bought it.' },
+    pushTitle: 'Want the heads up?', pushBody: 'When something new lands or we open, you get a nudge. Nothing else.',
+    pushOn: 'Done — we\u2019ll let you know.', pushOff: 'Switched off.',
+    pushDenied: 'Your phone refused permission. Turn it back on in browser settings.',
+    pushUnsupported: 'This browser cannot do alerts. On iPhone, add the app to your home screen first.',
+    pushNotSetUp: 'This shop is not sending alerts yet.',
+    pushFailed: 'That did not switch on. Try again.',
     pfWho: 'Your details', pfTitle: 'Your profile',
     pfName: 'What to call you', pfPhone: 'Your phone', pfAddr: 'Where we deliver',
     pfAddrSub: 'Moved, or got the number wrong? Fix it here and El Mafu sees it.',
@@ -1917,7 +1980,7 @@ const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = '2026-09-16.1300';
+const BUILD = '2026-09-16.1900';
 
 // Tap feedback for the keypad.
 //
@@ -1926,6 +1989,15 @@ const BUILD = '2026-09-16.1300';
 // Android; iOS Safari does not implement the Vibration API at all, so the
 // visual response has to carry the feedback there on its own — hence the pop
 // on the dot and the harder press state on the key, which every device gets.
+// A VAPID key travels as base64url text and PushManager wants the raw bytes.
+const urlBase64ToUint8Array = (base64) => {
+  const pad = '='.repeat((4 - (base64.length % 4)) % 4);
+  const raw = atob((base64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+};
+
 const buzz = (ms = 8) => {
   try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
 };
@@ -1981,6 +2053,10 @@ class Component extends DCLogic {
     opensAt: '',
     profile: null,
     pfDraft: null,
+    pushMsg: '',
+    pushOk: false,
+    listeners: 0,
+    pushReady: false,
     pfMsg: '',
     pfOk: false,
     mine: [],
@@ -2202,6 +2278,59 @@ class Component extends DCLogic {
 
   // ── loading ──────────────────────────────────────────────────────────────
 
+  // ── automatic messages, customer side ─────────────────────────────────
+  //
+  // Three separate things have to line up and each can fail on its own, so
+  // each gets its own honest message rather than one "something went wrong":
+  // the browser has to support push at all, the person has to grant
+  // permission, and the device has to register with the shop.
+  //
+  // On iOS this only works once the app has been added to the home screen —
+  // Safari gives no push to a page in a tab — which is worth saying plainly
+  // instead of leaving a switch that silently never works.
+  togglePush() {
+    const on = !(this.state.profile && this.state.profile.notify);
+    if (!on) {
+      this.api('codes', 'notify', { on: false }).then(res => {
+        if (this.expired(res)) return;
+        if (res && res.ok) this.setState({ profile: res.profile, pushMsg: this.t().pushOff, pushOk: true });
+      });
+      return;
+    }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      this.setState({ pushMsg: this.t().pushUnsupported, pushOk: false });
+      return;
+    }
+    this.setState({ pushMsg: '' });
+    this.api('codes', 'pushKey').then(res => {
+      if (this.expired(res)) return;
+      if (!res || !res.ok || !res.configured || !res.key) {
+        this.setState({ pushMsg: this.t().pushNotSetUp, pushOk: false });
+        return;
+      }
+      return Notification.requestPermission().then(perm => {
+        if (perm !== 'granted') {
+          this.setState({ pushMsg: this.t().pushDenied, pushOk: false });
+          return;
+        }
+        return navigator.serviceWorker.ready
+          .then(reg => reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(res.key)
+          }))
+          .then(sub => this.api('codes', 'notify', { on: true, sub: sub.toJSON() }))
+          .then(saved => {
+            if (this.expired(saved)) return;
+            if (saved && saved.ok) {
+              this.setState({ profile: saved.profile, pushMsg: this.t().pushOn, pushOk: true });
+            } else {
+              this.setState({ pushMsg: (saved && saved.error) || this.t().offline, pushOk: false });
+            }
+          });
+      });
+    }).catch(() => this.setState({ pushMsg: this.t().pushFailed, pushOk: false }));
+  }
+
   // ── the customer's own profile ────────────────────────────────────────
   //
   // Their name and address were the owner's to fix, by hand, from whatever he
@@ -2295,7 +2424,10 @@ class Component extends DCLogic {
         this.setState({ fatal: (cfg && cfg.error) || this.t().offline, screen: 'down' });
         return false;
       }
-      this.setState({ cfg: cfg.config, products: cfg.products, telegram: !!cfg.telegram, draft: null });
+      this.setState({
+        cfg: cfg.config, products: cfg.products, telegram: !!cfg.telegram,
+        pushReady: !!cfg.pushReady, listeners: cfg.listeners || 0, draft: null
+      });
       if (ord && ord.ok) this.setState({ orders: ord.orders, stops: ord.stops, run: ord.run || null, takings: ord.takings || null });
       if (sig && sig.ok) this.setState({ signups: sig.signups });
       if (cod && cod.ok) this.setState({ codes: cod.codes });
@@ -3078,6 +3210,35 @@ class Component extends DCLogic {
       isProfile: s.screen === 'profile',
 
       // ── customer profile ─────────────────────────────────────────────────
+      // ── automatic messages ───────────────────────────────────────────────
+      pushOffDisplay: s.pushReady ? 'none' : 'block',
+      pushOnDisplay: s.pushReady ? 'flex' : 'none',
+      listenerLine: t.stNotifSubs(s.listeners || 0),
+      notifRows: ['newStrain', 'opened', 'run', 'orderStatus', 'lowStock'].map(k => {
+        const on = !!(d.notifs && d.notifs[k]);
+        return {
+          label: t.notifNames[k],
+          sub: t.notifWhen[k],
+          bg: on ? '#e1eecc' : '#f5ead8',
+          border: on ? '#56633f' : '#a19786',
+          switchBg: on ? '#56633f' : '#a19786',
+          justify: on ? 'flex-end' : 'flex-start',
+          toggle: () => this.editDraft(x => {
+            x.notifs = { ...(x.notifs || {}), [k]: !(x.notifs && x.notifs[k]) };
+          })
+        };
+      }),
+
+      // Customer side. Hidden entirely when the shop does not send anything,
+      // so nobody is offered a switch that can do nothing.
+      pfNotifDisplay: cfg.notifsOn ? 'block' : 'none',
+      pushBg: s.profile && s.profile.notify ? '#56633f' : '#a19786',
+      pushJustify: s.profile && s.profile.notify ? 'flex-end' : 'flex-start',
+      togglePush: () => this.togglePush(),
+      pushMsg: s.pushMsg || '',
+      pushMsgDisplay: s.pushMsg ? 'block' : 'none',
+      pushMsgFg: s.pushOk ? '#3d472b' : '#8c491a',
+
       goProfile: () => this.openProfile(),
       navProfileFg: s.screen === 'profile' ? '#f5ead8' : '#a19786',
       navProfilePill: s.screen === 'profile' ? '#56633f' : 'rgba(245,234,216,.1)',
