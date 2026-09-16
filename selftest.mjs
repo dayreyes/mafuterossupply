@@ -368,6 +368,97 @@ async function customerHistory() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// A customer's own profile — and only their own
+//
+// Names and addresses were the owner's to fix by hand from whatever he heard
+// down the phone, so customers can now correct their own. That makes scoping
+// the load-bearing part: these records hold every customer's name, number and
+// home address, and the code being read or written comes from the session, not
+// from the request body, so naming somebody else's code cannot reach it.
+// ════════════════════════════════════════════════════════════════════════════
+async function customerProfile() {
+  const s = await openShop({}, { stock: 300 });
+  const mk = async (name, contact) => {
+    const c = await call(codes, { action: 'issue', name }, s.token);
+    // Give the row an address the way approving a signup would.
+    const list = await call(codes, { action: 'list' }, s.token);
+    const row = list.codes.find(x => x.code === c.code);
+    row.phone = contact.phone; row.addr = contact.addr;
+    mem.set('codes', JSON.stringify(list.codes.map(x => (x.code === c.code ? row : x))));
+    const tok = (await call(auth, { action: 'unlock', code: c.code })).token;
+    return { code: c.code, token: tok };
+  };
+  const ana = await mk('Ana', { phone: '8135550101', addr: '1 Ana Street' });
+  const tito = await mk('Tito', { phone: '8135550188', addr: '2 Tito Road' });
+
+  section('a customer sees their own details');
+  let r = await call(codes, { action: 'me' }, ana.token);
+  ck('their own row comes back', r.ok === true && r.profile.name === 'Ana', r);
+  ck('with the address to correct', r.profile.addr === '1 Ana Street', r.profile);
+  ck('and nothing else is attached', Object.keys(r).sort().join(',') === 'ok,profile', Object.keys(r));
+
+  section('and cannot reach anybody else\u2019s');
+  const dump = JSON.stringify(r);
+  ck('no other customer\u2019s name', !dump.includes('Tito'), dump);
+  ck('no other customer\u2019s address', !dump.includes('Tito Road'), dump);
+  // A forged body naming the other code must not redirect the write.
+  r = await call(codes, { action: 'saveMe', code: tito.code, name: 'Hijacked', addr: 'nowhere' }, ana.token);
+  ck('a forged code in the body is ignored', r.ok === true && r.profile.name === 'Hijacked', r);
+  const titoRow = (await call(codes, { action: 'me' }, tito.token)).profile;
+  ck('the other customer is untouched', titoRow.name === 'Tito' && titoRow.addr === '2 Tito Road', titoRow);
+
+  section('an owner session is not a customer session');
+  r = await call(codes, { action: 'me' }, s.token);
+  ck('the owner cannot use the customer endpoint', r.ok === false, r);
+  r = await call(codes, { action: 'me' });
+  ck('nor can a stranger with no session', r.ok === false, r);
+
+  section('what they may and may not change');
+  r = await call(codes, { action: 'saveMe', name: 'Ana Ruiz', phone: '8135559999', addr: '9 New Place' }, ana.token);
+  ck('name, phone and address all save', r.profile.name === 'Ana Ruiz' && r.profile.addr === '9 New Place', r.profile);
+  const owner = (await call(codes, { action: 'list' }, s.token)).codes.find(c => c.code === ana.code);
+  ck('the owner sees the correction', owner.addr === '9 New Place', owner.addr);
+  ck('the code itself is unchanged', owner.code === ana.code);
+  r = await call(codes, { action: 'saveMe', name: 'A', addr: 'x' }, ana.token);
+  ck('a one-letter name is refused', r.ok === false, r);
+  // Revoking must close the door on the profile too.
+  await call(codes, { action: 'revoke', code: ana.code, active: false }, s.token);
+  r = await call(codes, { action: 'me' }, ana.token);
+  ck('a revoked customer keeps no access to their row', r.ok === false || r.profile === undefined, r);
+
+  section('revoking actually shuts the door');
+  // Live bug until now: revoking stopped new sign-ins and nothing else, so a
+  // session already open kept buying for its full thirty days. Revoke is the
+  // owner's only way to cut somebody off.
+  const bea = await mk('Bea', { phone: '8135550222', addr: '3 Bea Way' });
+  let placed = await call(orders, { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, bea.token);
+  ck('a live customer can buy', placed.ok === true, placed);
+  await call(codes, { action: 'revoke', code: bea.code, active: false }, s.token);
+  placed = await call(orders, { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, bea.token);
+  ck('the same session cannot buy once revoked', placed.ok === false, placed);
+  ck('nor read their own record', (await call(codes, { action: 'me' }, bea.token)).ok === false);
+  ck('nor their order history', (await call(orders, { action: 'mine' }, bea.token)).ok === false);
+  ck('and the code will not open a new session',
+    (await call(auth, { action: 'unlock', code: bea.code })).ok === false);
+  // Switching them back on restores the same session rather than stranding them.
+  await call(codes, { action: 'revoke', code: bea.code, active: true }, s.token);
+  ck('turning them back on restores access',
+    (await call(codes, { action: 'me' }, bea.token)).ok === true);
+  // Deleting is final for open sessions too.
+  const cid = await mk('Gone', { phone: '1', addr: 'x' });
+  await call(codes, { action: 'remove', code: cid.code }, s.token);
+  ck('a deleted code closes its open session as well',
+    (await call(codes, { action: 'me' }, cid.token)).ok === false);
+
+  section('their past orders are their own');
+  const t2 = (await call(auth, { action: 'unlock', code: tito.code })).token;
+  await call(orders, { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, t2);
+  const mine = await call(orders, { action: 'mine' }, t2);
+  ck('they see the order they placed', mine.orders.length === 1, mine.orders.length);
+  ck('and nobody else\u2019s', mine.orders.every(o => o.clientCode === tito.code), mine.orders.map(o => o.clientCode));
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // The storage diagnostic, and what it may not say
 //
 // GET .../auth?diag=1 separates a store that cannot be opened from a reachable
@@ -713,7 +804,7 @@ async function uniqueIds() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, diagnose, viewLayer]) {
+for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, diagnose, viewLayer]) {
   await suite();
 }
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');

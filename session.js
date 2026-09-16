@@ -112,9 +112,27 @@ export async function requireOwner(req) {
   return s && s.role === 'owner' ? s : null;
 }
 
+// A customer session, checked against the code still being live.
+//
+// Revoking used to stop new sign-ins and nothing else: a session already open
+// kept working for its full thirty days, so somebody the owner had cut off
+// carried on placing orders and reading their own record. Revoke is his ONLY
+// way to shut somebody out — the deployment notes even promised it took effect
+// immediately — so it has to hold against sessions that already exist, not
+// only future ones.
+//
+// The cost is one extra read per customer request. For a shop doing a few dozen
+// orders a day that is nothing next to the door actually locking.
 export async function requireClient(req) {
   const s = await readSession(bearer(req));
-  return s && (s.role === 'client' || s.role === 'owner') ? s : null;
+  if (!s) return null;
+  // The owner is allowed through the customer endpoints as well.
+  if (s.role === 'owner') return s;
+  if (s.role !== 'client') return null;
+  const row = (await read(KEYS.codes, [])).find((c) => c.code === s.code);
+  // Gone entirely (deleted) or switched off (revoked): no longer a customer.
+  if (!row || row.active !== true) return null;
+  return s;
 }
 
 // ── Throttling ───────────────────────────────────────────────────────────────

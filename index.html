@@ -450,6 +450,54 @@ input,textarea,select{font-size:16px}
           </div>
         </sc-if>
 
+        <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+          <div style="min-height:100dvh;padding:26px 22px 120px;box-sizing:border-box">
+            <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.pfWho }}</div>
+            <div style="font-family:'Caprasimo',serif;font-size:30px;line-height:1.08;color:#201e1d;margin-top:6px">{{ t.pfTitle }}</div>
+
+            <!-- Their own details, theirs to fix. The owner was correcting
+                 misheard names and wrong doors by hand; the person who knows
+                 the address is the one standing at it. -->
+            <div style="margin-top:18px;background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:16px">
+              <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.pfName }}</div>
+              <input value="{{ pfName }}" onChange="{{ setPfName }}" placeholder="{{ t.fNamePh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+              <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin:14px 0 7px">{{ t.pfPhone }}</div>
+              <input value="{{ pfPhone }}" onChange="{{ setPfPhone }}" inputMode="tel" placeholder="{{ t.fPhonePh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+              <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin:14px 0 7px">{{ t.pfAddr }}</div>
+              <input value="{{ pfAddr }}" onChange="{{ setPfAddr }}" placeholder="{{ t.fAddrPh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
+              <div style="font:500 11px/1.45 'Figtree';color:#645c50;margin-top:9px">{{ t.pfAddrSub }}</div>
+              <div onClick="{{ savePf }}" style="margin-top:14px;height:50px;border-radius:999px;background:{{ pfSaveBg }};border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:16px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ pfSaveLabel }}</div>
+              <div style="display:{{ pfMsgDisplay }};font:600 12px/1.45 'Figtree';color:{{ pfMsgFg }};margin-top:9px;text-align:center">{{ pfMsg }}</div>
+            </div>
+
+            <div style="margin-top:22px;display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+              <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.pfOrders }}</div>
+              <div style="font:600 11px/1 'Figtree';color:#645c50">{{ pfOrdersMeta }}</div>
+            </div>
+            <div style="display:{{ pfEmptyDisplay }};margin-top:11px;padding:20px;background:#f9f4ed;border:2px dashed #a19786;border-radius:22px;text-align:center;font:500 12.5px/1.5 'Figtree';color:#645c50">{{ t.pfOrdersEmpty }}</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:11px">
+              <sc-for list="{{ pfOrderRows }}" as="o" hint-placeholder-count="3">
+                <div style="background:#f9f4ed;border:2px solid #201e1d;border-radius:20px;padding:13px 15px">
+                  <div style="display:flex;align-items:baseline;gap:9px">
+                    <div style="flex:1;min-width:0;font:800 13.5px/1.25 'Figtree';color:#201e1d">{{ o.no }}</div>
+                    <div style="flex:none;font-family:'Caprasimo',serif;font-size:17px;color:#201e1d">{{ o.total }}</div>
+                  </div>
+                  <div style="font:600 11px/1.4 'Figtree';color:#645c50;margin-top:3px">{{ o.when }}</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:9px">
+                    <sc-for list="{{ o.lines }}" as="l" hint-placeholder-count="2">
+                      <div style="padding:6px 10px;border-radius:999px;background:#eee7db;border:2px solid #a19786;font:700 11px/1 'Figtree';color:#474238">{{ l }}</div>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:7px;margin-top:9px;flex-wrap:wrap">
+                    <div style="padding:5px 10px;border-radius:999px;border:2px solid {{ o.stBorder }};background:{{ o.stBg }};font:800 9.5px/1 'Figtree';letter-spacing:.06em;text-transform:uppercase;color:{{ o.stFg }}">{{ o.status }}</div>
+                    <div style="font:600 11px/1 'Figtree';color:#645c50">{{ o.where }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
         <sc-if value="{{ isConfirm }}" hint-placeholder-val="{{ true }}">
           <div style="min-height:100dvh;background:#56633f;background-image:radial-gradient(rgba(0,0,0,.22) 1px,transparent 1.4px);background-size:9px 9px;padding:96px 30px 128px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px">
             <div style="width:148px;height:148px;border-radius:50%;background:#f5ead8;border:3px solid #201e1d;box-shadow:5px 6px 0 rgba(32,30,29,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-5deg);animation:mfPop .5s ease both">
@@ -721,8 +769,9 @@ input,textarea,select{font-size:16px}
               <!-- Patterns stay hidden until there is enough trading to mean
                    anything; three orders make a very confident bar chart out of
                    nothing at all. -->
+              <div style="display:{{ thinWindowDisplay }};margin-top:18px;padding:13px 15px;background:#f9f4ed;border:2px dashed #a19786;border-radius:18px;font:600 11.5px/1.45 'Figtree';color:#645c50">{{ thinWindowNote }}</div>
               <div style="display:{{ patternsDisplay }}">
-                <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.patternsTitle }}</div>
+                <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ patternsTitle }}</div>
                 <div style="margin-top:11px;background:#f9f4ed;border:2px solid #201e1d;border-radius:22px;padding:14px 16px">
                   <div style="font:700 9.5px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:#82796a">{{ t.peakHours }}</div>
                   <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:9px">
@@ -755,7 +804,7 @@ input,textarea,select{font-size:16px}
                 </div>
               </div>
 
-              <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.fastest }}</div>
+              <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ fastestTitle }}</div>
               <div style="margin-top:11px;background:#f9f4ed;border:2px solid #201e1d;border-radius:22px;padding:6px 16px">
                 <sc-for list="{{ bestSellers }}" as="b" hint-placeholder-count="3">
                   <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(32,30,29,.12)">
@@ -1338,6 +1387,12 @@ input,textarea,select{font-size:16px}
               </div>
               <div style="font:800 10.5px/1 'Figtree';letter-spacing:.04em">{{ t.navBag }}</div>
             </div>
+            <div onClick="{{ goProfile }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:5px 0;color:{{ navProfileFg }}">
+              <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:{{ navProfilePill }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"></path></svg>
+              </div>
+              <div style="font:800 10.5px/1 'Figtree';letter-spacing:.04em">{{ t.navProfile }}</div>
+            </div>
             <div onClick="{{ logout }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:5px 0;color:#a19786">
               <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(245,234,216,.1)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
@@ -1431,7 +1486,14 @@ const COPY = {
     priceHint: u => 'Precio de ' + u + '. Los demás pesos se calculan solos.',
     saveStrain: 'Guardar la mata', cancelAdd: 'Cancelar',
     removeStrain: 'Quitar',
-    navMenu: 'Menú', navBag: 'Bolsa', navOut: 'Salir',
+    navMenu: 'Menú', navBag: 'Bolsa', navOut: 'Salir', navProfile: 'Perfil',
+    pfWho: 'Tus datos', pfTitle: 'Tu perfil',
+    pfName: 'Cómo te llamas', pfPhone: 'Tu teléfono', pfAddr: 'Dónde te entregamos',
+    pfAddrSub: 'Si te mudaste o el número está mal, arréglalo aquí y El Mafu lo ve.',
+    pfSave: 'Guardar mis datos', pfSaved: 'Guardado.',
+    pfNeedName: 'Pon un nombre que él reconozca.',
+    pfOrders: 'Tus órdenes', pfOrdersEmpty: 'Todavía no has hecho ninguna orden.',
+    saving: 'Guardando…',
     confirmTitle: 'Confirma que te llegó el pago',
     confirmSub: 'Hasta que lo confirmes, esto no está separado.',
     revokeLabel: 'Cancelar la orden', cancelled: 'Cancelada',
@@ -1540,6 +1602,7 @@ const COPY = {
     owedTitle: 'Quién te debe', reupTitle: 'Hay que buscar más',
     quietTitle: 'Se desaparecieron', deadTitle: 'Ahí cogiendo polvo',
     patternsTitle: 'Cómo se mueve la tienda',
+    thinWindow: n => n === 1 ? 'Con una sola orden no hay patrón que ver. Cambia a esta semana o este mes.' : 'Solo ' + n + ' órdenes en este rango — muy poco para ver un patrón. Cambia a esta semana o este mes.',
     peakHours: 'Las horas buenas', peakDays: 'Los días buenos', sizesTitle: 'Lo que más piden',
     owedNone: 'Nadie te debe nada.',
     lastOrder: w => 'Última: ' + w, neverOrdered: 'Todavía no ha ordenado',
@@ -1652,7 +1715,14 @@ const COPY = {
     priceHint: u => 'Price for ' + u + '. The other weights are worked out from it.',
     saveStrain: 'Save strain', cancelAdd: 'Cancel',
     removeStrain: 'Remove',
-    navMenu: 'Menu', navBag: 'Bag', navOut: 'Sign out',
+    navMenu: 'Menu', navBag: 'Bag', navOut: 'Sign out', navProfile: 'Profile',
+    pfWho: 'Your details', pfTitle: 'Your profile',
+    pfName: 'What to call you', pfPhone: 'Your phone', pfAddr: 'Where we deliver',
+    pfAddrSub: 'Moved, or got the number wrong? Fix it here and El Mafu sees it.',
+    pfSave: 'Save my details', pfSaved: 'Saved.',
+    pfNeedName: 'Put a name he will recognise.',
+    pfOrders: 'Your orders', pfOrdersEmpty: 'You have not ordered yet.',
+    saving: 'Saving\u2026',
     confirmTitle: 'Confirm the payment landed',
     confirmSub: 'Until you confirm, nothing is held.',
     revokeLabel: 'Cancel this order', cancelled: 'Cancelled',
@@ -1761,6 +1831,7 @@ const COPY = {
     owedTitle: 'Who owes you', reupTitle: 'Re-up soon',
     quietTitle: 'Gone quiet', deadTitle: 'Sitting there',
     patternsTitle: 'How the shop moves',
+    thinWindow: n => n === 1 ? 'One order is not a pattern. Try this week or this month.' : 'Only ' + n + ' orders in this range — too few to show a pattern. Try this week or this month.',
     peakHours: 'Busiest hours', peakDays: 'Busiest days', sizesTitle: 'What they buy',
     owedNone: 'Nobody owes you anything.',
     lastOrder: w => 'Last: ' + w, neverOrdered: 'No orders yet',
@@ -1908,6 +1979,11 @@ class Component extends DCLogic {
     window: 'today',
     shopOpen: true,
     opensAt: '',
+    profile: null,
+    pfDraft: null,
+    pfMsg: '',
+    pfOk: false,
+    mine: [],
     telegram: false,
 
     // ── client shopping ────────────────────────────────────────────────────
@@ -2125,6 +2201,55 @@ class Component extends DCLogic {
   }
 
   // ── loading ──────────────────────────────────────────────────────────────
+
+  // ── the customer's own profile ────────────────────────────────────────
+  //
+  // Their name and address were the owner's to fix, by hand, from whatever he
+  // heard down the phone. The person who knows the address is the one standing
+  // at it, so they get to correct it themselves. The server scopes the write to
+  // the code on the session, so this can only ever edit the caller's own row.
+  openProfile() {
+    this.setState({ screen: 'profile', pfMsg: '' });
+    this.api('codes', 'me').then(res => {
+      if (this.expired(res)) return;
+      if (res && res.ok) {
+        this.setState({ profile: res.profile, pfDraft: { ...res.profile } });
+      }
+    });
+    this.api('orders', 'mine').then(res => {
+      if (this.expired(res)) return;
+      if (res && res.ok) this.setState({ mine: res.orders || [] });
+    });
+  }
+  editPf(fn) {
+    const d = { ...(this.state.pfDraft || this.state.profile || { name: '', phone: '', addr: '' }) };
+    fn(d);
+    this.setState({ pfDraft: d, pfMsg: '' });
+  }
+  saveProfile() {
+    const d = this.state.pfDraft;
+    if (!d || this.state.busy) return;
+    if (!(d.name || '').trim() || (d.name || '').trim().length < 2) {
+      this.setState({ pfMsg: this.t().pfNeedName, pfOk: false });
+      return;
+    }
+    this.setState({ busy: true });
+    this.api('codes', 'saveMe', {
+      name: (d.name || '').trim(), phone: (d.phone || '').trim(), addr: (d.addr || '').trim()
+    }).then(res => {
+      this.setState({ busy: false });
+      if (this.expired(res)) return;
+      if (!res || !res.ok) {
+        this.setState({ pfMsg: (res && res.error) || this.t().offline, pfOk: false });
+        return;
+      }
+      // The name on screen elsewhere comes from the session, so keep it in step.
+      this.setState({
+        profile: res.profile, pfDraft: { ...res.profile },
+        clientName: res.profile.name, pfMsg: this.t().pfSaved, pfOk: true
+      });
+    });
+  }
 
   loadMenu() {
     return this.api('shop', 'menu').then(res => {
@@ -2732,17 +2857,8 @@ class Component extends DCLogic {
     const live = s.orders.filter(o => !o.cancelled);
     const waiting = live.filter(o => (o.step || 0) < 2);
     const newest = live[0] || null;
-    const takeByPay = {};
-    live.forEach(o => {
-      const k = o.payLabel || o.pay || '—';
-      takeByPay[k] = (takeByPay[k] || 0) + (o.subtotal || 0) + (o.fee || 0);
-    });
-    const soldQty = {};
-    const soldTake = {};
-    live.forEach(o => (o.items || []).forEach(l => {
-      soldQty[l.name] = (soldQty[l.name] || 0) + l.qty;
-      soldTake[l.name] = (soldTake[l.name] || 0) + l.unit * l.qty;
-    }));
+    // What sold, and what it brought in, are worked out further down against
+    // the window on screen rather than over every order ever — see below.
     // Today's money is NOT computed here any more. The browser counted every
     // order that had not been cancelled, so an unpaid order in the queue was
     // already reported as cash taken. The server splits it into collected and
@@ -2857,9 +2973,40 @@ class Component extends DCLogic {
       .sort((a, b) => new Date(a.lastOrder) - new Date(b.lastOrder));
 
     // ── when the work actually happens ───────────────────────────────────
+    //
+    // These follow the window on screen. They used to be computed over every
+    // order the shop had ever taken, so switching Today / This week / This
+    // month changed the money and left the patterns sitting exactly as they
+    // were — the block looked broken, and it was: a busiest-hour worked out
+    // across five weeks says nothing about this week.
+    //
+    // The hour and weekday are read in the SHOP's timezone, for the same
+    // reason the day boundary is: the phone's idea of 9pm is not the shop's if
+    // he is ever away, and the two disagreeing is how a Monday's trade shows
+    // up under Sunday.
+    const clockParts = (iso) => {
+      const d = new Date(iso);
+      if (shopTz) {
+        try {
+          const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: shopTz, hour12: false, weekday: 'short', hour: '2-digit'
+          }).formatToParts(d);
+          const get = (t) => ((parts.find(p => p.type === t) || {}).value || '');
+          const DOW = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+          const dow = DOW[get('weekday')];
+          if (dow !== undefined) return { hour: Number(get('hour')) % 24, dow };
+        } catch (e) { /* unknown zone — fall back to the phone */ }
+      }
+      return { hour: d.getHours(), dow: d.getDay() };
+    };
+
     const byHour = new Array(24).fill(0);
     const byDay = new Array(7).fill(0);
-    live.forEach(o => { const d = new Date(o.at); byHour[d.getHours()]++; byDay[d.getDay()]++; });
+    windowOrders.forEach(o => {
+      const { hour, dow } = clockParts(o.at);
+      byHour[hour]++;
+      byDay[dow]++;
+    });
     const dayPeak = Math.max(1, ...byDay);
     const hourLabel = (h) => (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? 'am' : 'pm');
     const busiestHours = byHour
@@ -2869,9 +3016,17 @@ class Component extends DCLogic {
     // Which size people actually buy, which is what says whether the ladder is
     // priced right.
     const bySize = {};
-    live.forEach(o => (o.items || []).forEach(l => { bySize[l.label] = (bySize[l.label] || 0) + l.qty; }));
+    windowOrders.forEach(o => (o.items || []).forEach(l => { bySize[l.label] = (bySize[l.label] || 0) + l.qty; }));
     const sizeTotal = Object.values(bySize).reduce((a, b) => a + b, 0) || 1;
     const sizeRows = Object.entries(bySize).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    // Moving fastest, over the same window.
+    const soldQty = {};
+    const soldTake = {};
+    windowOrders.forEach(o => (o.items || []).forEach(l => {
+      soldQty[l.name] = (soldQty[l.name] || 0) + l.qty;
+      soldTake[l.name] = (soldTake[l.name] || 0) + l.unit * l.qty;
+    }));
 
     const best = Object.keys(soldQty)
       .sort((a, b) => soldQty[b] - soldQty[a])
@@ -2920,6 +3075,40 @@ class Component extends DCLogic {
       isSignup: s.screen === 'signup', isWaiting: s.screen === 'waiting',
       isSetup: s.screen === 'setup', isSettings: s.screen === 'settings',
       isProduct: s.screen === 'product', isBag: s.screen === 'bag', isConfirm: s.screen === 'confirm',
+      isProfile: s.screen === 'profile',
+
+      // ── customer profile ─────────────────────────────────────────────────
+      goProfile: () => this.openProfile(),
+      navProfileFg: s.screen === 'profile' ? '#f5ead8' : '#a19786',
+      navProfilePill: s.screen === 'profile' ? '#56633f' : 'rgba(245,234,216,.1)',
+      pfName: (s.pfDraft || s.profile || {}).name || '',
+      pfPhone: (s.pfDraft || s.profile || {}).phone || '',
+      pfAddr: (s.pfDraft || s.profile || {}).addr || '',
+      setPfName: e => this.editPf(d => { d.name = e.target.value; }),
+      setPfPhone: e => this.editPf(d => { d.phone = e.target.value; }),
+      setPfAddr: e => this.editPf(d => { d.addr = e.target.value; }),
+      savePf: () => this.saveProfile(),
+      pfSaveLabel: s.busy ? t.saving : t.pfSave,
+      pfSaveBg: s.busy ? '#a19786' : '#56633f',
+      pfMsg: s.pfMsg || '',
+      pfMsgDisplay: s.pfMsg ? 'block' : 'none',
+      pfMsgFg: s.pfOk ? '#3d472b' : '#8c491a',
+      pfOrdersMeta: t.ordersN((s.mine || []).length),
+      pfEmptyDisplay: (s.mine || []).length ? 'none' : 'block',
+      pfOrderRows: (s.mine || []).slice(0, 12).map(o => {
+        const st = t.statuses[o.step || 0];
+        return {
+          no: o.no,
+          total: o.total,
+          when: stamp(o.at),
+          where: o.where || '',
+          lines: (o.items || []).map(l => l.qty + '\u00d7 ' + l.name + ' \u00b7 ' + l.label),
+          status: o.cancelled ? t.cancelled : st.label,
+          stBg: o.cancelled ? '#eee7db' : (o.step || 0) >= 3 ? '#e1eecc' : '#ffe1d0',
+          stFg: o.cancelled ? '#8c491a' : (o.step || 0) >= 3 ? '#3d472b' : '#8c491a',
+          stBorder: o.cancelled ? '#a19786' : (o.step || 0) >= 3 ? '#56633f' : '#8c491a'
+        };
+      }),
       isExpired: s.screen === 'expired',
       isDash: s.screen === 'dash', isQueue: s.screen === 'queue', isInv: s.screen === 'inv', isCodes: s.screen === 'codes',
       isOwner: ['dash', 'queue', 'inv', 'codes', 'settings'].indexOf(s.screen) > -1,
@@ -3333,7 +3522,13 @@ class Component extends DCLogic {
         bg: n === dayPeak && n > 0 ? '#c67139' : '#a19786',
         value: String(n)
       })),
-      patternsDisplay: live.length >= 5 ? 'block' : 'none',
+      // Gated on the window, not on all history: picking Today with two orders
+      // in it would otherwise draw a very confident chart of two orders.
+      patternsDisplay: windowOrders.length >= 5 ? 'block' : 'none',
+      patternsTitle: t.patternsTitle + ' · ' + t.windowName[period].toLowerCase(),
+      fastestTitle: t.fastest + ' · ' + t.windowName[period].toLowerCase(),
+      thinWindowDisplay: windowOrders.length > 0 && windowOrders.length < 5 ? 'block' : 'none',
+      thinWindowNote: t.thinWindow(windowOrders.length),
       sizeRows: sizeRows.map(([label, n]) => ({
         label,
         value: Math.round((n / sizeTotal) * 100) + '%',
@@ -3627,7 +3822,7 @@ class Component extends DCLogic {
         tab('dash', t.tabs[0]), tab('queue', t.tabs[1]), tab('inv', t.tabs[2]),
         tab('codes', t.tabs[3]), tab('settings', t.tabs[4])
       ],
-      isClientNav: ['home', 'confirm', 'expired'].indexOf(s.screen) > -1,
+      isClientNav: ['home', 'confirm', 'expired', 'profile'].indexOf(s.screen) > -1,
       navHomeFg: s.screen === 'home' ? '#f5ead8' : '#a19786',
       navHomePill: s.screen === 'home' ? '#c67139' : 'rgba(245,234,216,.1)',
       navBagFg: s.cart.length ? '#f5ead8' : '#a19786',
