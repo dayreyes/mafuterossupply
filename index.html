@@ -1846,7 +1846,7 @@ const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = '2026-09-14.1200';
+const BUILD = '2026-09-16.1300';
 
 // Tap feedback for the keypad.
 //
@@ -2763,7 +2763,31 @@ class Component extends DCLogic {
     // could read $0 taken with $350 of cash underneath it.
     const DAY = 86400000;
     const nowMs = Date.now();
-    const midnight = new Date(); midnight.setHours(0, 0, 0, 0);
+    // Midnight where the SHOP is, not where the phone is.
+    //
+    // The server counts the day in the shop's timezone — it has to, because a
+    // UTC day rolled over at 8pm Florida time and dropped the evening's
+    // takings into tomorrow. If this used the phone's midnight instead, the
+    // week and month figures would disagree with today's whenever the owner
+    // travelled or his phone guessed wrong.
+    const shopTz = (cfg.hours && cfg.hours.tz) || '';
+    const midnight = (() => {
+      const d = new Date();
+      if (shopTz) {
+        try {
+          const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: shopTz, hour12: false,
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+          }).formatToParts(d);
+          const get = (t) => Number((parts.find(p => p.type === t) || {}).value);
+          const secondsIntoDay = (get('hour') % 24) * 3600 + get('minute') * 60 + get('second');
+          return new Date(d.getTime() - secondsIntoDay * 1000);
+        } catch (e) { /* unknown zone — fall through to the phone's day */ }
+      }
+      const local = new Date(); local.setHours(0, 0, 0, 0);
+      return local;
+    })();
     const WINDOWS = { today: midnight.getTime(), week: nowMs - 7 * DAY, month: nowMs - 30 * DAY };
     const period = WINDOWS[s.window] === undefined ? 'today' : s.window;
     const ms = (o) => new Date(o.at).getTime();

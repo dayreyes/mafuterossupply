@@ -608,6 +608,56 @@ async function viewLayer() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// The day ends where the shop is, not at midnight UTC
+//
+// The server's day was `new Date().toISOString().slice(0, 10)` — a UTC date.
+// Midnight UTC is 8pm in Florida, so the day rolled over mid-shift: an order
+// at 9pm was booked as tomorrow's. For an evening trade that is most of the
+// night's takings landing on the wrong day, the delivery capacity resetting
+// while he is still driving, and the evening's stops dropping off today's run.
+// ════════════════════════════════════════════════════════════════════════════
+async function shopDayBoundary() {
+  section('the shop day follows the shop, not UTC');
+  const { shopDay, defaultConfig } = cfgLib;
+  const fl = { hours: { tz: 'America/New_York' } };
+  const at = (iso) => new Date(iso);
+  ck('the default timezone is Florida\u2019s', defaultConfig().hours.tz === 'America/New_York',
+    defaultConfig().hours.tz);
+  // 01:00Z Tue 15 Sep is 9pm Mon 14 Sep in New York.
+  ck('9pm Monday is still Monday', shopDay(fl, at('2026-09-15T01:00:00Z')) === '2026-09-14',
+    shopDay(fl, at('2026-09-15T01:00:00Z')));
+  ck('and UTC would have called it Tuesday',
+    at('2026-09-15T01:00:00Z').toISOString().slice(0, 10) === '2026-09-15');
+  ck('11pm Monday is still Monday', shopDay(fl, at('2026-09-15T03:00:00Z')) === '2026-09-14');
+  ck('1am Tuesday is Tuesday', shopDay(fl, at('2026-09-15T05:00:00Z')) === '2026-09-15');
+  ck('an unknown timezone falls back rather than throwing',
+    /^\d{4}-\d{2}-\d{2}$/.test(shopDay({ hours: { tz: 'Nope/Nope' } }, at('2026-09-15T01:00:00Z'))));
+
+  section('an evening order counts towards tonight');
+  // Shop open around the clock so the hours gate cannot interfere.
+  const s = await openShop({
+    hours: { on: false, tz: 'America/New_York' },
+    zones: [{ name: 'Heights', mi: 4 }]
+  }, { stock: 400 });
+  const t = await s.asCustomer();
+  await call(orders, { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, t);
+  let list = await call(orders, { action: 'list' }, s.token);
+  const oid = list.orders[0].id;
+  await call(orders, { action: 'patch', id: oid, payOk: true }, s.token);
+  list = await call(orders, { action: 'list' }, s.token);
+  ck('a paid order lands in today\u2019s takings', list.takings.collected === 25, list.takings);
+
+  // Re-date it to 9pm shop time on the shop's current day: still today.
+  const day = shopDay({ hours: { tz: 'America/New_York' } });
+  const evening = new Date(day + 'T23:30:00Z');  // 7:30pm EDT / 6:30pm EST, same day either way
+  const stored = JSON.parse(mem.get('orders'));
+  stored[0].at = evening.toISOString();
+  mem.set('orders', JSON.stringify(stored));
+  list = await call(orders, { action: 'list' }, s.token);
+  ck('an order placed this evening is still counted today', list.takings.collected === 25, list.takings);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // Ids are unique, including within the same millisecond
 //
 // Records were identified by `prefix + Date.now().toString(36)`, so two created
@@ -663,7 +713,7 @@ async function uniqueIds() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-for (const suite of [storeHours, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, diagnose, viewLayer]) {
+for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, diagnose, viewLayer]) {
   await suite();
 }
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
