@@ -536,6 +536,23 @@ input,textarea,select{font-size:16px}
               </div>
             </div>
 
+            <!-- Asked here rather than on the way in.
+                 A permission prompt on first load is the thing everybody
+                 refuses on reflex, and browsers hold it against a site that
+                 does it. Here the reason is in front of them: they have just
+                 ordered, and the first thing the shop would tell them is that
+                 this order is ready. Asked once — say no and it does not come
+                 back. -->
+            <div style="display:{{ pushOfferDisplay }};width:100%;background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:16px 18px;text-align:left;box-shadow:4px 4px 0 rgba(32,30,29,.3);flex-direction:column">
+              <div style="font-family:'Caprasimo',serif;font-size:19px;color:#201e1d">{{ t.offerTitle }}</div>
+              <div style="font:500 12.5px/1.5 'Figtree';color:#645c50;margin-top:6px">{{ t.offerBody }}</div>
+              <div style="display:flex;gap:9px;margin-top:13px">
+                <div onClick="{{ acceptPush }}" style="flex:1;height:46px;border-radius:999px;background:#56633f;border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#f5ead8;font-family:'Caprasimo',serif;font-size:15px" style-active="box-shadow:0 0 0 #201e1d;transform:translate(3px,3px)">{{ t.offerYes }}</div>
+                <div onClick="{{ dismissPush }}" style="flex:none;padding:0 18px;height:46px;border-radius:999px;border:2px solid #a19786;background:#f5ead8;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 12.5px/1 'Figtree';color:#645c50" style-hover="background:#eee7db">{{ t.offerNo }}</div>
+              </div>
+              <div style="display:{{ pushMsgDisplay }};font:600 11.5px/1.45 'Figtree';color:{{ pushMsgFg }};margin-top:10px">{{ pushMsg }}</div>
+            </div>
+
             <div style="width:100%;background:#f5ead8;border:2px solid #201e1d;border-radius:24px;padding:16px 18px;text-align:left;box-shadow:4px 4px 0 rgba(32,30,29,.3)">
               <div style="display:flex;justify-content:space-between;align-items:baseline">
                 <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#82796a">{{ t.orderLabel }}</div>
@@ -1532,6 +1549,9 @@ const COPY = {
     stNotifKeys: 'Faltan las llaves VAPID en Netlify. Sin ellas no se manda nada — mira DEPLOY.md.',
     notifNames: { newStrain: 'Llegó algo nuevo', opened: 'Abrimos', run: 'Salió el delivery', orderStatus: 'Su orden se movió', lowStock: 'Se está acabando algo que compran' },
     notifWhen: { newStrain: 'Cuando metes una mata nueva al menú.', opened: 'Cuando la tienda abre.', run: 'Cuando prendes el run de hoy.', orderStatus: 'Solo al cliente de esa orden.', lowStock: 'Solo a quien ya la ha comprado.' },
+    offerTitle: '¿Te aviso cuando esté listo?',
+    offerBody: 'Te llega un mensaje cuando El Mafu tenga tu orden lista — y cuando entre algo nuevo al menú. Nada más.',
+    offerYes: 'Sí, avísame', offerNo: 'Ahora no',
     pushTitle: '¿Te avisamos?', pushBody: 'Cuando entra algo nuevo o abrimos, te llega un aviso. Nada más.',
     pushOn: 'Listo, te avisamos.', pushOff: 'Ya no te avisamos.',
     pushDenied: 'Tu teléfono no dio permiso. Búscalo en los ajustes del navegador.',
@@ -1773,6 +1793,9 @@ const COPY = {
     stNotifKeys: 'The VAPID keys are missing in Netlify. Nothing can send without them — see DEPLOY.md.',
     notifNames: { newStrain: 'Something new landed', opened: 'We opened', run: 'Delivery is rolling', orderStatus: 'Their order moved', lowStock: 'Something they buy is nearly gone' },
     notifWhen: { newStrain: 'When you add a strain to the menu.', opened: 'When the shop opens.', run: 'When you switch tonight\u2019s run on.', orderStatus: 'Only to the customer on that order.', lowStock: 'Only to people who have bought it.' },
+    offerTitle: 'Want a nudge when it\u2019s ready?',
+    offerBody: 'We\u2019ll message you when El Mafu has your order ready — and when something new lands on the menu. Nothing else.',
+    offerYes: 'Yes, tell me', offerNo: 'Not now',
     pushTitle: 'Want the heads up?', pushBody: 'When something new lands or we open, you get a nudge. Nothing else.',
     pushOn: 'Done — we\u2019ll let you know.', pushOff: 'Switched off.',
     pushDenied: 'Your phone refused permission. Turn it back on in browser settings.',
@@ -1980,7 +2003,7 @@ const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = '2026-09-16.1900';
+const BUILD = '2026-09-18.1400';
 
 // Tap feedback for the keypad.
 //
@@ -2004,6 +2027,9 @@ const buzz = (ms = 8) => {
 
 const TOKEN_KEY = 'mf-token';
 const LANG_KEY = 'mf-lang';
+// Whether this person has already been offered automatic messages. Per device,
+// because the subscription is per device.
+const PUSH_ASKED_KEY = 'mf-push-asked';
 
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -2055,6 +2081,7 @@ class Component extends DCLogic {
     pfDraft: null,
     pushMsg: '',
     pushOk: false,
+    pushAsked: false,
     listeners: 0,
     pushReady: false,
     pfMsg: '',
@@ -2189,6 +2216,7 @@ class Component extends DCLogic {
 
   componentDidMount() {
     const saved = store.get(LANG_KEY);
+    if (store.get(PUSH_ASKED_KEY)) this.state.pushAsked = true;
     if (saved === 'es' || saved === 'en') this.setState({ lang: saved });
 
     // The owner hands out a link ending in #signup. Honour it: someone opening
@@ -2277,6 +2305,17 @@ class Component extends DCLogic {
   }
 
   // ── loading ──────────────────────────────────────────────────────────────
+
+  // Offered once, at the moment it makes sense, and never again if refused.
+  dismissPush() {
+    store.set(PUSH_ASKED_KEY, '1');
+    this.setState({ pushAsked: true, pushMsg: '' });
+  }
+  acceptPush() {
+    store.set(PUSH_ASKED_KEY, '1');
+    this.setState({ pushAsked: true });
+    this.togglePush();
+  }
 
   // ── automatic messages, customer side ─────────────────────────────────
   //
@@ -3231,6 +3270,13 @@ class Component extends DCLogic {
 
       // Customer side. Hidden entirely when the shop does not send anything,
       // so nobody is offered a switch that can do nothing.
+      // Only when there is something to offer: the shop sends, this browser can
+      // receive, they have not been asked, and they are not already signed up.
+      pushOfferDisplay: cfg.notifsOn && !s.pushAsked && !(s.profile && s.profile.notify) &&
+        typeof window !== 'undefined' && 'PushManager' in window ? 'flex' : 'none',
+      acceptPush: () => this.acceptPush(),
+      dismissPush: () => this.dismissPush(),
+
       pfNotifDisplay: cfg.notifsOn ? 'block' : 'none',
       pushBg: s.profile && s.profile.notify ? '#56633f' : '#a19786',
       pushJustify: s.profile && s.profile.notify ? 'flex-end' : 'flex-start',

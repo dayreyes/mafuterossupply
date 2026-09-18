@@ -7,13 +7,12 @@
 import { route, ok, fail, unauthorized, str, num } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner } from './lib/session.js';
-import { defaultConfig, cleanConfig, cleanProduct, publicConfig, publicProduct, migrateProduct, shopOpen } from './lib/config.js';
+import { defaultConfig, cleanConfig, cleanProduct, publicConfig, publicProduct, migrateProduct, shopOpen, loadConfig } from './lib/config.js';
 import {
   send, configured as telegramConfigured,
   pushTo, pushConfigured, everyoneListening, listenerCount, newStrainMsg, openedMsg, runMsg
 } from './lib/notify.js';
 
-const loadConfig = () => read(KEYS.config, defaultConfig());
 
 // A shop is "set up" only when a customer could actually complete an order:
 // it has a name, at least one enabled payment method, and something to sell.

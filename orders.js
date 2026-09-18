@@ -12,7 +12,7 @@
 import { route, ok, fail, unauthorized, str, num, newId } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
-import { defaultConfig, mileFee, migrateProduct, shopOpen, shopDay } from './lib/config.js';
+import { mileFee, migrateProduct, shopOpen, shopDay, loadConfig } from './lib/config.js';
 import {
   sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText,
   pushTo, orderStatusMsg, lowStockCustomerMsg
@@ -86,7 +86,7 @@ function buildRun(orders, cfg) {
 // screen used to get back only the order list, so those numbers sat wrong until
 // something else forced a reload.
 async function snapshot(orders) {
-  const cfg = await read(KEYS.config, defaultConfig());
+  const cfg = await loadConfig();
   const day = shopDay(cfg);
   const todays = orders.filter((o) => String(o.at || '').slice(0, 10) === day);
   return {
@@ -122,7 +122,7 @@ export default async (req) => route(req, {
     const session = await requireClient(req);
     if (!session) return unauthorized('Your session expired — enter your code again.');
 
-    const cfg = await read(KEYS.config, defaultConfig());
+    const cfg = await loadConfig();
     if (!cfg.setupComplete) return fail('This shop is not open yet.');
 
     // Closed is closed, decided here rather than in the browser. The menu hides
@@ -297,7 +297,7 @@ export default async (req) => route(req, {
     // messages are noise.
     const now = orders.find((o) => o.id === id);
     const moved = before && now && (now.step || 0) !== (before.step || 0);
-    const cfg = await read(KEYS.config, defaultConfig());
+    const cfg = await loadConfig();
     if (moved && now.clientCode && cfg.notifs && cfg.notifs.orderStatus) {
       const STEPS = ['', 'He is packing it.', 'It is ready.', 'Handed over. Enjoy.'];
       const line = STEPS[now.step || 0];

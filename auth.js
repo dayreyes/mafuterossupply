@@ -4,7 +4,7 @@
 
 import { route, json, ok, fail, tooMany, clientIp, str } from './lib/http.js';
 import { read, write, mutate, available, diagnose, KEYS } from './lib/store.js';
-import { defaultConfig } from './lib/config.js';
+import { loadConfig } from './lib/config.js';
 import {
   OWNER_PIN_LEN, CLIENT_CODE_LEN, hashPin, verifyPin, isOwnerPin, isClientCode,
   createSession, readSession, destroySession, bearer,
@@ -49,7 +49,7 @@ export default async (req) => {
         error: 'Netlify Blobs is not available for this site — see DEPLOY.md.'
       });
     }
-    const cfg = await read(KEYS.config, defaultConfig());
+    const cfg = await loadConfig();
     const products = await read(KEYS.products, []);
     return ok({
       backend: true,
@@ -93,7 +93,7 @@ export default async (req) => {
 
     await write(KEYS.auth, hashPin(pin));
     await recordSuccess('setup', ip);
-    const cfg = await read(KEYS.config, defaultConfig());
+    const cfg = await loadConfig();
     if (body.shopName) await write(KEYS.config, { ...cfg, shopName: str(body.shopName, 60) });
 
     const session = await createSession('owner');

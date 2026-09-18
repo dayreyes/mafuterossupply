@@ -459,6 +459,64 @@ async function customerProfile() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// New settings reach a shop that already exists
+//
+// Stored config is whatever was written the last time the owner pressed save,
+// so every field added afterwards is absent from it and stays absent. That is
+// not theoretical: it made the customer notification opt-in invisible on a
+// shop that had been trading for a month, because `notifs` was not in the
+// stored object and "does this shop send anything" therefore answered no.
+// ════════════════════════════════════════════════════════════════════════════
+async function configMigration() {
+  section('a config written before a feature existed still works');
+  reset();
+  // Exactly the shape a month-old shop has on disk: no hours, no notifs.
+  mem.set('config', JSON.stringify({
+    shopName: "Mafutero's Supply", pickupNote: 'Text him', contact: '656',
+    payments: [
+      { id: 'zelle', label: 'Zelle', handle: 'x', fast: true, enabled: true },
+      { id: 'cash', label: 'Cash', labelEs: 'Efectivo', handle: '', fast: false, enabled: true }
+    ],
+    zones: [], run: { on: false, start: '18:00', end: '21:00', max: 15, zones: [] },
+    fees: { freeMiles: 5, midMiles: 10, midFee: 5, farBase: 6, farStepMiles: 5, farStepFee: 1 },
+    holdMinutes: 30, setupComplete: true
+  }));
+  mem.set('products', JSON.stringify([{
+    id: 'p1', name: 'Gelato 33', sec: 'Indoors', type: 'Hybrid', unit: 'g', thc: '20%', cbd: '\u2014',
+    bg: '#e1eecc', notes: '', effects: [], tiers: [{ label: '3.5g', grams: 3.5, price: 25 }],
+    foot: '', stock: 100, active: true, at: new Date().toISOString()
+  }]));
+
+  const menu = await call(shop, { action: 'menu' });
+  ck('the menu still loads', menu.ok === true, menu);
+  ck('the notification opt-in is offered', menu.config.notifsOn === true, menu.config.notifsOn);
+  ck('opening hours have real defaults, not blanks',
+    menu.config.hours.open === '10:00' && menu.config.hours.close === '22:00', menu.config.hours);
+
+  // The owner's view gets the whole block, not just the summary.
+  // No shopName here: setup writes that field, which would mask what is being
+  // checked — that the settings already on disk survive the merge untouched.
+  const su = await call(auth, { action: 'setup', pin: '481902' });
+  const cfg = (await call(shop, { action: 'config' }, su.token)).config;
+  ck('the owner sees every trigger', Object.keys(cfg.notifs || {}).length === 5, cfg.notifs);
+  ck('and the timezone', !!(cfg.hours && cfg.hours.tz), cfg.hours);
+  ck('while the settings that were stored are untouched',
+    cfg.shopName === "Mafutero's Supply" && cfg.holdMinutes === 30 && cfg.pickupNote === 'Text him',
+    { name: cfg.shopName, hold: cfg.holdMinutes, note: cfg.pickupNote });
+
+  section('a field added inside a block arrives too');
+  // `run` stored without `max` — the shape before that field existed.
+  reset();
+  mem.set('config', JSON.stringify({
+    shopName: 'T', payments: [{ id: 'cash', label: 'Cash', fast: false, enabled: true }],
+    zones: [], run: { on: true, start: '18:00', end: '21:00', zones: [] }, setupComplete: true
+  }));
+  const c2 = cfgLib.migrateConfig(JSON.parse(mem.get('config')));
+  ck('the missing sub-field is filled from defaults', c2.run.max === 15, c2.run);
+  ck('without overwriting what was stored', c2.run.on === true && c2.run.start === '18:00', c2.run);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // Automatic messages to customers
 //
 // The owner writes none of these, which is exactly why they have to be right:
@@ -930,7 +988,7 @@ async function uniqueIds() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, automaticMessages, diagnose, viewLayer]) {
+for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, configMigration, automaticMessages, diagnose, viewLayer]) {
   await suite();
 }
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');

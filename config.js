@@ -6,6 +6,7 @@
 // products, no zones, no payment handles. Nothing fake ever reaches a customer.
 
 import { str, num, newId } from './http.js';
+import { read, KEYS } from './store.js';
 
 export const defaultConfig = () => ({
   shopName: '',
@@ -57,6 +58,32 @@ export const defaultConfig = () => ({
   },
   setupComplete: false
 });
+
+// Defaults reach a shop that already exists.
+//
+// Stored config is whatever was written the last time the owner pressed save,
+// so any field added afterwards is simply absent from it — and stays absent
+// until he happens to open Settings and save again. That is how the customer
+// opt-in came to be invisible on the only shop that matters: `notifs` was not
+// in the stored object, so "does this shop send anything" answered no and the
+// switch was never offered to anybody.
+//
+// Merged on READ rather than written back, because this has to be right for a
+// customer loading the menu, not only for an owner who happens to save.
+export function migrateConfig(stored) {
+  const d = defaultConfig();
+  const c = { ...d, ...(stored || {}) };
+  // One level down as well, or a field added inside run/hours/notifs goes
+  // missing in exactly the same way.
+  for (const key of ['run', 'fees', 'hours', 'notifs']) {
+    c[key] = { ...d[key], ...((stored && stored[key]) || {}) };
+  }
+  return c;
+}
+
+// The one way config should ever be read. Everything that reads it directly
+// gets the stale-shape problem above.
+export const loadConfig = async () => migrateConfig(await read(KEYS.config, null));
 
 export const SECTIONS = ['Flower', 'Indoors', 'Concentrated', 'Vapes', 'Edibles'];
 export const TYPES = ['Hybrid', 'Indica', 'Sativa', 'Cart'];
