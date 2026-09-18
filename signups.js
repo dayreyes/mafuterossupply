@@ -10,7 +10,7 @@
 import { route, ok, fail, unauthorized, tooMany, clientIp, str, newId } from './lib/http.js';
 import { read, mutate, KEYS } from './lib/store.js';
 import { requireOwner, checkThrottle, recordFailure } from './lib/session.js';
-import { defaultConfig } from './lib/config.js';
+import { loadConfig } from './lib/config.js';
 import { mintCode, withHistory } from './lib/invites.js';
 import { sendAll, signupText, codeText } from './lib/notify.js';
 
@@ -45,7 +45,7 @@ export default async (req) => route(req, {
     const gate = await checkThrottle('signup', ip, false);
     if (!gate.allowed) return tooMany('Too many requests. Try again later.', gate.retryAfter);
 
-    const cfg = await read(KEYS.config, defaultConfig());
+    const cfg = await loadConfig();
     if (!cfg.setupComplete) return fail('This shop is not taking signups yet.');
 
     const name = str(body.name, 60);
