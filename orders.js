@@ -12,11 +12,13 @@
 import { route, ok, fail, unauthorized, str, num, newId } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
-import { defaultConfig, mileFee, migrateProduct, shopOpen } from './lib/config.js';
-import { sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText } from './lib/notify.js';
+import { defaultConfig, mileFee, migrateProduct, shopOpen, shopDay } from './lib/config.js';
+import {
+  sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText,
+  pushTo, orderStatusMsg, lowStockCustomerMsg
+} from './lib/notify.js';
 
 const money = (n) => '$' + Number(n).toLocaleString('en-US');
-const today = () => new Date().toISOString().slice(0, 10);
 
 // "Low" means something different per unit: three grams of flower is almost
 // gone, three carts is a normal shelf.
@@ -34,8 +36,9 @@ const fmtStock = (n, unit) => (unit === 'ea' ? String(n) : (Math.round(n * 10) /
 
 // Delivery capacity is derived from the orders actually taken today rather than
 // a counter someone has to remember to reset.
-const stopsToday = (orders) =>
-  orders.filter((o) => o.mode === 'delivery' && !o.cancelled && String(o.at || '').slice(0, 10) === today()).length;
+const stopsToday = (orders, cfg) =>
+  orders.filter((o) => o.mode === 'delivery' && !o.cancelled &&
+    String(o.at || '').slice(0, 10) === shopDay(cfg)).length;
 
 // Today's delivery run, grouped so he drives one area at a time.
 //
@@ -49,7 +52,7 @@ const stopsToday = (orders) =>
 // and every customer's home address handed to a third party. Grouping by area
 // removes the crossing-town problem, which is the expensive part.
 function buildRun(orders, cfg) {
-  const day = today();
+  const day = shopDay(cfg);
   const live = orders.filter((o) =>
     o.mode === 'delivery' && !o.cancelled && !o.archived && (o.step || 0) < 3 &&
     String(o.at || '').slice(0, 10) === day);
@@ -84,11 +87,11 @@ function buildRun(orders, cfg) {
 // something else forced a reload.
 async function snapshot(orders) {
   const cfg = await read(KEYS.config, defaultConfig());
-  const day = today();
+  const day = shopDay(cfg);
   const todays = orders.filter((o) => String(o.at || '').slice(0, 10) === day);
   return {
     orders: orders.slice(0, 300),
-    stops: stopsToday(orders),
+    stops: stopsToday(orders, cfg),
     max: cfg.run.max,
     run: buildRun(orders, cfg),
     // Split deliberately: what is banked, and what is still owed.
@@ -181,7 +184,7 @@ export default async (req) => route(req, {
 
     if (mode === 'delivery') {
       if (!cfg.run.on) return fail('Delivery is off today.');
-      if (stopsToday(orders) >= cfg.run.max) return fail('Delivery is full today — pickup only.');
+      if (stopsToday(orders, cfg) >= cfg.run.max) return fail('Delivery is full today — pickup only.');
       const zone = cfg.zones.find((z) => z.id === str(body.zone, 24) && cfg.run.zones.includes(z.id));
       if (!zone) return fail('Pick a delivery area.');
       zoneId = zone.id;
@@ -235,7 +238,7 @@ export default async (req) => route(req, {
         const taken = needed[p.id] || 0;
         if (!taken) return p;
         const left = Math.max(0, (p.stock || 0) - taken);
-        if (left <= lowStockAt(p.unit)) low.push({ name: p.name, left: fmtStock(left, p.unit), out: left <= 0 });
+        if (left <= lowStockAt(p.unit)) low.push({ pid: p.id, name: p.name, left: fmtStock(left, p.unit), out: left <= 0 });
         return { ...p, stock: left };
       })
     );
@@ -247,6 +250,21 @@ export default async (req) => route(req, {
       orderText({ ...order, when: 'just now' }, cfg.shopName),
       ...low.map((l) => (l.out ? soldOutText(l.name) : lowStockText(l.name, l.left)))
     ]);
+
+    // "Something you buy is nearly gone" goes only to people who have actually
+    // bought that strain before — a shop-wide alert about someone else's
+    // favourite is the kind of message that gets notifications switched off.
+    // Never when it has already run out: nothing to come in for.
+    if (cfg.notifs && cfg.notifs.lowStock) {
+      for (const l of low.filter((x) => !x.out)) {
+        const past = (await read(KEYS.orders, []))
+          .filter((o) => !o.cancelled && o.clientCode &&
+            (o.items || []).some((i) => i.pid === l.pid))
+          .map((o) => o.clientCode);
+        const regulars = [...new Set(past)].filter((c) => c !== session.code);
+        if (regulars.length) await pushTo(regulars, lowStockCustomerMsg(l.name, l.left));
+      }
+    }
 
     return ok({ order });
   },
@@ -268,9 +286,23 @@ export default async (req) => route(req, {
   async advance(body, req) {
     if (!(await requireOwner(req))) return unauthorized();
     const id = str(body.id, 40);
+    // What it was before, so a step that did not actually move stays silent.
+    const before = (await read(KEYS.orders, [])).find((o) => o.id === id);
     const orders = await mutate(KEYS.orders, [], (list) =>
       list.map((o) => (o.id === id && !o.cancelled ? { ...o, step: Math.min(3, (o.step || 0) + 1) } : o))
     );
+    // The customer hears about their own order and nobody else's — and only
+    // when it really moved. Advancing an order already at the last step is a
+    // no-op, and "handed over" arriving twice is how somebody decides these
+    // messages are noise.
+    const now = orders.find((o) => o.id === id);
+    const moved = before && now && (now.step || 0) !== (before.step || 0);
+    const cfg = await read(KEYS.config, defaultConfig());
+    if (moved && now.clientCode && cfg.notifs && cfg.notifs.orderStatus) {
+      const STEPS = ['', 'He is packing it.', 'It is ready.', 'Handed over. Enjoy.'];
+      const line = STEPS[now.step || 0];
+      if (line) await pushTo([now.clientCode], orderStatusMsg(now, line));
+    }
     return ok(await snapshot(orders));
   },
 

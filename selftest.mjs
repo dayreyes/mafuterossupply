@@ -368,6 +368,223 @@ async function customerHistory() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// A customer's own profile — and only their own
+//
+// Names and addresses were the owner's to fix by hand from whatever he heard
+// down the phone, so customers can now correct their own. That makes scoping
+// the load-bearing part: these records hold every customer's name, number and
+// home address, and the code being read or written comes from the session, not
+// from the request body, so naming somebody else's code cannot reach it.
+// ════════════════════════════════════════════════════════════════════════════
+async function customerProfile() {
+  const s = await openShop({}, { stock: 300 });
+  const mk = async (name, contact) => {
+    const c = await call(codes, { action: 'issue', name }, s.token);
+    // Give the row an address the way approving a signup would.
+    const list = await call(codes, { action: 'list' }, s.token);
+    const row = list.codes.find(x => x.code === c.code);
+    row.phone = contact.phone; row.addr = contact.addr;
+    mem.set('codes', JSON.stringify(list.codes.map(x => (x.code === c.code ? row : x))));
+    const tok = (await call(auth, { action: 'unlock', code: c.code })).token;
+    return { code: c.code, token: tok };
+  };
+  const ana = await mk('Ana', { phone: '8135550101', addr: '1 Ana Street' });
+  const tito = await mk('Tito', { phone: '8135550188', addr: '2 Tito Road' });
+
+  section('a customer sees their own details');
+  let r = await call(codes, { action: 'me' }, ana.token);
+  ck('their own row comes back', r.ok === true && r.profile.name === 'Ana', r);
+  ck('with the address to correct', r.profile.addr === '1 Ana Street', r.profile);
+  ck('and nothing else is attached', Object.keys(r).sort().join(',') === 'ok,profile', Object.keys(r));
+
+  section('and cannot reach anybody else\u2019s');
+  const dump = JSON.stringify(r);
+  ck('no other customer\u2019s name', !dump.includes('Tito'), dump);
+  ck('no other customer\u2019s address', !dump.includes('Tito Road'), dump);
+  // A forged body naming the other code must not redirect the write.
+  r = await call(codes, { action: 'saveMe', code: tito.code, name: 'Hijacked', addr: 'nowhere' }, ana.token);
+  ck('a forged code in the body is ignored', r.ok === true && r.profile.name === 'Hijacked', r);
+  const titoRow = (await call(codes, { action: 'me' }, tito.token)).profile;
+  ck('the other customer is untouched', titoRow.name === 'Tito' && titoRow.addr === '2 Tito Road', titoRow);
+
+  section('an owner session is not a customer session');
+  r = await call(codes, { action: 'me' }, s.token);
+  ck('the owner cannot use the customer endpoint', r.ok === false, r);
+  r = await call(codes, { action: 'me' });
+  ck('nor can a stranger with no session', r.ok === false, r);
+
+  section('what they may and may not change');
+  r = await call(codes, { action: 'saveMe', name: 'Ana Ruiz', phone: '8135559999', addr: '9 New Place' }, ana.token);
+  ck('name, phone and address all save', r.profile.name === 'Ana Ruiz' && r.profile.addr === '9 New Place', r.profile);
+  const owner = (await call(codes, { action: 'list' }, s.token)).codes.find(c => c.code === ana.code);
+  ck('the owner sees the correction', owner.addr === '9 New Place', owner.addr);
+  ck('the code itself is unchanged', owner.code === ana.code);
+  r = await call(codes, { action: 'saveMe', name: 'A', addr: 'x' }, ana.token);
+  ck('a one-letter name is refused', r.ok === false, r);
+  // Revoking must close the door on the profile too.
+  await call(codes, { action: 'revoke', code: ana.code, active: false }, s.token);
+  r = await call(codes, { action: 'me' }, ana.token);
+  ck('a revoked customer keeps no access to their row', r.ok === false || r.profile === undefined, r);
+
+  section('revoking actually shuts the door');
+  // Live bug until now: revoking stopped new sign-ins and nothing else, so a
+  // session already open kept buying for its full thirty days. Revoke is the
+  // owner's only way to cut somebody off.
+  const bea = await mk('Bea', { phone: '8135550222', addr: '3 Bea Way' });
+  let placed = await call(orders, { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, bea.token);
+  ck('a live customer can buy', placed.ok === true, placed);
+  await call(codes, { action: 'revoke', code: bea.code, active: false }, s.token);
+  placed = await call(orders, { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, bea.token);
+  ck('the same session cannot buy once revoked', placed.ok === false, placed);
+  ck('nor read their own record', (await call(codes, { action: 'me' }, bea.token)).ok === false);
+  ck('nor their order history', (await call(orders, { action: 'mine' }, bea.token)).ok === false);
+  ck('and the code will not open a new session',
+    (await call(auth, { action: 'unlock', code: bea.code })).ok === false);
+  // Switching them back on restores the same session rather than stranding them.
+  await call(codes, { action: 'revoke', code: bea.code, active: true }, s.token);
+  ck('turning them back on restores access',
+    (await call(codes, { action: 'me' }, bea.token)).ok === true);
+  // Deleting is final for open sessions too.
+  const cid = await mk('Gone', { phone: '1', addr: 'x' });
+  await call(codes, { action: 'remove', code: cid.code }, s.token);
+  ck('a deleted code closes its open session as well',
+    (await call(codes, { action: 'me' }, cid.token)).ok === false);
+
+  section('their past orders are their own');
+  const t2 = (await call(auth, { action: 'unlock', code: tito.code })).token;
+  await call(orders, { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, t2);
+  const mine = await call(orders, { action: 'mine' }, t2);
+  ck('they see the order they placed', mine.orders.length === 1, mine.orders.length);
+  ck('and nobody else\u2019s', mine.orders.every(o => o.clientCode === tito.code), mine.orders.map(o => o.clientCode));
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// Automatic messages to customers
+//
+// The owner writes none of these, which is exactly why they have to be right:
+// a message sent to the wrong person, or one nobody asked for, is how a shop
+// gets its notifications switched off for good and never finds out.
+//
+// Two gates, both of which must say yes — the shop has the kind switched on,
+// and that customer asked for messages — and neither party can volunteer the
+// other into it.
+// ════════════════════════════════════════════════════════════════════════════
+async function automaticMessages() {
+  process.env.VAPID_PUBLIC_KEY = 'BK0H0vUxHbxqj2219ZCVKDTuTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTES';
+  process.env.VAPID_PRIVATE_KEY = 'testprivatekeytestprivatekeytestprivatekey1';
+
+  // Every push attempt is captured instead of leaving the machine.
+  const sentTo = [];
+  const webpush = (await import('web-push')).default;
+  const realSend = webpush.sendNotification;
+  webpush.sendNotification = async (sub, body) => {
+    sentTo.push({ endpoint: sub.endpoint, msg: JSON.parse(body) });
+    return { statusCode: 201 };
+  };
+  const during = async (fn) => { const from = sentTo.length; await fn(); return sentTo.slice(from); };
+  const SUB = (who) => ({ endpoint: 'https://push.test/' + who, keys: { p256dh: 'k'.repeat(87), auth: 'a'.repeat(22) } });
+
+  const s = await openShop({ hours: { on: false } }, { stock: 400 });
+  const join = async (name, wants) => {
+    const c = await call(codes, { action: 'issue', name }, s.token);
+    const tok = (await call(auth, { action: 'unlock', code: c.code })).token;
+    if (wants) await call(codes, { action: 'notify', on: true, sub: SUB(name) }, tok);
+    return { code: c.code, token: tok, name };
+  };
+  const ana = await join('ana', true);
+  const tito = await join('tito', true);
+  const quiet = await join('quiet', false);
+
+  section('only the people who asked');
+  let msgs = await during(() => call(shop, {
+    action: 'saveProduct',
+    product: { name: 'Blackberry Gelato', sec: 'Indoors', stock: 60, tiers: [{ label: '3.5g', grams: 3.5, price: 25 }] }
+  }, s.token));
+  ck('a new strain reaches the two who opted in', msgs.length === 2, msgs.map(m => m.endpoint));
+  ck('and never the one who did not',
+    !msgs.some(m => /quiet/.test(m.endpoint)), msgs.map(m => m.endpoint));
+  ck('the message names the strain', /Blackberry Gelato/.test(msgs[0].msg.body), msgs[0].msg);
+
+  section('editing is not news');
+  const prods = (await call(shop, { action: 'config' }, s.token)).products;
+  const bb = prods.find(p => p.name === 'Blackberry Gelato');
+  msgs = await during(() => call(shop, {
+    action: 'saveProduct',
+    product: { id: bb.id, name: 'Blackberry Gelato', sec: 'Indoors', stock: 90, tiers: bb.tiers }
+  }, s.token));
+  ck('changing an existing strain sends nothing', msgs.length === 0, msgs);
+
+  section('the owner can switch a kind off');
+  const cfg = (await call(shop, { action: 'config' }, s.token)).config;
+  await call(shop, { action: 'saveConfig', config: { ...cfg, notifs: { ...cfg.notifs, newStrain: false } } }, s.token);
+  msgs = await during(() => call(shop, {
+    action: 'saveProduct',
+    product: { name: 'Jelly Donut', sec: 'Indoors', stock: 60, tiers: [{ label: '3.5g', grams: 3.5, price: 25 }] }
+  }, s.token));
+  ck('with the kind off, nothing goes out', msgs.length === 0, msgs);
+
+  section('an order update goes to that customer only');
+  const placed = await call(orders, { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, ana.token);
+  msgs = await during(() => call(orders, { action: 'advance', id: placed.order.id }, s.token));
+  ck('one message, to the person who ordered', msgs.length === 1 && /ana/.test(msgs[0].endpoint), msgs.map(m => m.endpoint));
+  ck('and it says what happened', /packing/i.test(msgs[0].msg.body), msgs[0].msg);
+  // Walk it to the end: the last advance is a no-op and must stay silent.
+  await call(orders, { action: 'advance', id: placed.order.id }, s.token);
+  await call(orders, { action: 'advance', id: placed.order.id }, s.token);
+  msgs = await during(() => call(orders, { action: 'advance', id: placed.order.id }, s.token));
+  ck('a step that cannot move says nothing', msgs.length === 0, msgs);
+
+  section('switching off means off');
+  msgs = await during(() => call(codes, { action: 'notify', on: false }, tito.token));
+  const after = await call(codes, { action: 'me' }, tito.token);
+  ck('the switch is off', after.profile.notify === false, after.profile);
+  ck('and the devices are dropped with it', after.profile.devices === 0, after.profile);
+  const cfg2 = (await call(shop, { action: 'config' }, s.token)).config;
+  await call(shop, { action: 'saveConfig', config: { ...cfg2, notifs: { ...cfg2.notifs, newStrain: true } } }, s.token);
+  msgs = await during(() => call(shop, {
+    action: 'saveProduct',
+    product: { name: 'Gumbo', sec: 'Indoors', stock: 60, tiers: [{ label: '3.5g', grams: 3.5, price: 25 }] }
+  }, s.token));
+  ck('someone switched off hears nothing', !msgs.some(m => /tito/.test(m.endpoint)), msgs.map(m => m.endpoint));
+
+  section('a revoked customer is not a customer');
+  await call(codes, { action: 'revoke', code: ana.code, active: false }, s.token);
+  msgs = await during(() => call(shop, {
+    action: 'saveProduct',
+    product: { name: 'Zkittlez', sec: 'Indoors', stock: 60, tiers: [{ label: '3.5g', grams: 3.5, price: 25 }] }
+  }, s.token));
+  ck('revoking stops the messages too', !msgs.some(m => /ana/.test(m.endpoint)), msgs.map(m => m.endpoint));
+
+  section('a device that has gone is forgotten');
+  await call(codes, { action: 'revoke', code: ana.code, active: true }, s.token);
+  webpush.sendNotification = async (sub) => {
+    if (/ana/.test(sub.endpoint)) { const e = new Error('gone'); e.statusCode = 410; throw e; }
+    return { statusCode: 201 };
+  };
+  await call(shop, {
+    action: 'saveProduct',
+    product: { name: 'Runtz', sec: 'Indoors', stock: 60, tiers: [{ label: '3.5g', grams: 3.5, price: 25 }] }
+  }, s.token);
+  const anaNow = await call(codes, { action: 'me' }, ana.token);
+  ck('a subscription the push service rejects is pruned', anaNow.profile.devices === 0, anaNow.profile);
+
+  section('with no keys configured, nothing is attempted');
+  delete process.env.VAPID_PUBLIC_KEY;
+  delete process.env.VAPID_PRIVATE_KEY;
+  const r = await call(codes, { action: 'notify', on: true, sub: SUB('nope') }, quiet.token);
+  ck('subscribing is refused rather than half-working', r.ok === false, r);
+  ck('and the owner screen is told it cannot send',
+    (await call(shop, { action: 'config' }, s.token)).pushReady === false);
+
+  section('a malformed subscription is refused once, not every send');
+  process.env.VAPID_PUBLIC_KEY = 'x'; process.env.VAPID_PRIVATE_KEY = 'y';
+  const bad = await call(codes, { action: 'notify', on: true, sub: { endpoint: 'not-a-url' } }, quiet.token);
+  ck('a junk endpoint is rejected', bad.ok === false, bad);
+  delete process.env.VAPID_PUBLIC_KEY; delete process.env.VAPID_PRIVATE_KEY;
+  webpush.sendNotification = realSend;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // The storage diagnostic, and what it may not say
 //
 // GET .../auth?diag=1 separates a store that cannot be opened from a reachable
@@ -608,6 +825,56 @@ async function viewLayer() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// The day ends where the shop is, not at midnight UTC
+//
+// The server's day was `new Date().toISOString().slice(0, 10)` — a UTC date.
+// Midnight UTC is 8pm in Florida, so the day rolled over mid-shift: an order
+// at 9pm was booked as tomorrow's. For an evening trade that is most of the
+// night's takings landing on the wrong day, the delivery capacity resetting
+// while he is still driving, and the evening's stops dropping off today's run.
+// ════════════════════════════════════════════════════════════════════════════
+async function shopDayBoundary() {
+  section('the shop day follows the shop, not UTC');
+  const { shopDay, defaultConfig } = cfgLib;
+  const fl = { hours: { tz: 'America/New_York' } };
+  const at = (iso) => new Date(iso);
+  ck('the default timezone is Florida\u2019s', defaultConfig().hours.tz === 'America/New_York',
+    defaultConfig().hours.tz);
+  // 01:00Z Tue 15 Sep is 9pm Mon 14 Sep in New York.
+  ck('9pm Monday is still Monday', shopDay(fl, at('2026-09-15T01:00:00Z')) === '2026-09-14',
+    shopDay(fl, at('2026-09-15T01:00:00Z')));
+  ck('and UTC would have called it Tuesday',
+    at('2026-09-15T01:00:00Z').toISOString().slice(0, 10) === '2026-09-15');
+  ck('11pm Monday is still Monday', shopDay(fl, at('2026-09-15T03:00:00Z')) === '2026-09-14');
+  ck('1am Tuesday is Tuesday', shopDay(fl, at('2026-09-15T05:00:00Z')) === '2026-09-15');
+  ck('an unknown timezone falls back rather than throwing',
+    /^\d{4}-\d{2}-\d{2}$/.test(shopDay({ hours: { tz: 'Nope/Nope' } }, at('2026-09-15T01:00:00Z'))));
+
+  section('an evening order counts towards tonight');
+  // Shop open around the clock so the hours gate cannot interfere.
+  const s = await openShop({
+    hours: { on: false, tz: 'America/New_York' },
+    zones: [{ name: 'Heights', mi: 4 }]
+  }, { stock: 400 });
+  const t = await s.asCustomer();
+  await call(orders, { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, t);
+  let list = await call(orders, { action: 'list' }, s.token);
+  const oid = list.orders[0].id;
+  await call(orders, { action: 'patch', id: oid, payOk: true }, s.token);
+  list = await call(orders, { action: 'list' }, s.token);
+  ck('a paid order lands in today\u2019s takings', list.takings.collected === 25, list.takings);
+
+  // Re-date it to 9pm shop time on the shop's current day: still today.
+  const day = shopDay({ hours: { tz: 'America/New_York' } });
+  const evening = new Date(day + 'T23:30:00Z');  // 7:30pm EDT / 6:30pm EST, same day either way
+  const stored = JSON.parse(mem.get('orders'));
+  stored[0].at = evening.toISOString();
+  mem.set('orders', JSON.stringify(stored));
+  list = await call(orders, { action: 'list' }, s.token);
+  ck('an order placed this evening is still counted today', list.takings.collected === 25, list.takings);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // Ids are unique, including within the same millisecond
 //
 // Records were identified by `prefix + Date.now().toString(36)`, so two created
@@ -663,7 +930,7 @@ async function uniqueIds() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-for (const suite of [storeHours, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, diagnose, viewLayer]) {
+for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, automaticMessages, diagnose, viewLayer]) {
   await suite();
 }
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');

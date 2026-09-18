@@ -25,6 +25,21 @@ export const defaultConfig = () => ({
   // farStepFee for every farStepMiles beyond midMiles.
   fees: { freeMiles: 5, midMiles: 10, midFee: 5, farBase: 6, farStepMiles: 5, farStepFee: 1 },
   holdMinutes: 30,
+  // Which automatic messages the shop sends its customers at all.
+  //
+  // These send themselves — the owner writes nothing. He only decides which
+  // kinds go out; each customer decides separately whether to receive any.
+  // Both have to say yes, so neither the shop nor the customer can be
+  // volunteered into it by the other.
+  //
+  // No `points` trigger yet: that goes in when the points system does.
+  notifs: {
+    newStrain: true,      // something new landed on the menu
+    opened: true,         // the shop just opened
+    run: true,            // tonight's delivery run is rolling
+    orderStatus: true,    // their own order moved along
+    lowStock: false       // something they buy is nearly gone
+  },
   // Opening hours, so the shop closes itself.
   //
   // The owner was leaving it open because after a long day he is not thinking
@@ -37,7 +52,7 @@ export const defaultConfig = () => ({
     open: '10:00',
     close: '22:00',
     days: [0, 1, 2, 3, 4, 5, 6],
-    tz: 'America/Puerto_Rico',
+    tz: 'America/New_York',
     paused: false
   },
   setupComplete: false
@@ -89,6 +104,13 @@ export function cleanConfig(incoming, current) {
     };
   } else {
     c.run = { ...c.run, zones: c.run.zones.filter((z) => c.zones.some((x) => x.id === z)) };
+  }
+
+  if (inp.notifs && typeof inp.notifs === 'object') {
+    const n = inp.notifs;
+    const base = defaultConfig().notifs;
+    c.notifs = Object.fromEntries(Object.keys(base).map((k) =>
+      [k, n[k] === undefined ? (c.notifs ? c.notifs[k] === true : base[k]) : n[k] === true]));
   }
 
   if (inp.hours && typeof inp.hours === 'object') {
@@ -145,6 +167,22 @@ export function shopClock(cfg, at = new Date()) {
   // "24" appears at midnight in some ICU builds.
   const hour = Number(get('hour')) % 24;
   return { day: day === undefined ? at.getDay() : day, minutes: hour * 60 + Number(get('minute')) };
+}
+
+// What day it is where the shop is.
+//
+// The server's own day was `new Date().toISOString().slice(0, 10)` — a UTC
+// date. Midnight UTC is 8pm in Florida, so the day rolled over mid-shift:
+// every order after 8pm was counted as tomorrow's, which is most of an
+// evening trade. "Taken today" reset while he was still working, the delivery
+// capacity reset with it, and the evening's stops fell off today's run.
+export function shopDay(cfg, at = new Date()) {
+  const tz = (cfg && cfg.hours && cfg.hours.tz) || defaultConfig().hours.tz;
+  const fmt = (zone) => new Intl.DateTimeFormat('en-CA', {
+    timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(at);
+  // en-CA gives YYYY-MM-DD, which is what the stored timestamps slice to.
+  try { return fmt(tz); } catch { return at.toISOString().slice(0, 10); }
 }
 
 const toMinutes = (hhmm) => {
@@ -325,6 +363,9 @@ export const publicConfig = (c) => ({
   // Only when it opens and whether it is open — never the day list, the
   // timezone or the paused flag, which are the owner's business.
   hours: { on: !!(c.hours && c.hours.on), open: (c.hours || {}).open || '', close: (c.hours || {}).close || '' },
+  // Whether automatic messages are on for this shop at all, so the opt-in can
+  // be offered or hidden. Never which kinds — that is the owner's business.
+  notifsOn: Object.values((c.notifs || {})).some((v) => v === true),
   pickupNote: c.pickupNote,
   contact: c.contact,
   payments: c.payments.filter((p) => p.enabled).map((p) => ({
