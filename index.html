@@ -2003,7 +2003,7 @@ const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = '2026-09-18.1400';
+const BUILD = '2026-09-18.1830';
 
 // Tap feedback for the keypad.
 //
@@ -2343,7 +2343,16 @@ class Component extends DCLogic {
     this.setState({ pushMsg: '' });
     this.api('codes', 'pushKey').then(res => {
       if (this.expired(res)) return;
-      if (!res || !res.ok || !res.configured || !res.key) {
+      // A failed request and a shop with no keys are NOT the same answer, and
+      // collapsing them cost an evening: a fault in the shop's own code came
+      // out on the customer's phone as "this shop is not sending alerts yet",
+      // which reads as a decision the owner made. Nobody looks for a bug when
+      // the app says everything is working as intended.
+      if (!res || !res.ok) {
+        this.setState({ pushMsg: (res && res.error) || this.t().pushFailed, pushOk: false });
+        return;
+      }
+      if (!res.configured || !res.key) {
         this.setState({ pushMsg: this.t().pushNotSetUp, pushOk: false });
         return;
       }

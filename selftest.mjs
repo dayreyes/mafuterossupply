@@ -553,6 +553,33 @@ async function automaticMessages() {
   const tito = await join('tito', true);
   const quiet = await join('quiet', false);
 
+  // The endpoint nothing else covered, and the one that broke.
+  //
+  // A browser cannot subscribe to push at all without the shop's public key,
+  // so every opt-in starts here — and this handler was the only caller of
+  // `pushPublicKey()`, which referenced a helper that was never imported. It
+  // threw on every call, the router turned that into a 500, and the app
+  // reported "this shop is not sending alerts yet" to the customer. A month of
+  // green test runs never touched it.
+  //
+  // Both answers are checked, because the app now tells them apart: keys
+  // present is a working shop, keys absent is a shop that has not set push up.
+  // A failure has to be neither, or a real fault gets shown as a decision.
+  section('the key a browser needs to subscribe');
+  const key = await call(codes, { action: 'pushKey' }, ana.token);
+  ck('a customer can fetch the shop public key', key.ok === true, key);
+  ck('and it is the key the shop is configured with',
+    key.configured === true && key.key === process.env.VAPID_PUBLIC_KEY, key);
+  ck('asking without a session is refused',
+    (await call(codes, { action: 'pushKey' })).ok === false);
+  delete process.env.VAPID_PUBLIC_KEY;
+  delete process.env.VAPID_PRIVATE_KEY;
+  const noKey = await call(codes, { action: 'pushKey' }, ana.token);
+  ck('an unconfigured shop answers plainly instead of failing',
+    noKey.ok === true && noKey.configured === false, noKey);
+  process.env.VAPID_PUBLIC_KEY = 'BK0H0vUxHbxqj2219ZCVKDTuTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTES';
+  process.env.VAPID_PRIVATE_KEY = 'testprivatekeytestprivatekeytestprivatekey1';
+
   section('only the people who asked');
   let msgs = await during(() => call(shop, {
     action: 'saveProduct',

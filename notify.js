@@ -142,6 +142,7 @@ export const paidText = (o) =>
 
 import webpush from 'web-push';
 import { read, mutate, KEYS } from './store.js';
+import { str } from './http.js';
 
 export const pushConfigured = () =>
   !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
