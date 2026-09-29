@@ -746,6 +746,48 @@ async function viewLayer() {
   const halfBound = template.match(/(?<!\{)\{\s*[a-zA-Z_$][\w$.]*\s*\}(?!\})/g) || [];
   ck('every interpolation uses double braces', halfBound.length === 0, halfBound);
 
+  // ── the two skins must cover each other exactly ───────────────────────────
+  //
+  // A token defined in one palette and forgotten in the other does not throw
+  // anything: the element quietly keeps the first skin's value, so a single
+  // missing line leaves one control cream on a black screen. Nobody sees it
+  // until they are looking at that one screen in that one skin.
+  section('the two skins define the same colours');
+  const blockOf = (sel) => {
+    const at = html.indexOf(sel);
+    return at < 0 ? '' : html.slice(at, html.indexOf('}', at));
+  };
+  const tokensIn = (block) => new Set([...block.matchAll(/--([a-z0-9-]+)\s*:/g)].map(m => m[1]));
+  const year = tokensIn(blockOf(':root {'));
+  const hallo = tokensIn(blockOf(':root[data-skin="halloween"] {'));
+  ck('the year-round palette is there', year.size > 30, year.size);
+  const missingHallo = [...year].filter(t => !hallo.has(t));
+  const missingYear = [...hallo].filter(t => !year.has(t));
+  ck('Halloween defines every one of them', missingHallo.length === 0, missingHallo);
+  ck('and invents none of its own', missingYear.length === 0, missingYear);
+
+  // Every var(--x) the app actually draws with has to exist, or it paints
+  // nothing at all.
+  const used = new Set([...html.matchAll(/var\(--([a-z0-9-]+)\)/g)].map(m => m[1]));
+  const undefinedTokens = [...used].filter(t => !year.has(t));
+  ck('every colour referenced is a colour defined', undefinedTokens.length === 0, undefinedTokens);
+
+  // The skin is set by hand at maintenance time, so the one thing to guard is
+  // that it is set to something real.
+  const skinAttr = /<html[^>]*data-skin="([a-z]+)"/.exec(html);
+  ck('the page names a skin', !!skinAttr, skinAttr && skinAttr[0]);
+  ck('and it is one that exists', !!skinAttr && ['year', 'halloween'].includes(skinAttr[1]),
+    skinAttr && skinAttr[1]);
+
+  section('no colour is typed in by hand any more');
+  const strayHex = (html.match(/#[0-9a-fA-F]{6}\b/g) || []);
+  // The swatches on nothing, the meta tag, and the two palette blocks are the
+  // only places a literal belongs.
+  const paletteEnd = html.indexOf('html,body{margin:0');
+  const strayAfter = (html.slice(paletteEnd).match(/#[0-9a-fA-F]{6}\b/g) || []);
+  ck('the palette blocks hold nearly all of them', strayHex.length - strayAfter.length > 55,
+    { total: strayHex.length, outside: strayAfter.length });
+
   const loopVars = new Set([...template.matchAll(/as="([A-Za-z0-9_]+)"/g)].map(m => m[1]));
   const wanted = new Set();
   for (const m of template.matchAll(/\{\{([^}]*)\}\}/g)) {

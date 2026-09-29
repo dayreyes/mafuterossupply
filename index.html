@@ -1,25 +1,24 @@
 <!DOCTYPE html>
-<html lang="es">
+<!-- THE SKIN. Change this one word at monthly maintenance.
+     "year"      cream and olive, the shop's usual look
+     "halloween" black, orange and toxic green
+     It is an attribute rather than a setting because it only ever changes
+     when somebody is already in this file. That also makes the flash of the
+     wrong colours impossible rather than merely unlikely: the value is in the
+     markup before the first frame, so there is nothing to catch up to. -->
+<html lang="es" data-skin="year">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mafutero&#39;s Supply</title>
 <meta name="theme-color" content="#402310">
-<!-- Paint the right skin on the FIRST frame.
-     Runs before the stylesheet below and before the app boots, so the page
-     never opens cream and then jumps to black once the shop answers. It only
-     reads a name this page wrote itself; the server still decides, a moment
-     later, and corrects this if it is stale. -->
+<!-- The status bar behind the notch is set by a meta tag, which cannot read a
+     CSS variable — so it is mirrored from the attribute above rather than
+     being a second place to remember to edit. -->
 <script>
-  try {
-    var s = localStorage.getItem('mafu.skin');
-    if (s === 'halloween' || s === 'year') {
-      document.documentElement.setAttribute('data-skin', s);
-      if (s === 'halloween') {
-        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0c0a0d');
-      }
-    }
-  } catch (e) { /* private tab: fall through to the default skin */ }
+  if (document.documentElement.getAttribute('data-skin') === 'halloween') {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0c0a0d');
+  }
 </script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -79,6 +78,38 @@
      is data, not palette, so it cannot invert with everything else. */
   --on-sticker: #201e1d;      --on-sticker-2: #402310;
   --on-solid: #f5ead8;
+  --on-takings: #402310;      --on-takings-pill: #f9f4ed;
+  --on-takings-fig: #f9f4ed;
+
+  /* translucent, mixed from the palette above */
+  --dot-12: rgba(32,30,29,.12);
+  --dot-18: rgba(32,30,29,.18);
+  --dot-2: rgba(32,30,29,.2);
+  --dot-22: rgba(32,30,29,.22);
+  --dot-paper-07: rgba(32,30,29,.07);
+  --glow-25: rgba(198,113,57,.25);
+  --glow-35: rgba(198,113,57,.35);
+  --glow-6: rgba(198,113,57,.6);
+  --hairline-18: rgba(32,30,29,.18);
+  --scrim-15: rgba(32,30,29,.15);
+  --scrim-5: rgba(32,30,29,.5);
+  --shadow-2: rgba(32,30,29,.2);
+  --shadow-22: rgba(32,30,29,.22);
+  --shadow-3: rgba(32,30,29,.3);
+  --shadow-35: rgba(32,30,29,.35);
+  --shadow-4: rgba(32,30,29,.4);
+  --veil-07: rgba(245,234,216,.07);
+  --veil-08: rgba(245,234,216,.08);
+  --veil-1: rgba(245,234,216,.1);
+  --veil-12: rgba(245,234,216,.12);
+  --veil-14: rgba(245,234,216,.14);
+  --veil-15: rgba(245,234,216,.15);
+  --veil-2: rgba(245,234,216,.2);
+  --veil-25: rgba(245,234,216,.25);
+  --veil-35: rgba(249,244,237,.35);
+  --veil-4: rgba(245,234,216,.4);
+  --veil-5: rgba(245,234,216,.5);
+  --veil-6: rgba(245,234,216,.6);
 }
 
 /* Halloween.
@@ -112,6 +143,37 @@
   /* Black on the accents, because on Halloween they are neon: bone on
      #ff6a13 is 2.4:1 and unreadable outdoors, black on it is 7.4:1. */
   --on-solid: #0c0a0d;
+  --on-takings: #0c0a0d;      --on-takings-pill: #ff8a3d;
+  --on-takings-fig: #0c0a0d;
+
+  --dot-12: rgba(32,30,29,.12);
+  --dot-18: rgba(32,30,29,.18);
+  --dot-2: rgba(32,30,29,.2);
+  --dot-22: rgba(32,30,29,.22);
+  --dot-paper-07: rgba(239,231,216,.07);
+  --glow-25: rgba(255,106,19,.25);
+  --glow-35: rgba(255,106,19,.35);
+  --glow-6: rgba(255,106,19,.6);
+  --hairline-18: rgba(239,231,216,.18);
+  --scrim-15: rgba(32,30,29,.15);
+  --scrim-5: rgba(32,30,29,.5);
+  --shadow-2: rgba(32,30,29,.2);
+  --shadow-22: rgba(32,30,29,.22);
+  --shadow-3: rgba(32,30,29,.3);
+  --shadow-35: rgba(32,30,29,.35);
+  --shadow-4: rgba(32,30,29,.4);
+  --veil-07: rgba(239,231,216,.07);
+  --veil-08: rgba(239,231,216,.08);
+  --veil-1: rgba(239,231,216,.1);
+  --veil-12: rgba(239,231,216,.12);
+  --veil-14: rgba(239,231,216,.14);
+  --veil-15: rgba(239,231,216,.15);
+  --veil-2: rgba(239,231,216,.2);
+  --veil-25: rgba(239,231,216,.25);
+  --veil-35: rgba(239,231,216,.35);
+  --veil-4: rgba(239,231,216,.4);
+  --veil-5: rgba(239,231,216,.5);
+  --veil-6: rgba(239,231,216,.6);
 }
 
 html,body{margin:0;padding:0;background:var(--slab-2);font-family:"Figtree",system-ui,sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
@@ -173,7 +235,7 @@ input,textarea,select{font-size:16px}
               <div style="font:700 12px/1 'Figtree';letter-spacing:.44em;text-transform:uppercase;color:var(--green-pale-2);margin-top:10px">Supply</div>
             </div>
             <div style="position:relative;display:{{ modeBadgeDisplay }};background:{{ modeBadgeBg }};border:2px solid var(--ink);border-radius:999px;padding:7px 14px;font:800 10.5px/1.3 'Figtree';letter-spacing:.06em;text-transform:uppercase;color:var(--on-solid);text-align:center;max-width:280px">{{ modeBadge }}</div>
-            <div style="position:relative;display:flex;gap:6px;background:rgba(32,30,29,.5);border:2px solid var(--on-dark);padding:5px;border-radius:999px">
+            <div style="position:relative;display:flex;gap:6px;background:var(--scrim-5);border:2px solid var(--on-dark);padding:5px;border-radius:999px">
               <div onClick="{{ pickClient }}" style="padding:10px 18px;border-radius:999px;font:700 12.5px/1 'Figtree';cursor:pointer;color:{{ clientFg }};background:{{ clientBg }};transition:background .2s ease">{{ t.tabClient }}</div>
               <div onClick="{{ pickOwner }}" style="padding:10px 18px;border-radius:999px;font:700 12.5px/1 'Figtree';cursor:pointer;color:{{ ownerFg }};background:{{ ownerBg }};transition:background .2s ease">{{ t.tabOwner }}</div>
             </div>
@@ -191,14 +253,14 @@ input,textarea,select{font-size:16px}
             <div style="position:relative;display:{{ codeErrDisplay }};padding:8px 14px;border-radius:999px;background:var(--danger);border:2px solid var(--ink);font:700 12px/1.3 'Figtree';color:var(--blush-3);text-align:center;max-width:270px">{{ codeErr }}</div>
             <div style="position:relative;margin-top:4px;font:500 11.5px/1.5 'Figtree';color:var(--green-3);text-align:center;max-width:270px">{{ t.codeFoot }}</div>
             <div style="position:relative;display:flex;gap:9px;flex-wrap:wrap;justify-content:center">
-              <div onClick="{{ toLang }}" style="padding:8px 14px;border-radius:999px;border:2px solid rgba(245,234,216,.4);font:700 11px/1 'Figtree';color:var(--green-glow);cursor:pointer" style-hover="background:rgba(245,234,216,.12)">{{ t.switchLang }}</div>
-              <div onClick="{{ goSignup }}" style="padding:8px 14px;border-radius:999px;border:2px solid var(--blush-2);background:rgba(198,113,57,.35);font:700 11px/1 'Figtree';color:var(--blush);cursor:pointer" style-hover="background:rgba(198,113,57,.6)">{{ t.newHere }}</div>
+              <div onClick="{{ toLang }}" style="padding:8px 14px;border-radius:999px;border:2px solid var(--veil-4);font:700 11px/1 'Figtree';color:var(--green-glow);cursor:pointer" style-hover="background:var(--veil-12)">{{ t.switchLang }}</div>
+              <div onClick="{{ goSignup }}" style="padding:8px 14px;border-radius:999px;border:2px solid var(--blush-2);background:var(--glow-35);font:700 11px/1 'Figtree';color:var(--blush);cursor:pointer" style-hover="background:var(--glow-6)">{{ t.newHere }}</div>
             </div>
           </div>
         </sc-if>
 
         <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
-          <div style="min-height:100dvh;background:var(--paper);background-image:radial-gradient(rgba(32,30,29,.07) 1px,transparent 1.3px);background-size:8px 8px;padding:60px 0 0;box-sizing:border-box;display:flex;flex-direction:column">
+          <div style="min-height:100dvh;background:var(--paper);background-image:radial-gradient(var(--dot-paper-07) 1px,transparent 1.3px);background-size:8px 8px;padding:60px 0 0;box-sizing:border-box;display:flex;flex-direction:column">
             <div style="padding:0 22px;display:flex;align-items:center;gap:12px">
               <div onClick="{{ toLock }}" style="width:42px;height:42px;border-radius:50%;background:var(--card);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" style-active="transform:translate(2px,2px)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
@@ -273,7 +335,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
-          <div style="min-height:100dvh;background:var(--paper);background-image:radial-gradient(rgba(32,30,29,.07) 1px,transparent 1.3px);background-size:8px 8px;padding:60px 0 108px;box-sizing:border-box">
+          <div style="min-height:100dvh;background:var(--paper);background-image:radial-gradient(var(--dot-paper-07) 1px,transparent 1.3px);background-size:8px 8px;padding:60px 0 108px;box-sizing:border-box">
             <div style="padding:0 22px 8px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
               <div>
                 <div style="display:flex;align-items:center;gap:8px">
@@ -332,8 +394,8 @@ input,textarea,select{font-size:16px}
                 </div>
                 <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
                   <sc-for list="{{ s.items }}" as="p" hint-placeholder-count="3">
-                    <div onClick="{{ p.open }}" style="display:flex;gap:14px;align-items:center;background:var(--card);border:2px solid var(--ink);border-radius:22px;padding:12px;box-shadow:3px 3px 0 rgba(32,30,29,.22);cursor:pointer" style-active="box-shadow:0 0 0 rgba(32,30,29,.22);transform:translate(3px,3px)">
-                      <div style="flex:none;width:66px;height:66px;border-radius:50%;border:2px solid var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;background:{{ p.stickerBg }};background-image:radial-gradient(rgba(32,30,29,.22) 1.2px,transparent 1.4px);background-size:6px 6px">
+                    <div onClick="{{ p.open }}" style="display:flex;gap:14px;align-items:center;background:var(--card);border:2px solid var(--ink);border-radius:22px;padding:12px;box-shadow:3px 3px 0 var(--shadow-22);cursor:pointer" style-active="box-shadow:0 0 0 var(--shadow-22);transform:translate(3px,3px)">
+                      <div style="flex:none;width:66px;height:66px;border-radius:50%;border:2px solid var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;background:{{ p.stickerBg }};background-image:radial-gradient(var(--dot-22) 1.2px,transparent 1.4px);background-size:6px 6px">
                         <div style="font-family:'Caprasimo',serif;font-size:21px;line-height:1;color:var(--on-sticker)">{{ p.initials }}</div>
                         <div style="font:800 8px/1 'Figtree';letter-spacing:.1em;text-transform:uppercase;color:var(--on-sticker-2);margin-top:3px">{{ p.type }}</div>
                       </div>
@@ -366,12 +428,12 @@ input,textarea,select{font-size:16px}
 
         <sc-if value="{{ isProduct }}" hint-placeholder-val="{{ true }}">
           <div style="min-height:100dvh;background:var(--paper);padding:0 0 132px;box-sizing:border-box">
-            <div style="position:relative;padding:64px 22px 26px;background:{{ selBg }};background-image:radial-gradient(rgba(32,30,29,.18) 1.3px,transparent 1.5px);background-size:7px 7px;border-bottom:2px solid var(--ink)">
+            <div style="position:relative;padding:64px 22px 26px;background:{{ selBg }};background-image:radial-gradient(var(--dot-18) 1.3px,transparent 1.5px);background-size:7px 7px;border-bottom:2px solid var(--ink)">
               <div onClick="{{ back }}" style="width:42px;height:42px;border-radius:50%;background:var(--card);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:translate(2px,2px)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
               </div>
               <div style="display:flex;justify-content:center;margin:14px 0 4px">
-                <div style="width:172px;height:172px;border-radius:50%;background:var(--card);border:3px solid var(--ink);box-shadow:5px 6px 0 rgba(32,30,29,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-4deg);animation:mfPop .45s ease both">
+                <div style="width:172px;height:172px;border-radius:50%;background:var(--card);border:3px solid var(--ink);box-shadow:5px 6px 0 var(--shadow-3);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-4deg);animation:mfPop .45s ease both">
                   <div style="font:800 9px/1 'Figtree';letter-spacing:.2em;text-transform:uppercase;color:var(--rust)">Mafutero&rsquo;s</div>
                   <div style="font-family:'Caprasimo',serif;font-size:46px;line-height:1;color:var(--ink);margin:6px 0">{{ selInitials }}</div>
                   <div style="font:800 9.5px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--green)">{{ selType }}</div>
@@ -563,7 +625,7 @@ input,textarea,select{font-size:16px}
               <div style="font:500 11.5px/1.45 'Figtree';color:var(--faint);margin-top:3px">{{ t.ptsRule }}</div>
 
               <div style="display:{{ ptsGoalDisplay }};margin-top:15px">
-                <div style="height:10px;border-radius:999px;background:rgba(245,234,216,.14);overflow:hidden">
+                <div style="height:10px;border-radius:999px;background:var(--veil-14);overflow:hidden">
                   <div style="height:100%;width:{{ ptsPct }};background:var(--rust-2);border-radius:999px"></div>
                 </div>
                 <div style="font:600 11px/1.4 'Figtree';color:var(--faint);margin-top:8px">{{ ptsGoalLine }}</div>
@@ -572,7 +634,7 @@ input,textarea,select{font-size:16px}
               <div style="display:{{ ptsHistDisplay }};margin-top:16px">
                 <div style="font:800 9.5px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:4px">{{ t.ptsHistory }}</div>
                 <sc-for list="{{ ptsRows }}" as="p" hint-placeholder-count="3">
-                  <div style="display:flex;align-items:baseline;gap:9px;padding:8px 0;border-top:2px solid rgba(245,234,216,.1)">
+                  <div style="display:flex;align-items:baseline;gap:9px;padding:8px 0;border-top:2px solid var(--veil-1)">
                     <div style="flex:1;min-width:0;font:800 12.5px/1.3 'Figtree';color:var(--on-dark)">{{ p.no }}</div>
                     <div style="flex:none;font:600 11px/1 'Figtree';color:var(--faint)">{{ p.when }}</div>
                     <div style="flex:none;font:800 13.5px/1 'Figtree';color:var(--green-glow)">{{ p.pts }}</div>
@@ -641,14 +703,14 @@ input,textarea,select{font-size:16px}
 
         <sc-if value="{{ isConfirm }}" hint-placeholder-val="{{ true }}">
           <div style="min-height:100dvh;background:var(--green);background-image:radial-gradient(rgba(0,0,0,.22) 1px,transparent 1.4px);background-size:9px 9px;padding:96px 30px 128px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px">
-            <div style="width:148px;height:148px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 6px 0 rgba(32,30,29,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-5deg);animation:mfPop .5s ease both">
+            <div style="width:148px;height:148px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 6px 0 var(--shadow-35);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-5deg);animation:mfPop .5s ease both">
               <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
               <div style="font:800 9.5px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:var(--rust);margin-top:8px">{{ t.orderSent }}</div>
             </div>
             <div style="font-family:'Caprasimo',serif;font-size:32px;line-height:1.06;color:var(--on-dark);letter-spacing:-.02em">{{ t.gotIt }}</div>
             <div style="font:500 13.5px/1.55 'Figtree';color:var(--green-glow);max-width:290px">{{ t.buzzed }}</div>
 
-            <div style="width:100%;background:{{ holdCardBg }};border:2px solid var(--ink);border-radius:22px;padding:14px 16px;text-align:left;box-shadow:4px 4px 0 rgba(32,30,29,.3)">
+            <div style="width:100%;background:{{ holdCardBg }};border:2px solid var(--ink);border-radius:22px;padding:14px 16px;text-align:left;box-shadow:4px 4px 0 var(--shadow-3)">
               <div style="display:flex;align-items:center;gap:12px">
                 <div style="flex:1;min-width:0">
                   <div style="font:800 13px/1.25 'Figtree';color:var(--blush-ink)">{{ holdTitle }}</div>
@@ -670,7 +732,7 @@ input,textarea,select{font-size:16px}
                  ordered, and the first thing the shop would tell them is that
                  this order is ready. Asked once — say no and it does not come
                  back. -->
-            <div style="display:{{ pushOfferDisplay }};width:100%;background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:16px 18px;text-align:left;box-shadow:4px 4px 0 rgba(32,30,29,.3);flex-direction:column">
+            <div style="display:{{ pushOfferDisplay }};width:100%;background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:16px 18px;text-align:left;box-shadow:4px 4px 0 var(--shadow-3);flex-direction:column">
               <div style="font-family:'Caprasimo',serif;font-size:19px;color:var(--ink)">{{ t.offerTitle }}</div>
               <div style="font:500 12.5px/1.5 'Figtree';color:var(--muted);margin-top:6px">{{ t.offerBody }}</div>
               <div style="display:flex;gap:9px;margin-top:13px">
@@ -680,7 +742,7 @@ input,textarea,select{font-size:16px}
               <div style="display:{{ pushMsgDisplay }};font:600 11.5px/1.45 'Figtree';color:{{ pushMsgFg }};margin-top:10px">{{ pushMsg }}</div>
             </div>
 
-            <div style="width:100%;background:var(--paper);border:2px solid var(--ink);border-radius:24px;padding:16px 18px;text-align:left;box-shadow:4px 4px 0 rgba(32,30,29,.3)">
+            <div style="width:100%;background:var(--paper);border:2px solid var(--ink);border-radius:24px;padding:16px 18px;text-align:left;box-shadow:4px 4px 0 var(--shadow-3)">
               <div style="display:flex;justify-content:space-between;align-items:baseline">
                 <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)">{{ t.orderLabel }}</div>
                 <div style="font-family:'Caprasimo',serif;font-size:19px;color:var(--ink)">{{ orderNo }}</div>
@@ -698,7 +760,7 @@ input,textarea,select{font-size:16px}
             <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
               <div onClick="{{ goHome }}" style="padding:13px 20px;border-radius:999px;background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-family:'Caprasimo',serif;font-size:15px;color:var(--ink);cursor:pointer" style-active="box-shadow:0 0 0 var(--ink);transform:translate(3px,3px)">{{ t.backToMenu }}</div>
               <sc-if value="{{ showClock }}" hint-placeholder-val="{{ false }}">
-                <div onClick="{{ forceExpire }}" style="padding:13px 20px;border-radius:999px;background:transparent;border:2px dashed rgba(245,234,216,.6);font:700 12.5px/1 'Figtree';color:var(--green-glow);cursor:pointer" style-hover="background:rgba(245,234,216,.12)">{{ t.simulateExpiry }}</div>
+                <div onClick="{{ forceExpire }}" style="padding:13px 20px;border-radius:999px;background:transparent;border:2px dashed var(--veil-6);font:700 12.5px/1 'Figtree';color:var(--green-glow);cursor:pointer" style-hover="background:var(--veil-12)">{{ t.simulateExpiry }}</div>
               </sc-if>
             </div>
           </div>
@@ -706,14 +768,14 @@ input,textarea,select{font-size:16px}
 
         <sc-if value="{{ isExpired }}" hint-placeholder-val="{{ false }}">
           <div style="min-height:100dvh;background:var(--rust);background-image:radial-gradient(rgba(0,0,0,.24) 1px,transparent 1.4px);background-size:9px 9px;padding:104px 30px 128px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px">
-            <div style="width:152px;height:152px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 6px 0 rgba(32,30,29,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(4deg);animation:mfPop .5s ease both">
+            <div style="width:152px;height:152px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 6px 0 var(--shadow-4);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(4deg);animation:mfPop .5s ease both">
               <div style="font-family:'Caprasimo',serif;font-size:34px;line-height:1;color:var(--rust)">00:00</div>
               <div style="font:800 9px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:8px">{{ t.expiredStamp }}</div>
             </div>
             <div style="font-family:'Caprasimo',serif;font-size:33px;line-height:1.06;color:var(--on-dark);letter-spacing:-.02em">{{ t.expiredTitle }}</div>
             <div style="font:500 14px/1.55 'Figtree';color:var(--blush);max-width:295px">{{ t.expiredBody }}</div>
 
-            <div style="width:100%;background:var(--paper);border:2px solid var(--ink);border-radius:24px;padding:16px 18px;text-align:left;box-shadow:4px 4px 0 rgba(32,30,29,.35)">
+            <div style="width:100%;background:var(--paper);border:2px solid var(--ink);border-radius:24px;padding:16px 18px;text-align:left;box-shadow:4px 4px 0 var(--shadow-35)">
               <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--rust)">{{ t.stillInHand }}</div>
               <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
                 <sc-for list="{{ suggestions }}" as="g" hint-placeholder-count="3">
@@ -748,7 +810,7 @@ input,textarea,select{font-size:16px}
                 </div>
               </div>
 
-              <div style="margin-top:16px;background:var(--slab-2);border:2px solid var(--ink);border-radius:26px;padding:16px 18px;box-shadow:4px 4px 0 rgba(32,30,29,.35)">
+              <div style="margin-top:16px;background:var(--slab-2);border:2px solid var(--ink);border-radius:26px;padding:16px 18px;box-shadow:4px 4px 0 var(--shadow-35)">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
                   <div>
                     <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--green-3)">{{ t.runTitle }}</div>
@@ -764,19 +826,19 @@ input,textarea,select{font-size:16px}
                      empty hours/stops/zones panel reading "0 areas on" is just
                      furniture. The header and its switch stay put, so turning
                      delivery back on is still one tap. -->
-                <div style="display:{{ runOffNoteDisplay }};margin-top:12px;background:rgba(245,234,216,.1);border:2px solid rgba(245,234,216,.35);border-radius:18px;padding:12px 13px;font:600 11.5px/1.45 'Figtree';color:var(--green-3)">{{ t.pickupOnlyNote }}</div>
+                <div style="display:{{ runOffNoteDisplay }};margin-top:12px;background:var(--veil-1);border:2px solid var(--veil-35);border-radius:18px;padding:12px 13px;font:600 11.5px/1.45 'Figtree';color:var(--green-3)">{{ t.pickupOnlyNote }}</div>
                 <div style="display:{{ runDetailDisplay }};flex-direction:column">
                 <div style="display:flex;gap:9px;margin-top:14px">
-                  <div style="flex:1;background:rgba(245,234,216,.1);border:2px solid rgba(245,234,216,.35);border-radius:18px;padding:11px 13px">
+                  <div style="flex:1;background:var(--veil-1);border:2px solid var(--veil-35);border-radius:18px;padding:11px 13px">
                     <div style="font:700 9.5px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:var(--green-3)">{{ t.hoursTitle }}</div>
                     <div style="display:flex;align-items:center;gap:7px;margin-top:8px">
-                      <input type="time" value="{{ runStart }}" onChange="{{ setRunStart }}" style="flex:1;min-width:0;height:38px;padding:0 8px;border-radius:12px;border:2px solid rgba(245,234,216,.5);background:rgba(245,234,216,.12);color:var(--on-dark);font:700 14px/1 'Figtree';box-sizing:border-box">
+                      <input type="time" value="{{ runStart }}" onChange="{{ setRunStart }}" style="flex:1;min-width:0;height:38px;padding:0 8px;border-radius:12px;border:2px solid var(--veil-5);background:var(--veil-12);color:var(--on-dark);font:700 14px/1 'Figtree';box-sizing:border-box">
                       <div style="font:800 13px/1 'Figtree';color:var(--green-2);flex:none">&ndash;</div>
-                      <input type="time" value="{{ runEnd }}" onChange="{{ setRunEnd }}" style="flex:1;min-width:0;height:38px;padding:0 8px;border-radius:12px;border:2px solid rgba(245,234,216,.5);background:rgba(245,234,216,.12);color:var(--on-dark);font:700 14px/1 'Figtree';box-sizing:border-box">
+                      <input type="time" value="{{ runEnd }}" onChange="{{ setRunEnd }}" style="flex:1;min-width:0;height:38px;padding:0 8px;border-radius:12px;border:2px solid var(--veil-5);background:var(--veil-12);color:var(--on-dark);font:700 14px/1 'Figtree';box-sizing:border-box">
                     </div>
                     <div style="font:600 10px/1.3 'Figtree';color:var(--green-2);margin-top:7px">{{ runWindowLabel }}</div>
                   </div>
-                  <div style="flex:1;background:rgba(245,234,216,.1);border:2px solid rgba(245,234,216,.35);border-radius:18px;padding:11px 13px">
+                  <div style="flex:1;background:var(--veil-1);border:2px solid var(--veil-35);border-radius:18px;padding:11px 13px">
                     <div style="font:700 9.5px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:var(--green-3)">{{ t.runStops }}</div>
                     <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
                       <div onClick="{{ fewerStops }}" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--on-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 15px/1 'Figtree';color:var(--on-dark)">&minus;</div>
@@ -786,7 +848,7 @@ input,textarea,select{font-size:16px}
                   </div>
                 </div>
 
-                <div style="margin-top:10px;background:rgba(245,234,216,.1);border:2px solid rgba(245,234,216,.35);border-radius:18px;padding:12px 13px">
+                <div style="margin-top:10px;background:var(--veil-1);border:2px solid var(--veil-35);border-radius:18px;padding:12px 13px">
                   <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
                     <div style="font:700 9.5px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:var(--green-3)">{{ t.zonesTitle }}</div>
                     <div style="font:700 10px/1 'Figtree';color:var(--green-2);flex:none">{{ runZonesMeta }}</div>
@@ -801,34 +863,34 @@ input,textarea,select{font-size:16px}
                 </div>
               </div>
 
-              <div style="margin-top:16px;background:var(--rust-2);background-image:radial-gradient(rgba(32,30,29,.2) 1.2px,transparent 1.4px);background-size:7px 7px;border:2px solid var(--ink);border-radius:26px;padding:18px 20px;box-shadow:4px 4px 0 rgba(32,30,29,.3)">
-                <div style="display:flex;align-items:center;gap:6px;background:rgba(249,244,237,.35);border:2px solid var(--blush-ink);border-radius:999px;padding:3px;width:fit-content;margin-bottom:12px">
+              <div style="margin-top:16px;background:var(--rust-2);background-image:radial-gradient(var(--dot-2) 1.2px,transparent 1.4px);background-size:7px 7px;border:2px solid var(--ink);border-radius:26px;padding:18px 20px;box-shadow:4px 4px 0 var(--shadow-3)">
+                <div style="display:flex;align-items:center;gap:6px;background:var(--veil-35);border:2px solid var(--blush-ink);border-radius:999px;padding:3px;width:fit-content;margin-bottom:12px">
                   <sc-for list="{{ windowTabs }}" as="w" hint-placeholder-count="3">
                     <div onClick="{{ w.pick }}" style="padding:7px 13px;border-radius:999px;cursor:pointer;font:800 11px/1 'Figtree';white-space:nowrap;background:{{ w.bg }};color:{{ w.fg }}">{{ w.label }}</div>
                   </sc-for>
                 </div>
-                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--blush-ink)">{{ takenLabel }}</div>
-                <div style="font-family:'Caprasimo',serif;font-size:46px;line-height:1.02;color:var(--card);margin-top:6px">{{ takenToday }}</div>
+                <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--on-takings)">{{ takenLabel }}</div>
+                <div style="font-family:'Caprasimo',serif;font-size:46px;line-height:1.02;color:var(--on-takings-fig);margin-top:6px">{{ takenToday }}</div>
                 <div style="display:{{ profitDisplay }};align-items:baseline;gap:8px;margin-top:8px">
-                  <div style="font:700 10px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:var(--blush-ink)">{{ profitLabel }}</div>
-                  <div style="font-family:'Caprasimo',serif;font-size:24px;line-height:1;color:var(--card)">{{ profitValue }}</div>
+                  <div style="font:700 10px/1 'Figtree';letter-spacing:.12em;text-transform:uppercase;color:var(--on-takings)">{{ profitLabel }}</div>
+                  <div style="font-family:'Caprasimo',serif;font-size:24px;line-height:1;color:var(--on-takings-fig)">{{ profitValue }}</div>
                 </div>
-                <div style="display:{{ costGapDisplay }};font:600 10.5px/1.4 'Figtree';color:var(--blush-ink);margin-top:6px;opacity:.85">{{ costGapNote }}</div>
-                <div style="display:flex;gap:14px;margin-top:10px;font:700 12px/1.3 'Figtree';color:var(--blush-ink);flex-wrap:wrap">
+                <div style="display:{{ costGapDisplay }};font:600 10.5px/1.4 'Figtree';color:var(--on-takings);margin-top:6px;opacity:.85">{{ costGapNote }}</div>
+                <div style="display:flex;gap:14px;margin-top:10px;font:700 12px/1.3 'Figtree';color:var(--on-takings);flex-wrap:wrap">
                   <span>{{ placedToday }}</span><span>&middot;</span><span>{{ avgTicketLabel }}</span>
                 </div>
                 <div style="display:{{ pendingDisplay }};align-items:center;gap:7px;margin-top:9px;padding:6px 11px;border-radius:999px;background:var(--card);border:2px solid var(--rust);width:fit-content">
                   <div style="font:700 10px/1 'Figtree';letter-spacing:.08em;text-transform:uppercase;color:var(--rust)">{{ pendingLabel }}</div>
-                  <div style="font:800 13px/1 'Figtree';color:var(--blush-ink)">{{ pendingToday }}</div>
+                  <div style="font:800 13px/1 'Figtree';color:var(--on-takings)">{{ pendingToday }}</div>
                 </div>
                 <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
                   <sc-for list="{{ payMix }}" as="p" hint-placeholder-count="4">
-                    <div style="padding:6px 10px;border-radius:999px;background:var(--card);border:2px solid var(--ink);font:800 10.5px/1 'Figtree';color:var(--blush-ink)">{{ p.label }} {{ p.value }}</div>
+                    <div style="padding:6px 10px;border-radius:999px;background:var(--card);border:2px solid var(--ink);font:800 10.5px/1 'Figtree';color:var(--ink)">{{ p.label }} {{ p.value }}</div>
                   </sc-for>
                 </div>
               </div>
 
-              <div onClick="{{ goQueue }}" style="margin-top:14px;display:flex;align-items:center;gap:13px;background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:15px 17px;cursor:pointer;box-shadow:3px 3px 0 rgba(32,30,29,.22)" style-active="box-shadow:0 0 0 rgba(32,30,29,.22);transform:translate(3px,3px)">
+              <div onClick="{{ goQueue }}" style="margin-top:14px;display:flex;align-items:center;gap:13px;background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:15px 17px;cursor:pointer;box-shadow:3px 3px 0 var(--shadow-22)" style-active="box-shadow:0 0 0 var(--shadow-22);transform:translate(3px,3px)">
                 <div style="width:44px;height:44px;border-radius:50%;background:var(--blush);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;flex:none">
                   <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="var(--rust)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
                 </div>
@@ -965,7 +1027,7 @@ input,textarea,select{font-size:16px}
               <div style="margin-top:22px;font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:var(--rust)">{{ fastestTitle }}</div>
               <div style="margin-top:11px;background:var(--card);border:2px solid var(--ink);border-radius:22px;padding:6px 16px">
                 <sc-for list="{{ bestSellers }}" as="b" hint-placeholder-count="3">
-                  <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(32,30,29,.12)">
+                  <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--dot-12)">
                     <div style="font-family:'Caprasimo',serif;font-size:18px;color:var(--rust-2);width:20px">{{ b.rank }}</div>
                     <div style="flex:1;font:700 13.5px/1.2 'Figtree';color:var(--ink)">{{ b.name }}</div>
                     <div style="font:600 12px/1 'Figtree';color:var(--muted);flex:none">{{ b.orders }}</div>
@@ -1003,7 +1065,7 @@ input,textarea,select{font-size:16px}
                   <div style="font:500 11px/1.4 'Figtree';color:var(--faint);margin-top:6px">{{ t.runHint }}</div>
                   <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
                     <sc-for list="{{ runLegs }}" as="leg" hint-placeholder-count="3">
-                      <div style="background:rgba(245,234,216,.07);border:2px solid rgba(245,234,216,.25);border-radius:18px;padding:12px 13px">
+                      <div style="background:var(--veil-07);border:2px solid var(--veil-25);border-radius:18px;padding:12px 13px">
                         <div style="display:flex;align-items:center;gap:9px">
                           <div style="flex:none;width:26px;height:26px;border-radius:50%;background:var(--rust-2);border:2px solid var(--on-dark);display:flex;align-items:center;justify-content:center;font-family:'Caprasimo',serif;font-size:13px;color:var(--on-solid)">{{ leg.step }}</div>
                           <div style="flex:1;min-width:0">
@@ -1032,7 +1094,7 @@ input,textarea,select{font-size:16px}
                   </div>
                 </div>
                                 <sc-for list="{{ orders }}" as="o" hint-placeholder-count="3">
-                  <div style="background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:15px 16px;box-shadow:3px 3px 0 rgba(32,30,29,.2)">
+                  <div style="background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:15px 16px;box-shadow:3px 3px 0 var(--shadow-2)">
                     <div style="display:flex;align-items:center;gap:11px">
                       <div style="width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-family:'Caprasimo',serif;font-size:16px;color:var(--green-ink);flex:none">{{ o.initials }}</div>
                       <div style="flex:1;min-width:0">
@@ -1047,7 +1109,7 @@ input,textarea,select{font-size:16px}
                         <div style="padding:6px 10px;border-radius:999px;border:2px solid var(--rust);background:var(--blush);font:800 10px/1 'Figtree';letter-spacing:.06em;text-transform:uppercase;color:var(--rust);white-space:nowrap">{{ o.holdTag }}</div>
                       </sc-if>
                     </div>
-                    <div style="margin-top:11px;padding:11px 13px;border-radius:16px;background:var(--paper);border:1.5px solid rgba(32,30,29,.18)">
+                    <div style="margin-top:11px;padding:11px 13px;border-radius:16px;background:var(--paper);border:1.5px solid var(--hairline-18)">
                       <sc-for list="{{ o.items }}" as="it" hint-placeholder-count="2">
                         <div style="display:flex;justify-content:space-between;gap:10px;font:600 13px/1.7 'Figtree';color:var(--chip-ink)"><span>{{ it.line }}</span><span style="flex:none">{{ it.price }}</span></div>
                       </sc-for>
@@ -1107,7 +1169,7 @@ input,textarea,select{font-size:16px}
                 {{ t.addStrain }}
               </div>
 
-              <div style="display:{{ addFormDisplay }};margin-top:14px;background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:16px;box-shadow:3px 3px 0 rgba(32,30,29,.22)">
+              <div style="display:{{ addFormDisplay }};margin-top:14px;background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:16px;box-shadow:3px 3px 0 var(--shadow-22)">
                 <div style="font-family:'Caprasimo',serif;font-size:20px;color:var(--ink)">{{ addTitle }}</div>
                 <div style="display:flex;flex-direction:column;gap:13px;margin-top:14px">
                   <div>
@@ -1304,7 +1366,7 @@ input,textarea,select{font-size:16px}
         <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ false }}">
           <div style="min-height:100dvh;background:var(--slab-2);background-image:radial-gradient(circle at 50% 18%,var(--green) 0%,var(--slab-2) 62%);padding:60px 0 40px;box-sizing:border-box">
             <div style="padding:0 24px">
-              <div onClick="{{ suBack }}" style="width:42px;height:42px;border-radius:50%;background:rgba(245,234,216,.12);border:2px solid var(--on-dark);display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <div onClick="{{ suBack }}" style="width:42px;height:42px;border-radius:50%;background:var(--veil-12);border:2px solid var(--on-dark);display:flex;align-items:center;justify-content:center;cursor:pointer">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--on-dark)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
               </div>
               <div style="font-family:'Caprasimo',serif;font-size:31px;line-height:1.05;color:var(--on-dark);letter-spacing:-.02em;margin-top:18px">{{ t.setupTitle }}</div>
@@ -1313,23 +1375,23 @@ input,textarea,select{font-size:16px}
               <div style="display:flex;flex-direction:column;gap:15px;margin-top:24px">
                 <div>
                   <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--green-pale-2);margin-bottom:7px">{{ t.setupShop }}</div>
-                  <input value="{{ suShopName }}" onChange="{{ setSuShopName }}" placeholder="{{ t.setupShopPh }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 18px;border-radius:999px;border:2px solid var(--on-dark);background:rgba(245,234,216,.08);font:600 14px/1 'Figtree';color:var(--on-dark);outline:none">
+                  <input value="{{ suShopName }}" onChange="{{ setSuShopName }}" placeholder="{{ t.setupShopPh }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 18px;border-radius:999px;border:2px solid var(--on-dark);background:var(--veil-08);font:600 14px/1 'Figtree';color:var(--on-dark);outline:none">
                 </div>
 
                 <div style="display:{{ suCodeDisplay }}">
                   <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--green-pale-2);margin-bottom:7px">{{ t.setupCodeLabel }}</div>
-                  <input value="{{ suSetupCode }}" onChange="{{ setSuSetupCode }}" placeholder="{{ t.setupCodePh }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 18px;border-radius:999px;border:2px solid var(--on-dark);background:rgba(245,234,216,.08);font:600 14px/1 'Figtree';color:var(--on-dark);outline:none">
+                  <input value="{{ suSetupCode }}" onChange="{{ setSuSetupCode }}" placeholder="{{ t.setupCodePh }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 18px;border-radius:999px;border:2px solid var(--on-dark);background:var(--veil-08);font:600 14px/1 'Figtree';color:var(--on-dark);outline:none">
                 </div>
 
                 <div>
                   <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--green-pale-2);margin-bottom:7px">{{ t.setupConfirm }}</div>
                   <div style="font:500 11.5px/1.4 'Figtree';color:var(--green-3);margin-bottom:9px">{{ t.setupConfirmSub }}</div>
-                  <input value="{{ suPin2 }}" onChange="{{ setSuPin2 }}" inputMode="numeric" type="password" placeholder="••••••" style="width:100%;box-sizing:border-box;height:56px;padding:0 18px;border-radius:999px;border:2px solid var(--on-dark);background:rgba(245,234,216,.08);font-family:'Caprasimo',serif;font-size:24px;letter-spacing:.3em;color:var(--on-dark);outline:none;text-align:center">
+                  <input value="{{ suPin2 }}" onChange="{{ setSuPin2 }}" inputMode="numeric" type="password" placeholder="••••••" style="width:100%;box-sizing:border-box;height:56px;padding:0 18px;border-radius:999px;border:2px solid var(--on-dark);background:var(--veil-08);font-family:'Caprasimo',serif;font-size:24px;letter-spacing:.3em;color:var(--on-dark);outline:none;text-align:center">
                 </div>
 
                 <div style="display:{{ suErrDisplay }};padding:10px 15px;border-radius:18px;background:var(--danger);border:2px solid var(--ink);font:700 12px/1.4 'Figtree';color:var(--blush-3)">{{ suErr }}</div>
 
-                <div style="padding:13px 15px;border-radius:18px;background:rgba(198,113,57,.25);border:2px solid var(--blush-2);font:600 11.5px/1.5 'Figtree';color:var(--blush)">{{ t.setupWarn }}</div>
+                <div style="padding:13px 15px;border-radius:18px;background:var(--glow-25);border:2px solid var(--blush-2);font:600 11.5px/1.5 'Figtree';color:var(--blush)">{{ t.setupWarn }}</div>
 
                 <div onClick="{{ submitSetup }}" style="height:56px;border-radius:999px;background:{{ suBg }};border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--on-solid);font-family:'Caprasimo',serif;font-size:17px" style-active="box-shadow:0 0 0 var(--ink);transform:translate(3px,3px)">{{ t.setupGo }}</div>
               </div>
@@ -1367,27 +1429,6 @@ input,textarea,select{font-size:16px}
                     <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:var(--rust);margin-bottom:6px">{{ t.stContact }}</div>
                     <input value="{{ stContact }}" onChange="{{ setStContact }}" placeholder="{{ t.stContactPh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid var(--ink);background:var(--paper);font:600 14px/1 'Figtree';color:var(--ink);outline:none">
                   </div>
-                </div>
-              </div>
-
-              <!-- the skin.
-                   Saves on the spot rather than waiting for the Save button at
-                   the bottom, because the whole point is seeing it change. -->
-              <div style="margin-top:16px;background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:16px">
-                <div style="font-family:'Caprasimo',serif;font-size:19px;color:var(--ink)">{{ t.stLookTitle }}</div>
-                <div style="font:500 11.5px/1.45 'Figtree';color:var(--muted);margin-top:5px">{{ t.stLookSub }}</div>
-                <div style="display:flex;gap:9px;margin-top:13px">
-                  <sc-for list="{{ lookOptions }}" as="k" hint-placeholder-count="2">
-                    <div onClick="{{ k.pick }}" style="flex:1;padding:13px 11px;border-radius:18px;border:2px solid var(--ink);cursor:pointer;background:{{ k.bg }};box-shadow:{{ k.shadow }}">
-                      <div style="display:flex;gap:4px;margin-bottom:8px">
-                        <div style="width:15px;height:15px;border-radius:50%;border:2px solid var(--ink);background:{{ k.sw1 }};box-sizing:border-box"></div>
-                        <div style="width:15px;height:15px;border-radius:50%;border:2px solid var(--ink);background:{{ k.sw2 }};box-sizing:border-box"></div>
-                        <div style="width:15px;height:15px;border-radius:50%;border:2px solid var(--ink);background:{{ k.sw3 }};box-sizing:border-box"></div>
-                      </div>
-                      <div style="font:800 12.5px/1.2 'Figtree';color:{{ k.fg }}">{{ k.label }}</div>
-                      <div style="font:600 10.5px/1.35 'Figtree';color:{{ k.subFg }};margin-top:3px">{{ k.sub }}</div>
-                    </div>
-                  </sc-for>
                 </div>
               </div>
 
@@ -1598,7 +1639,7 @@ input,textarea,select{font-size:16px}
               <div style="font:800 10.5px/1 'Figtree';letter-spacing:.04em">{{ t.navProfile }}</div>
             </div>
             <div onClick="{{ logout }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:5px 0;color:var(--faint)">
-              <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(245,234,216,.1)">
+              <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--veil-1)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>
               </div>
               <div style="font:800 10.5px/1 'Figtree';letter-spacing:.04em">{{ t.navOut }}</div>
@@ -1851,10 +1892,6 @@ const COPY = {
     stShop: 'Tienda', stShopName: 'Nombre', stPickup: 'Nota de recogido',
     stPickupPh: 'Dónde y cómo se recoge', stContact: 'Cómo te escriben',
     stContactPh: 'Teléfono · IG',
-    stLookTitle: 'El look de la tienda',
-    stLookSub: 'Cambia pa’ todo el mundo al momento. Préndelo cuando quieras y apágalo cuando te canses.',
-    lookYear: 'Año redondo', lookYearSub: 'Crema y olivo',
-    lookHallo: 'Halloween', lookHalloSub: 'Negro, naranja y verde',
     stPaysTitle: 'Cómo cobras', stHandlePh: 'Tu número o usuario', stCashPh: '',
     stOn: 'Prendido', stOff: 'Apagado',
     stRunTitle: 'El run de delivery', stStartLabel: 'Empieza', stEndLabel: 'Termina',
@@ -2105,10 +2142,6 @@ const COPY = {
     stShop: 'Shop', stShopName: 'Name', stPickup: 'Pickup note',
     stPickupPh: 'Where and how to collect', stContact: 'How people reach you',
     stContactPh: 'Phone · IG',
-    stLookTitle: 'The shop\u2019s look',
-    stLookSub: 'Changes for everybody the moment you tap it. Put it up when you like, take it down when you have had enough.',
-    lookYear: 'Year round', lookYearSub: 'Cream and olive',
-    lookHallo: 'Halloween', lookHalloSub: 'Black, orange and green',
     stPaysTitle: 'How you get paid', stHandlePh: 'Your number or username', stCashPh: '',
     stOn: 'On', stOff: 'Off',
     stRunTitle: 'Delivery run', stStartLabel: 'Starts', stEndLabel: 'Ends',
@@ -2173,28 +2206,6 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 // there was no way to tell from the outside.
 const BUILD = '2026-09-29.1830';
 
-// ── the skin ────────────────────────────────────────────────────────────────
-// Which palette the page is wearing. The values live in the stylesheet as two
-// blocks of custom properties; all this does is say which block wins.
-//
-// The last one seen is remembered so the NEXT load paints it immediately,
-// before the shop has answered. Without that the app opens cream, then jumps
-// to black a few hundred milliseconds later on every single launch — which
-// looks broken, and is worse on a slow phone on mobile data. The remembered
-// value is only ever a skin name, and the server is still what decides.
-const SKIN_KEY = 'mafu.skin';
-const SKINS = ['year', 'halloween'];
-
-function applySkin(look) {
-  const skin = SKINS.indexOf(look) > -1 ? look : 'year';
-  document.documentElement.setAttribute('data-skin', skin);
-  // The browser chrome — the status bar behind the notch — is set by a meta
-  // tag that cannot take a var(), so it is kept in step by hand.
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', skin === 'halloween' ? '#0c0a0d' : '#402310');
-  try { localStorage.setItem(SKIN_KEY, skin); } catch (e) { /* private tab */ }
-  return skin;
-}
 
 // The Mafupuntos ladder, and the ONE thing in here that has to agree with the
 // server: lib/points.js owns the real list and decides what has actually been
@@ -2643,9 +2654,6 @@ class Component extends DCLogic {
   loadMenu() {
     return this.api('shop', 'menu').then(res => {
       if (!res || !res.ok) return;
-      // Applied before the owner's early return below, because the skin is the
-      // one thing on this response that belongs to everybody.
-      applySkin(res.config && res.config.look);
       // The owner's config is a superset of this one: the public copy hides
       // disabled payment methods, drops the `enabled` flag entirely, and omits
       // any area that is not in today's run. Letting a slow menu response land
@@ -2687,7 +2695,6 @@ class Component extends DCLogic {
         this.setState({ fatal: (cfg && cfg.error) || this.t().offline, screen: 'down' });
         return false;
       }
-      applySkin(cfg.config && cfg.config.look);
       this.setState({
         cfg: cfg.config, products: cfg.products, telegram: !!cfg.telegram,
         pushReady: !!cfg.pushReady, listeners: cfg.listeners || 0, draft: null
@@ -2797,41 +2804,9 @@ class Component extends DCLogic {
       this.setState({ busy: false });
       if (this.expired(res)) return;
       if (!res || !res.ok) { this.setState({ settingsMsg: (res && res.error) || this.t().offline }); return; }
-      applySkin(res.config && res.config.look);
       this.setState({ cfg: res.config, draft: null, settingsMsg: this.t().setSaved });
     });
   }
-  // Switching the skin.
-  //
-  // Painted first and saved second, so the tap is answered instantly rather
-  // than after a round trip — this is a look-at-it-and-decide control, and a
-  // second of nothing makes it feel broken. If the save fails the colours are
-  // put back where they were, because a skin that says it changed and did not
-  // is worse than one that refused.
-  pickLook(id) {
-    const was = (this.state.cfg || {}).look || 'year';
-    if (was === id) return;
-    applySkin(id);
-    const next = JSON.parse(JSON.stringify(this.state.cfg || {}));
-    next.look = id;
-    this.setState({ cfg: next });
-    this.api('shop', 'saveConfig', { config: next }).then(res => {
-      if (this.expired(res)) return;
-      if (!res || !res.ok) {
-        applySkin(was);
-        this.setState({ cfg: { ...next, look: was }, settingsMsg: (res && res.error) || this.t().offline });
-        return;
-      }
-      applySkin(res.config && res.config.look);
-      // If Settings has unsaved edits open, they were copied from the config
-      // as it was a moment ago — which still has the old skin in it. Pressing
-      // Save later would quietly put the old look back, so the pending copy is
-      // brought along too.
-      const draft = this.state.draft ? { ...this.state.draft, look: id } : null;
-      this.setState({ cfg: res.config, draft });
-    });
-  }
-
   addZone() {
     const z = this.state.newZone;
     if (!z.name.trim()) return;
@@ -3276,7 +3251,7 @@ class Component extends DCLogic {
     const tab = (id, label) => ({
       label, go: () => this.set('screen', id),
       fg: s.screen === id ? 'var(--on-dark)' : 'var(--faint)',
-      pill: s.screen === id ? 'var(--rust-2)' : 'rgba(245,234,216,.1)'
+      pill: s.screen === id ? 'var(--rust-2)' : 'var(--veil-1)'
     });
 
     // Live order figures. Every one of these was a hardcoded number in the
@@ -3544,7 +3519,7 @@ class Component extends DCLogic {
 
       goProfile: () => this.openProfile(),
       navProfileFg: s.screen === 'profile' ? 'var(--on-dark)' : 'var(--faint)',
-      navProfilePill: s.screen === 'profile' ? 'var(--green)' : 'rgba(245,234,216,.1)',
+      navProfilePill: s.screen === 'profile' ? 'var(--green)' : 'var(--veil-1)',
       pfName: (s.pfDraft || s.profile || {}).name || '',
       pfPhone: (s.pfDraft || s.profile || {}).phone || '',
       pfAddr: (s.pfDraft || s.profile || {}).addr || '',
@@ -3633,9 +3608,9 @@ class Component extends DCLogic {
       keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].map(k => ({
         label: k,
         border: k === '' ? 'transparent' : 'var(--on-dark)',
-        bg: k === '' ? 'transparent' : 'rgba(245,234,216,.08)',
+        bg: k === '' ? 'transparent' : 'var(--veil-08)',
         cursor: k === '' ? 'default' : 'pointer',
-        hoverBg: k === '' ? 'transparent' : 'rgba(245,234,216,.2)',
+        hoverBg: k === '' ? 'transparent' : 'var(--veil-2)',
         pressBg: k === '' ? 'transparent' : 'var(--rust-2)',
         // A digit gets a short tick; backspace a slightly longer one, so
         // deleting feels different from entering without having to look.
@@ -3859,7 +3834,7 @@ class Component extends DCLogic {
 
       // ── owner dashboard ───────────────────────────────────────────────────
       runHeadline: !cfg.run.on ? t.runOff : this.runFull() ? t.runFull(win.label) : t.runOn(win.label),
-      runSwitchBg: cfg.run.on ? 'var(--green)' : 'rgba(245,234,216,.15)',
+      runSwitchBg: cfg.run.on ? 'var(--green)' : 'var(--veil-15)',
       runSwitchJustify: cfg.run.on ? 'flex-end' : 'flex-start',
       runSwitchLabel: cfg.run.on ? 'ON' : 'OFF',
       toggleRun: () => {
@@ -3954,8 +3929,13 @@ class Component extends DCLogic {
 
       windowTabs: ['today', 'week', 'month'].map(k => ({
         label: t.windowName[k],
-        bg: period === k ? 'var(--blush-ink)' : 'transparent',
-        fg: period === k ? 'var(--card)' : 'var(--blush-ink)',
+        // On the takings card, which is the one accent-filled panel in the
+        // app. --blush-ink happened to be the right brown here on the
+        // year-round skin, but it is a "text on a blush surface" colour and
+        // Halloween turns it pale — pale peach on neon orange, which is how
+        // this control came out washed through.
+        bg: period === k ? 'var(--on-takings)' : 'transparent',
+        fg: period === k ? 'var(--on-takings-pill)' : 'var(--on-takings)',
         pick: () => this.set('window', k)
       })),
 
@@ -4236,28 +4216,6 @@ class Component extends DCLogic {
       setStPickupNote: e => { const v = e.target.value; this.editDraft(x => { x.pickupNote = v; }); },
       stContact: d.contact || '',
       setStContact: e => { const v = e.target.value; this.editDraft(x => { x.contact = v; }); },
-      // The two skins, as a pair of swatch cards.
-      //
-      // These are the ONLY literal colours left in the app, and deliberately
-      // so: a swatch has to show the palette you are not currently wearing, so
-      // it cannot be drawn with the variables — those are, by definition, the
-      // other one.
-      lookOptions: [
-        { id: 'year', label: t.lookYear, sub: t.lookYearSub, sw: ['#f5ead8', '#c67139', '#56633f'] },
-        { id: 'halloween', label: t.lookHallo, sub: t.lookHalloSub, sw: ['#0c0a0d', '#ff8a3d', '#6fd83a'] }
-      ].map(k => {
-        const on = ((s.cfg || {}).look || 'year') === k.id;
-        return {
-          label: k.label, sub: k.sub,
-          sw1: k.sw[0], sw2: k.sw[1], sw3: k.sw[2],
-          bg: on ? 'var(--green-pale)' : 'var(--paper)',
-          fg: on ? 'var(--green-ink)' : 'var(--ink)',
-          subFg: on ? 'var(--green-ink)' : 'var(--muted)',
-          shadow: on ? '3px 3px 0 var(--ink)' : 'none',
-          pick: () => this.pickLook(k.id)
-        };
-      }),
-
       stPays: (d.payments || []).map(p => ({
         label: p.label,
         handle: p.handle || '',
@@ -4276,7 +4234,7 @@ class Component extends DCLogic {
         }
       })),
       stRunOn: !!(d.run && d.run.on),
-      stRunBg: d.run && d.run.on ? 'var(--green)' : 'rgba(32,30,29,.15)',
+      stRunBg: d.run && d.run.on ? 'var(--green)' : 'var(--scrim-15)',
       stRunJustify: d.run && d.run.on ? 'flex-end' : 'flex-start',
       stRunLabel: d.run && d.run.on ? 'ON' : 'OFF',
       toggleStRun: () => this.editDraft(x => { x.run.on = !x.run.on; }),
@@ -4340,9 +4298,9 @@ class Component extends DCLogic {
       ],
       isClientNav: ['home', 'confirm', 'expired', 'profile'].indexOf(s.screen) > -1,
       navHomeFg: s.screen === 'home' ? 'var(--on-dark)' : 'var(--faint)',
-      navHomePill: s.screen === 'home' ? 'var(--rust-2)' : 'rgba(245,234,216,.1)',
+      navHomePill: s.screen === 'home' ? 'var(--rust-2)' : 'var(--veil-1)',
       navBagFg: s.cart.length ? 'var(--on-dark)' : 'var(--faint)',
-      navBagPill: s.cart.length ? 'var(--green)' : 'rgba(245,234,216,.1)',
+      navBagPill: s.cart.length ? 'var(--green)' : 'var(--veil-1)',
       goHome: () => this.set('screen', 'home'), goBag: () => this.set('screen', 'bag'),
       goQueue: () => this.set('screen', 'queue'), back: () => this.set('screen', 'home'),
       logout: () => this.logout()
