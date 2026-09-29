@@ -455,10 +455,42 @@ input,textarea,select{font-size:16px}
             <div style="font:700 10px/1 'Figtree';letter-spacing:.16em;text-transform:uppercase;color:#8c491a">{{ t.pfWho }}</div>
             <div style="font-family:'Caprasimo',serif;font-size:30px;line-height:1.08;color:#201e1d;margin-top:6px">{{ t.pfTitle }}</div>
 
+            <!-- Mafupuntos. Dark card on a light screen because it is the one
+                 thing on here they came to look at, and nothing is redeemable
+                 yet — so it says "rewards coming soon" rather than dressing a
+                 number up as something it can already buy. -->
+            <div style="margin-top:18px;background:#201e1d;border:2px solid #201e1d;border-radius:24px;padding:18px;box-shadow:3px 3px 0 #8c491a">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                <div style="font-family:'Caprasimo',serif;font-size:19px;color:#f5ead8">{{ t.ptsTitle }}</div>
+                <div style="font:800 9.5px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#c67139">{{ t.ptsSoon }}</div>
+              </div>
+              <div style="font-family:'Caprasimo',serif;font-size:52px;line-height:1.02;color:#e1eecc;margin-top:8px">{{ ptsValue }}</div>
+              <div style="font:500 11.5px/1.45 'Figtree';color:#a19786;margin-top:3px">{{ t.ptsRule }}</div>
+
+              <div style="display:{{ ptsGoalDisplay }};margin-top:15px">
+                <div style="height:10px;border-radius:999px;background:rgba(245,234,216,.14);overflow:hidden">
+                  <div style="height:100%;width:{{ ptsPct }};background:#c67139;border-radius:999px"></div>
+                </div>
+                <div style="font:600 11px/1.4 'Figtree';color:#a19786;margin-top:8px">{{ ptsGoalLine }}</div>
+              </div>
+
+              <div style="display:{{ ptsHistDisplay }};margin-top:16px">
+                <div style="font:800 9.5px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#a19786;margin-bottom:4px">{{ t.ptsHistory }}</div>
+                <sc-for list="{{ ptsRows }}" as="p" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:baseline;gap:9px;padding:8px 0;border-top:2px solid rgba(245,234,216,.1)">
+                    <div style="flex:1;min-width:0;font:800 12.5px/1.3 'Figtree';color:#f5ead8">{{ p.no }}</div>
+                    <div style="flex:none;font:600 11px/1 'Figtree';color:#a19786">{{ p.when }}</div>
+                    <div style="flex:none;font:800 13.5px/1 'Figtree';color:#e1eecc">{{ p.pts }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:{{ ptsEmptyDisplay }};margin-top:13px;font:500 12px/1.5 'Figtree';color:#a19786">{{ t.ptsEmpty }}</div>
+            </div>
+
             <!-- Their own details, theirs to fix. The owner was correcting
                  misheard names and wrong doors by hand; the person who knows
                  the address is the one standing at it. -->
-            <div style="margin-top:18px;background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:16px">
+            <div style="margin-top:16px;background:#f9f4ed;border:2px solid #201e1d;border-radius:24px;padding:16px">
               <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin-bottom:7px">{{ t.pfName }}</div>
               <input value="{{ pfName }}" onChange="{{ setPfName }}" placeholder="{{ t.fNamePh }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 16px;border-radius:999px;border:2px solid #201e1d;background:#f5ead8;font:600 15px/1 'Figtree';color:#201e1d;outline:none">
               <div style="font:700 10px/1 'Figtree';letter-spacing:.14em;text-transform:uppercase;color:#8c491a;margin:14px 0 7px">{{ t.pfPhone }}</div>
@@ -1547,8 +1579,8 @@ const COPY = {
     stNotifSub: 'Estos se mandan solos. Tú no escribes nada.',
     stNotifSubs: n => n === 1 ? '1 cliente los tiene prendidos' : n + ' clientes los tienen prendidos',
     stNotifKeys: 'Faltan las llaves VAPID en Netlify. Sin ellas no se manda nada — mira DEPLOY.md.',
-    notifNames: { newStrain: 'Llegó algo nuevo', opened: 'Abrimos', run: 'Salió el delivery', orderStatus: 'Su orden se movió', lowStock: 'Se está acabando algo que compran' },
-    notifWhen: { newStrain: 'Cuando metes una mata nueva al menú.', opened: 'Cuando la tienda abre.', run: 'Cuando prendes el run de hoy.', orderStatus: 'Solo al cliente de esa orden.', lowStock: 'Solo a quien ya la ha comprado.' },
+    notifNames: { newStrain: 'Llegó algo nuevo', opened: 'Abrimos', run: 'Salió el delivery', orderStatus: 'Su orden se movió', lowStock: 'Se está acabando algo que compran', points: 'Llegó a una meta de Mafupuntos' },
+    notifWhen: { newStrain: 'Cuando metes una mata nueva al menú.', opened: 'Cuando la tienda abre.', run: 'Cuando prendes el run de hoy.', orderStatus: 'Solo al cliente de esa orden.', lowStock: 'Solo a quien ya la ha comprado.', points: 'Solo en la orden que lo pasa. Cuatro o cinco veces en toda su historia.' },
     offerTitle: '¿Te aviso cuando esté listo?',
     offerBody: 'Te llega un mensaje cuando El Mafu tenga tu orden lista — y cuando entre algo nuevo al menú. Nada más.',
     offerYes: 'Sí, avísame', offerNo: 'Ahora no',
@@ -1564,6 +1596,12 @@ const COPY = {
     pfSave: 'Guardar mis datos', pfSaved: 'Guardado.',
     pfNeedName: 'Pon un nombre que él reconozca.',
     pfOrders: 'Tus órdenes', pfOrdersEmpty: 'Todavía no has hecho ninguna orden.',
+    ptsTitle: 'Mafupuntos', ptsRule: '1 Mafupunto por cada $1 que gastas.',
+    ptsSoon: 'Premios pronto',
+    ptsHistory: 'Cómo los ganaste',
+    ptsEmpty: 'Todavía no tienes Mafupuntos. Haz una orden y empiezas.',
+    ptsGoal: (n, g) => 'Te faltan ' + n + ' pa’ llegar a ' + g + '.',
+    ptsTop: 'Pasaste todas las metas. Bestia.',
     saving: 'Guardando…',
     confirmTitle: 'Confirma que te llegó el pago',
     confirmSub: 'Hasta que lo confirmes, esto no está separado.',
@@ -1791,8 +1829,8 @@ const COPY = {
     stNotifSub: 'These send themselves. You write nothing.',
     stNotifSubs: n => n === 1 ? '1 customer has them on' : n + ' customers have them on',
     stNotifKeys: 'The VAPID keys are missing in Netlify. Nothing can send without them — see DEPLOY.md.',
-    notifNames: { newStrain: 'Something new landed', opened: 'We opened', run: 'Delivery is rolling', orderStatus: 'Their order moved', lowStock: 'Something they buy is nearly gone' },
-    notifWhen: { newStrain: 'When you add a strain to the menu.', opened: 'When the shop opens.', run: 'When you switch tonight\u2019s run on.', orderStatus: 'Only to the customer on that order.', lowStock: 'Only to people who have bought it.' },
+    notifNames: { newStrain: 'Something new landed', opened: 'We opened', run: 'Delivery is rolling', orderStatus: 'Their order moved', lowStock: 'Something they buy is nearly gone', points: 'They hit a Mafupuntos goal' },
+    notifWhen: { newStrain: 'When you add a strain to the menu.', opened: 'When the shop opens.', run: 'When you switch tonight\u2019s run on.', orderStatus: 'Only to the customer on that order.', lowStock: 'Only to people who have bought it.', points: 'Only on the order that passes it. Four or five times in their whole history.' },
     offerTitle: 'Want a nudge when it\u2019s ready?',
     offerBody: 'We\u2019ll message you when El Mafu has your order ready — and when something new lands on the menu. Nothing else.',
     offerYes: 'Yes, tell me', offerNo: 'Not now',
@@ -1808,6 +1846,12 @@ const COPY = {
     pfSave: 'Save my details', pfSaved: 'Saved.',
     pfNeedName: 'Put a name he will recognise.',
     pfOrders: 'Your orders', pfOrdersEmpty: 'You have not ordered yet.',
+    ptsTitle: 'Mafupuntos', ptsRule: '1 Mafupunto for every $1 you spend.',
+    ptsSoon: 'Rewards coming soon',
+    ptsHistory: 'How you earned them',
+    ptsEmpty: 'No Mafupuntos yet. Place an order and you are away.',
+    ptsGoal: (n, g) => n + ' to go before you hit ' + g + '.',
+    ptsTop: 'You have passed every goal. Animal.',
     saving: 'Saving\u2026',
     confirmTitle: 'Confirm the payment landed',
     confirmSub: 'Until you confirm, nothing is held.',
@@ -2003,7 +2047,14 @@ const STICKERS = ['#e1eecc', '#ffe1d0', '#ffc6a5', '#f0fae1'];
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = '2026-09-18.1830';
+const BUILD = '2026-09-29.1100';
+
+// The Mafupuntos ladder, and the ONE thing in here that has to agree with the
+// server: lib/points.js owns the real list and decides what has actually been
+// earned. This copy exists only to draw the progress bar between one rung and
+// the next, so if the two ever drift the bar is wrong and the number is right —
+// which is the correct way round for a mistake to land.
+const PTS_RUNGS = [100, 250, 500, 1000, 2500, 5000];
 
 // Tap feedback for the keypad.
 //
@@ -2078,6 +2129,10 @@ class Component extends DCLogic {
     shopOpen: true,
     opensAt: '',
     profile: null,
+    pts: 0,
+    ptsGoal: 0,
+    ptsToGo: 0,
+    ptsEarned: [],
     pfDraft: null,
     pushMsg: '',
     pushOk: false,
@@ -2390,7 +2445,17 @@ class Component extends DCLogic {
     this.api('codes', 'me').then(res => {
       if (this.expired(res)) return;
       if (res && res.ok) {
-        this.setState({ profile: res.profile, pfDraft: { ...res.profile } });
+        this.setState({
+          profile: res.profile, pfDraft: { ...res.profile },
+          // Points come back with the profile rather than from a call of their
+          // own: they are read off the same order list the server already has
+          // open, so asking separately would cost a second round trip for a
+          // number that is never out of step with this one.
+          pts: res.points || 0,
+          ptsGoal: res.goal || 0,
+          ptsToGo: res.toGo || 0,
+          ptsEarned: res.earned || []
+        });
       }
     });
     this.api('orders', 'mine').then(res => {
@@ -3262,7 +3327,7 @@ class Component extends DCLogic {
       pushOffDisplay: s.pushReady ? 'none' : 'block',
       pushOnDisplay: s.pushReady ? 'flex' : 'none',
       listenerLine: t.stNotifSubs(s.listeners || 0),
-      notifRows: ['newStrain', 'opened', 'run', 'orderStatus', 'lowStock'].map(k => {
+      notifRows: ['newStrain', 'opened', 'run', 'orderStatus', 'lowStock', 'points'].map(k => {
         const on = !!(d.notifs && d.notifs[k]);
         return {
           label: t.notifNames[k],
@@ -3309,6 +3374,31 @@ class Component extends DCLogic {
       pfMsg: s.pfMsg || '',
       pfMsgDisplay: s.pfMsg ? 'block' : 'none',
       pfMsgFg: s.pfOk ? '#3d472b' : '#8c491a',
+      // ── Mafupuntos ────────────────────────────────────────────────────────
+      // Every figure here comes from the server's reading of the orders. The
+      // app never adds a point of its own, so there is no second opinion for
+      // the two to disagree about.
+      ptsValue: (s.pts || 0).toLocaleString('en-US'),
+      ptsGoalDisplay: s.ptsGoal ? 'block' : 'none',
+      ptsGoalLine: s.ptsGoal ? t.ptsGoal((s.ptsToGo || 0).toLocaleString('en-US'), s.ptsGoal.toLocaleString('en-US')) : t.ptsTop,
+      // The bar fills across the gap between the rung just cleared and the one
+      // ahead, not from zero — from zero every bar past the first rung sits
+      // nearly full and stops meaning anything.
+      ptsPct: (() => {
+        if (!s.ptsGoal) return '100%';
+        const span = s.ptsGoal - (PTS_RUNGS.filter(m => m <= (s.pts || 0)).pop() || 0);
+        const done = span > 0 ? ((s.pts || 0) - (s.ptsGoal - span)) / span : 0;
+        return Math.max(2, Math.min(100, Math.round(done * 100))) + '%';
+      })(),
+      ptsHistDisplay: (s.ptsEarned || []).length ? 'block' : 'none',
+      ptsEmptyDisplay: (s.ptsEarned || []).length ? 'none' : 'block',
+      // Four, not the lot. Their whole order list is already further down this
+      // same screen, so a full replay here is the same information twice and
+      // pushes everything they can actually edit off the bottom.
+      ptsRows: (s.ptsEarned || []).slice(0, 4).map(r => ({
+        no: r.no, when: stamp(r.at), pts: '+' + r.points
+      })),
+
       pfOrdersMeta: t.ordersN((s.mine || []).length),
       pfEmptyDisplay: (s.mine || []).length ? 'none' : 'block',
       pfOrderRows: (s.mine || []).slice(0, 12).map(o => {
@@ -3937,7 +4027,12 @@ class Component extends DCLogic {
         code: c.code,
         // Counted from the orders themselves by the server. This used to show
         // `uses`, which counts sign-ins, under the word "Orders".
-        meta: t.ordersN(c.orders || 0) + ' · ' + cash(c.spent || 0),
+        // Points ride along on the same line so he can see who his regulars
+        // are without opening anything — the whole reason he looks at this
+        // screen. Hidden at zero rather than shown as "0 pts", which is noise
+        // on every code he has just issued.
+        meta: t.ordersN(c.orders || 0) + ' · ' + cash(c.spent || 0) +
+          ((c.points || 0) > 0 ? ' · ' + (c.points || 0).toLocaleString('en-US') + ' pts' : ''),
         last: c.lastOrder ? t.lastOrder(stamp(c.lastOrder)) : t.neverOrdered,
         state: c.active ? t.active : t.revoked,
         bg: c.active ? '#e1eecc' : '#eee7db', fg: c.active ? '#3d472b' : '#82796a',

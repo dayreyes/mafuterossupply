@@ -8,6 +8,7 @@ import { read, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { mintCode, withHistory } from './lib/invites.js';
 import { sendAll, codeText, pushConfigured, pushPublicKey } from './lib/notify.js';
+import { pointsFor, earnedRows, nextMilestone, PTS_PER_DOLLAR } from './lib/points.js';
 
 // What a customer may see of their own record, and nothing of anyone else's.
 const publicSelf = (c) => ({
@@ -33,7 +34,20 @@ export default async (req) => route(req, {
     if (!session) return unauthorized('Your session expired — enter your code again.');
     const mine = (await read(KEYS.codes, [])).find((c) => c.code === session.code);
     if (!mine) return fail('That code is no longer active.');
-    return ok({ profile: publicSelf(mine) });
+    // Their points and the orders behind them, counted fresh. The rows are the
+    // customer's own orders only — the filter is on the session's code, so
+    // there is nothing here to scope wrong.
+    const orders = await read(KEYS.orders, []);
+    const points = pointsFor(orders, session.code, await read(KEYS.ptsCarry, {}));
+    const goal = nextMilestone(points);
+    return ok({
+      profile: publicSelf(mine),
+      points,
+      perDollar: PTS_PER_DOLLAR,
+      goal,
+      toGo: goal ? goal - points : 0,
+      earned: earnedRows(orders, session.code).slice(0, 20)
+    });
   },
 
   // The customer switching automatic messages on or off, and registering the

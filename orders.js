@@ -13,9 +13,10 @@ import { route, ok, fail, unauthorized, str, num, newId } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { mileFee, migrateProduct, shopOpen, shopDay, loadConfig } from './lib/config.js';
+import { pointsFor, orderPoints, crossed, addCarry } from './lib/points.js';
 import {
   sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText,
-  pushTo, orderStatusMsg, lowStockCustomerMsg
+  pushTo, orderStatusMsg, lowStockCustomerMsg, pointsMsg
 } from './lib/notify.js';
 
 const money = (n) => '$' + Number(n).toLocaleString('en-US');
@@ -229,7 +230,20 @@ export default async (req) => route(req, {
       cancelled: false
     };
 
-    await mutate(KEYS.orders, [], (list) => [order].concat(list).slice(0, 2000));
+    // Points before this order, taken off the very list it is being added to,
+    // so the two can never be read a moment apart. Anything pushed off the end
+    // of the cap has its points banked — see lib/points.js.
+    let ptsBefore = 0;
+    let aged = [];
+    await mutate(KEYS.orders, [], (list) => {
+      ptsBefore = pointsFor(list, order.clientCode);
+      const next = [order].concat(list);
+      aged = next.slice(2000);
+      return next.slice(0, 2000);
+    });
+    if (aged.length) {
+      await mutate(KEYS.ptsCarry, {}, (c) => addCarry(c, aged));
+    }
 
     // Commit the stock only once the order is safely stored.
     const low = [];
@@ -264,6 +278,14 @@ export default async (req) => route(req, {
         const regulars = [...new Set(past)].filter((c) => c !== session.code);
         if (regulars.length) await pushTo(regulars, lowStockCustomerMsg(l.name, l.left));
       }
+    }
+
+    // Crossing a Mafupuntos milestone. Only on the order that actually carries
+    // them past it, so this is rare by construction — four or five times in a
+    // customer's whole history — which is what keeps it worth reading.
+    if (cfg.notifs && cfg.notifs.points && order.clientCode) {
+      const rung = crossed(ptsBefore, ptsBefore + orderPoints(order));
+      if (rung) await pushTo([order.clientCode], pointsMsg(cfg, rung));
     }
 
     return ok({ order });

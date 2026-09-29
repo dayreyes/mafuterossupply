@@ -147,5 +147,8 @@ export const KEYS = {
   codes: 'codes',
   sessions: 'sessions',
   throttle: 'throttle',
-  counters: 'counters'
+  counters: 'counters',
+  // Points belonging to orders that have aged out of the capped order list.
+  // See the note in points.js — without it a balance would shrink over time.
+  ptsCarry: 'ptsCarry'
 };

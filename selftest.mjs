@@ -22,7 +22,7 @@ mkdirSync(join(F, 'lib'), { recursive: true });
 for (const f of ['auth', 'shop', 'orders', 'signups', 'codes']) {
   if (existsSync(join(root, f + '.js'))) copyFileSync(join(root, f + '.js'), join(F, f + '.js'));
 }
-for (const f of ['session', 'config', 'invites', 'http', 'store', 'notify']) {
+for (const f of ['session', 'config', 'invites', 'http', 'store', 'notify', 'points']) {
   if (existsSync(join(root, f + '.js'))) copyFileSync(join(root, f + '.js'), join(F, 'lib', f + '.js'));
 }
 
@@ -395,7 +395,13 @@ async function customerProfile() {
   let r = await call(codes, { action: 'me' }, ana.token);
   ck('their own row comes back', r.ok === true && r.profile.name === 'Ana', r);
   ck('with the address to correct', r.profile.addr === '1 Ana Street', r.profile);
-  ck('and nothing else is attached', Object.keys(r).sort().join(',') === 'ok,profile', Object.keys(r));
+  // Named one by one rather than counted, so anything new bolted onto this
+  // response has to be looked at: `me` is the reply that could most easily
+  // start carrying somebody else's details without anyone noticing.
+  ck('and nothing else is attached',
+    Object.keys(r).sort().join(',') === 'earned,goal,ok,perDollar,points,profile,toGo', Object.keys(r));
+  ck('the profile itself still carries only their own fields',
+    Object.keys(r.profile).sort().join(',') === 'addr,code,devices,name,notify,phone', Object.keys(r.profile));
 
   section('and cannot reach anybody else\u2019s');
   const dump = JSON.stringify(r);
@@ -498,7 +504,9 @@ async function configMigration() {
   // checked — that the settings already on disk survive the merge untouched.
   const su = await call(auth, { action: 'setup', pin: '481902' });
   const cfg = (await call(shop, { action: 'config' }, su.token)).config;
-  ck('the owner sees every trigger', Object.keys(cfg.notifs || {}).length === 5, cfg.notifs);
+  ck('the owner sees every trigger',
+    Object.keys(cfg.notifs || {}).sort().join(',') ===
+      Object.keys(cfgLib.defaultConfig().notifs).sort().join(','), cfg.notifs);
   ck('and the timezone', !!(cfg.hours && cfg.hours.tz), cfg.hours);
   ck('while the settings that were stored are untouched',
     cfg.shopName === "Mafutero's Supply" && cfg.holdMinutes === 30 && cfg.pickupNote === 'Text him',
@@ -1015,7 +1023,84 @@ async function uniqueIds() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, configMigration, automaticMessages, diagnose, viewLayer]) {
+// MAFUPUNTOS
+//
+// A balance is the customer's money in all but name, so the things that matter
+// are: it matches what they actually spent, the breakdown adds up to it, a
+// cancelled order takes its points back, and nobody can see or move anybody
+// else's.
+// ════════════════════════════════════════════════════════════════════════════
+async function mafupuntos() {
+  const s = await openShop({ hours: { on: false } }, { stock: 900 });
+  const ana = await s.asCustomer('Ana');
+  const tito = await s.asCustomer('Tito');
+  const buy = (tok, qty) => call(orders,
+    { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty }], mode: 'pickup', pay: 'cash' }, tok);
+
+  section('a point for a dollar, counted off the orders');
+  let me = await call(codes, { action: 'me' }, ana);
+  ck('a customer with no orders has none', me.points === 0, me.points);
+  ck('and is told the rate', me.perDollar === 1, me);
+  await buy(ana, 4);                       // 4 x 3.5g at $25 = $100
+  me = await call(codes, { action: 'me' }, ana);
+  ck('a $100 order is 100 points', me.points === 100, me.points);
+  ck('the breakdown has the order in it', me.earned.length === 1 && me.earned[0].points === 100, me.earned);
+
+  section('the list adds up to the number');
+  await buy(ana, 1);
+  await buy(ana, 2);
+  me = await call(codes, { action: 'me' }, ana);
+  ck('every row is accounted for',
+    me.earned.reduce((a, r) => a + r.points, 0) === me.points, { rows: me.earned, total: me.points });
+  ck('newest first', me.earned.length === 3 && me.earned[0].at >= me.earned[1].at, me.earned);
+
+  section('nobody earns on somebody else\'s money');
+  const his = await call(codes, { action: 'me' }, tito);
+  ck('a different customer has their own balance', his.points === 0, his.points);
+  await buy(tito, 1);
+  const hisNow = await call(codes, { action: 'me' }, tito);
+  const hers = await call(codes, { action: 'me' }, ana);
+  ck('and it only moves for their own orders', hisNow.points === 25 && hers.points === 175,
+    { tito: hisNow.points, ana: hers.points });
+
+  section('a cancelled order takes its points with it');
+  const all = (await call(orders, { action: 'list' }, s.token)).orders;
+  const anaOrder = all.find(o => o.clientCode === hers.profile.code && o.subtotal === 100);
+  await call(orders, { action: 'cancel', id: anaOrder.id }, s.token);
+  const afterCancel = await call(codes, { action: 'me' }, ana);
+  ck('the sale did not happen, so the points did not either', afterCancel.points === 75, afterCancel.points);
+  ck('and it drops out of the breakdown', afterCancel.earned.length === 2, afterCancel.earned);
+
+  section('the goal ahead of them');
+  ck('the next rung is named', afterCancel.goal === 100, afterCancel);
+  ck('with the distance to it', afterCancel.toGo === 25, afterCancel);
+
+  section('the owner sees the same number');
+  const row = (await call(codes, { action: 'list' }, s.token)).codes
+    .find(c => c.code === afterCancel.profile.code);
+  ck('no disagreement between the two screens', row.points === afterCancel.points,
+    { owner: row.points, customer: afterCancel.points });
+
+  section('points survive an order ageing off the end of the list');
+  // The cap is 2000 and nobody is placing 2000 orders in a test, so the carry
+  // is exercised directly — it is the mechanism, not the cap, that matters.
+  const pts = await import(B + 'lib/points.js');
+  const dropped = [{ clientCode: 'X', subtotal: 40, fee: 0, cancelled: false }];
+  const carry = pts.addCarry({}, dropped);
+  ck('the points of a dropped order are banked', carry.X === 40, carry);
+  ck('and still counted once it is gone', pts.pointsFor([], 'X', carry) === 40);
+  ck('a cancelled order banks nothing',
+    Object.keys(pts.addCarry({}, [{ clientCode: 'Y', subtotal: 40, cancelled: true }])).length === 0);
+
+  section('a milestone is crossed once, not every order after it');
+  ck('the order that passes it', pts.crossed(90, 110) === 100);
+  ck('nothing for the one after', pts.crossed(110, 130) === null);
+  ck('one message when an order clears two rungs', pts.crossed(90, 300) === 250);
+  ck('and nothing when the balance goes backwards', pts.crossed(300, 90) === null);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, configMigration, automaticMessages, mafupuntos, diagnose, viewLayer]) {
   await suite();
 }
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
