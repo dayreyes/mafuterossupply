@@ -14,7 +14,7 @@
 // API calls are never cached. Stale order and stock data would be worse than
 // an honest error, so anything under /.netlify/ bypasses the worker entirely.
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const SHELL = 'mafuteros-shell-' + VERSION;
 const ASSETS = 'mafuteros-assets-' + VERSION;
 

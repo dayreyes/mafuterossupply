@@ -410,10 +410,22 @@ impossible rather than merely unlikely — the value is there before the first
 frame is painted, so there is nothing for the page to catch up to.
 
 Both palettes are defined at the top of `index.html` as two blocks of custom
-properties. They must define exactly the same set of names — the test suite
-checks it, because a colour defined in one and forgotten in the other does
-not throw anything: it just leaves one control cream on a black screen until
-somebody happens to look at that screen in that skin.
+properties, and the typeface switches with them — Caprasimo and Figtree on
+the year-round skin, Anton and IBM Plex Mono on Halloween. They must define
+exactly the same set of names. The test suite checks it, because a colour
+defined in one and forgotten in the other does not throw anything: it just
+leaves one control cream on a black screen until somebody happens to look at
+that screen in that skin.
+
+**That one word is the only edit.** The app icon and the colours in
+`manifest.webmanifest` are deliberately neutral — a dark field that sits
+under either palette — so flipping the skin never turns into a hunt through
+three files for the bits that did not come along.
+
+One thing that does NOT follow the skin, on any phone: an icon already added
+to a home screen. iOS caches it at the moment it was added and will not
+refresh it. Existing customers keep whatever icon they saved; anyone adding
+the app from now on gets the current one.
 
 ---
 
