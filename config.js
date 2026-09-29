@@ -56,8 +56,17 @@ export const defaultConfig = () => ({
     tz: 'America/New_York',
     paused: false
   },
+  // Which skin the shop is wearing. 'year' is the cream-and-olive look it has
+  // always had; 'halloween' is black, orange and toxic green.
+  //
+  // The owner's switch rather than a date, because a date cannot be argued
+  // with: he may want it up from mid-October, or left on through the first
+  // week of November, and neither is worth a deploy.
+  look: 'year',
   setupComplete: false
 });
+
+export const LOOKS = ['year', 'halloween'];
 
 // Defaults reach a shop that already exists.
 //
@@ -99,6 +108,10 @@ export function cleanConfig(incoming, current) {
   if (inp.pickupNote !== undefined) c.pickupNote = str(inp.pickupNote, 160);
   if (inp.contact !== undefined) c.contact = str(inp.contact, 120);
   if (inp.holdMinutes !== undefined) c.holdMinutes = num(inp.holdMinutes, 5, 240, c.holdMinutes);
+  // Checked against the list rather than stored as given: this value is
+  // written straight into an attribute on <html>, so anything not a known
+  // skin name has no business reaching the page.
+  if (inp.look !== undefined) c.look = LOOKS.includes(inp.look) ? inp.look : c.look;
 
   if (Array.isArray(inp.payments)) {
     c.payments = c.payments.map((p) => {
@@ -387,6 +400,8 @@ export const publicProduct = (p) => ({
 
 export const publicConfig = (c) => ({
   shopName: c.shopName,
+  // Customers need this to paint themselves correctly, so it is public.
+  look: LOOKS.includes(c.look) ? c.look : 'year',
   // Only when it opens and whether it is open — never the day list, the
   // timezone or the paused flag, which are the owner's business.
   hours: { on: !!(c.hours && c.hours.on), open: (c.hours || {}).open || '', close: (c.hours || {}).close || '' },
