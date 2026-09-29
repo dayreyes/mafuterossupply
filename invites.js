@@ -9,6 +9,7 @@ import { randomInt } from 'node:crypto';
 import { read, mutate, KEYS } from './store.js';
 import { str, newId } from './http.js';
 import { CLIENT_CODE_LEN } from './session.js';
+import { orderPoints } from './points.js';
 
 export const genCode = () =>
   String(randomInt(0, 10 ** CLIENT_CODE_LEN)).padStart(CLIENT_CODE_LEN, '0');
@@ -55,17 +56,22 @@ export async function mintCode(name, contact = {}) {
 // count, since archiving only tidies the queue.
 export async function withHistory(codes) {
   const orders = await read(KEYS.orders, []);
+  const carry = await read(KEYS.ptsCarry, {});
   const byCode = new Map();
   for (const o of orders) {
     if (!o.clientCode || o.cancelled) continue;
-    const row = byCode.get(o.clientCode) || { orders: 0, spent: 0, lastOrder: '' };
+    const row = byCode.get(o.clientCode) || { orders: 0, spent: 0, points: 0, lastOrder: '' };
     row.orders += 1;
     row.spent += (o.subtotal || 0) + (o.fee || 0);
+    // Counted here off the same pass rather than by calling pointsFor, so the
+    // owner's list of customers stays one walk of the orders however long it
+    // gets. The per-order figure is the shared one, so the two never disagree.
+    row.points += orderPoints(o);
     if (!row.lastOrder || String(o.at) > row.lastOrder) row.lastOrder = String(o.at || '');
     byCode.set(o.clientCode, row);
   }
-  return codes.map((c) => ({
-    ...c,
-    ...(byCode.get(c.code) || { orders: 0, spent: 0, lastOrder: '' })
-  }));
+  return codes.map((c) => {
+    const row = byCode.get(c.code) || { orders: 0, spent: 0, points: 0, lastOrder: '' };
+    return { ...c, ...row, points: row.points + (carry[c.code] || 0) };
+  });
 }

@@ -252,3 +252,13 @@ export const lowStockCustomerMsg = (name, left) => ({
   body: 'Down to ' + left + '. Worth getting in before it goes.',
   tag: 'low-' + name
 });
+
+// Crossing a milestone. Says the number and stops — there is nothing to redeem
+// yet, and a message hinting at a reward that does not exist is worse than no
+// message at all.
+export const pointsMsg = (cfg, rung) => ({
+  kind: 'points',
+  title: rung + ' Mafupuntos',
+  body: 'You just passed ' + rung + ' at ' + shopName(cfg) + '.',
+  tag: 'pts-' + rung
+});

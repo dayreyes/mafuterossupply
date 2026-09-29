@@ -356,6 +356,79 @@ as **Still to collect**, so the figure is never inflated by unpaid orders.
 
 ---
 
+## 12. Mafupuntos
+
+One point for every dollar spent. Nothing redeems yet — the card in a
+customer's profile says "rewards coming soon" and means it.
+
+Points are **read from the order list**, never stored as a balance. That
+matters more than it sounds: cancel an order and the points go with it,
+because they were never anywhere else. It also means the feature arrived
+backdated — every order the shop had already taken counted the moment it
+shipped, so regulars opened the app holding a balance instead of a zero.
+
+The owner sees each customer's points on the **Codes** screen, on the same
+line as their orders and spend. It is the same count the customer sees, so
+the two screens cannot disagree.
+
+Customers get one message per milestone — 100, 250, 500, 1000, 2500, 5000 —
+and only on the order that actually carries them past it. That is four or
+five messages in a whole customer history, which is what keeps it worth
+reading. Switch it off under **Automatic messages** like any other kind.
+
+One piece of housekeeping happens on its own: the order list is capped at
+2000 and the oldest drop off the end, so the points on a dropped order are
+banked to a carry-over as it goes. Without that, balances would quietly
+shrink months from now.
+
+---
+
+## 13. Changing the shop's look
+
+The app ships with two skins:
+
+| `data-skin` | What it looks like |
+|---|---|
+| `year` | cream and olive — the shop's usual look |
+| `halloween` | black, orange and toxic green |
+
+It is **not** a setting the owner can reach, on purpose. It changes on the
+second line of `index.html`:
+
+```html
+<html lang="es" data-skin="year">
+```
+
+Change that one word, commit, and Netlify redeploys. Every customer sees the
+new skin the next time the app loads.
+
+It lives in the markup rather than in the shop's settings for two reasons.
+It only ever changes when somebody is already in this file doing maintenance,
+so a settings screen would be a control nobody touches for eleven months of
+the year. And putting it in the markup makes a flash of the wrong colours
+impossible rather than merely unlikely — the value is there before the first
+frame is painted, so there is nothing for the page to catch up to.
+
+Both palettes are defined at the top of `index.html` as two blocks of custom
+properties, and the typeface switches with them — Caprasimo and Figtree on
+the year-round skin, Anton and IBM Plex Mono on Halloween. They must define
+exactly the same set of names. The test suite checks it, because a colour
+defined in one and forgotten in the other does not throw anything: it just
+leaves one control cream on a black screen until somebody happens to look at
+that screen in that skin.
+
+**That one word is the only edit.** The app icon and the colours in
+`manifest.webmanifest` are deliberately neutral — a dark field that sits
+under either palette — so flipping the skin never turns into a hunt through
+three files for the bits that did not come along.
+
+One thing that does NOT follow the skin, on any phone: an icon already added
+to a home screen. iOS caches it at the moment it was added and will not
+refresh it. Existing customers keep whatever icon they saved; anyone adding
+the app from now on gets the current one.
+
+---
+
 ## Testing it
 
 ```bash

@@ -21,7 +21,7 @@
     for f in auth shop orders signups codes; do
       [ -f "$f.js" ] && cp -f "$f.js" netlify/functions/
     done
-    for f in session config invites http store notify; do
+    for f in session config invites http store notify points; do
       [ -f "$f.js" ] && cp -f "$f.js" netlify/functions/lib/
     done
     echo "functions ready:"; ls netlify/functions netlify/functions/lib

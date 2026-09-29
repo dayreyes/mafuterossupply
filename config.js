@@ -33,13 +33,13 @@ export const defaultConfig = () => ({
   // Both have to say yes, so neither the shop nor the customer can be
   // volunteered into it by the other.
   //
-  // No `points` trigger yet: that goes in when the points system does.
   notifs: {
     newStrain: true,      // something new landed on the menu
     opened: true,         // the shop just opened
     run: true,            // tonight's delivery run is rolling
     orderStatus: true,    // their own order moved along
-    lowStock: false       // something they buy is nearly gone
+    lowStock: false,      // something they buy is nearly gone
+    points: true          // they crossed a Mafupuntos milestone
   },
   // Opening hours, so the shop closes itself.
   //
