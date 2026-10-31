@@ -56,67 +56,79 @@
  * the page itself flips. Merge those and the nav bar turns bone.
  * ─────────────────────────────────────────────────────────────────────────── */
 :root {
-  --ink: #201e1d;            --paper: #f5ead8;
-  --card: #f9f4ed;           --chip: #eee7db;
-  --slab: #201e1d;           --slab-2: #2e2b25;
-  --on-dark: #f5ead8;
-  --muted: #645c50;          --muted-2: #82796a;
-  --faint: #a19786;          --chip-ink: #474238;
-  --rust: #8c491a;           --rust-2: #c67139;
-  --rust-3: #b2622d;         --rust-4: #f6a06b;
-  --danger: #8c2f1a;
-  --blush: #ffe1d0;          --blush-2: #ffc6a5;
-  --blush-3: #ffd9c7;        --blush-4: #ffd3ba;
-  --blush-ink: #402310;      --blush-ink-2: #5c3a1c;
-  --green: #56633f;          --green-2: #8fa073;
-  --green-3: #aebf92;        --green-pale: #e1eecc;
-  --green-pale-2: #ccdbb2;   --green-lightest: #f0fae1;
-  --green-ink: #3d472b;      --green-ink-2: #272e1b;
-  --green-glow: #e1eecc;
+  /* ISLA — the shop's year-round look.
+   *
+   * Forest, cream, terracotta and amber, from the Claude Design redesign. It
+   * replaces the cream-and-olive palette rather than joining it: this is the
+   * shop's identity now, and Halloween below stays as the seasonal set.
+   *
+   * The roles are unchanged, which is the whole return on having named them —
+   * a new identity is this block of values and nothing else. */
+  --ink: #13261b;            --paper: #f1e6d2;
+  --card: #fff8ea;           --chip: #e6d6b8;
+  --slab: #13261b;           --slab-2: #1f3a2b;
+  --on-dark: #f1e6d2;
+  --muted: #5a544c;          --muted-2: #7a6d62;
+  --faint: #a9b58c;          --chip-ink: #1d231c;
+  /* Terracotta carries the small labels, NOT amber: amber on cream is 1.8:1
+     and unreadable. Amber earns its keep on the dark panels instead. */
+  --rust: #b4502c;           --rust-2: #c4623f;
+  --rust-3: #a3471f;         --rust-4: #e0a43a;
+  --danger: #8f2f16;
+  --blush: #f6e2c6;          --blush-2: #efd0a4;
+  --blush-3: #f3dcc0;        --blush-4: #f0d6b4;
+  --blush-ink: #6b3a1a;      --blush-ink-2: #7a4a24;
+  --green: #1f3a2b;          --green-2: #35573f;
+  --green-3: #a9b58c;        --green-pale: #cdd5b8;
+  --green-pale-2: #bcc7a4;   --green-lightest: #e3e9d4;
+  --green-ink: #1f3a2b;      --green-ink-2: #13261b;
+  /* Amber on deep forest is 8:1 and the best thing in the palette, so it goes
+     where something should glow — the Mafupuntos figure above all. */
+  --green-glow: #e0a43a;
   /* Text on a strain's sticker. Stays dark in BOTH skins, because a sticker
      colour is stored on the product itself and is always a pale pastel — it
      is data, not palette, so it cannot invert with everything else. */
-  --on-sticker: #201e1d;      --on-sticker-2: #402310;
-  --on-solid: #f5ead8;
-  --font-display: 'Caprasimo', serif;
-  --font-body: 'Figtree', system-ui, sans-serif;
-  --font-hand: 'Caveat', cursive;
+  --on-sticker: #13261b;      --on-sticker-2: #5a544c;
+  --on-solid: #f1e6d2;
+  --font-display: 'Bowlby One', 'Caprasimo', serif;
+  --font-body: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-hand: 'Caveat Brush', cursive;
   /* the vessels: glass, its lid, and the shine down one side */
-  --glass: rgba(32,30,29,.05);   --shine: rgba(255,255,255,.55);
-  --lid: #a19786;                --lid-2: #82796a;
-  --vessel-ink: rgba(32,30,29,.34);
-  --on-takings: #402310;      --on-takings-pill: #f9f4ed;
-  --on-takings-fig: #f9f4ed;
+  --glass: rgba(19,38,27,.05);   --shine: rgba(255,255,255,.5);
+  --lid: #a9b58c;                --lid-2: #7a6d62;
+  --vessel-ink: rgba(19,38,27,.34);
+  --on-takings: #13261b;      --on-takings-pill: #fff8ea;
+  --on-takings-fig: #fff8ea;
 
   /* translucent, mixed from the palette above */
-  --dot-12: rgba(32,30,29,.12);
-  --dot-18: rgba(32,30,29,.18);
-  --dot-2: rgba(32,30,29,.2);
-  --dot-22: rgba(32,30,29,.22);
-  --dot-paper-07: rgba(32,30,29,.07);
-  --glow-25: rgba(198,113,57,.25);
-  --glow-35: rgba(198,113,57,.35);
-  --glow-6: rgba(198,113,57,.6);
-  --hairline-18: rgba(32,30,29,.18);
-  --scrim-15: rgba(32,30,29,.15);
-  --scrim-5: rgba(32,30,29,.5);
-  --shadow-2: rgba(32,30,29,.2);
-  --shadow-22: rgba(32,30,29,.22);
-  --shadow-3: rgba(32,30,29,.3);
-  --shadow-35: rgba(32,30,29,.35);
-  --shadow-4: rgba(32,30,29,.4);
-  --veil-07: rgba(245,234,216,.07);
-  --veil-08: rgba(245,234,216,.08);
-  --veil-1: rgba(245,234,216,.1);
-  --veil-12: rgba(245,234,216,.12);
-  --veil-14: rgba(245,234,216,.14);
-  --veil-15: rgba(245,234,216,.15);
-  --veil-2: rgba(245,234,216,.2);
-  --veil-25: rgba(245,234,216,.25);
-  --veil-35: rgba(249,244,237,.35);
-  --veil-4: rgba(245,234,216,.4);
-  --veil-5: rgba(245,234,216,.5);
-  --veil-6: rgba(245,234,216,.6);
+  --dot-12: rgba(19,38,27,.12);
+  --dot-18: rgba(19,38,27,.18);
+  --dot-2: rgba(19,38,27,.2);
+  --dot-22: rgba(19,38,27,.22);
+  --dot-paper-07: rgba(19,38,27,.07);
+  --glow-25: rgba(196,98,63,.25);
+  --glow-35: rgba(196,98,63,.35);
+  --glow-6: rgba(196,98,63,.6);
+  --hairline-18: rgba(19,38,27,.18);
+  --scrim-15: rgba(19,38,27,.15);
+  --scrim-5: rgba(19,38,27,.5);
+  --shadow-2: rgba(19,38,27,.2);
+  --shadow-22: rgba(19,38,27,.22);
+  --shadow-3: rgba(19,38,27,.3);
+  --shadow-35: rgba(19,38,27,.35);
+  --shadow-4: rgba(19,38,27,.4);
+  --veil-07: rgba(241,230,210,.07);
+  --veil-08: rgba(241,230,210,.08);
+  --veil-1: rgba(241,230,210,.1);
+  --veil-12: rgba(241,230,210,.12);
+  --veil-14: rgba(241,230,210,.14);
+  --veil-15: rgba(241,230,210,.15);
+  --veil-2: rgba(241,230,210,.2);
+  --veil-25: rgba(241,230,210,.25);
+  --veil-35: rgba(255,248,234,.35);
+  --veil-4: rgba(241,230,210,.4);
+  --veil-5: rgba(241,230,210,.5);
+  --veil-6: rgba(241,230,210,.6);
 }
 
 /* Halloween.
@@ -150,7 +162,7 @@
   /* Black on the accents, because on Halloween they are neon: bone on
      #ff6a13 is 2.4:1 and unreadable outdoors, black on it is 7.4:1. */
   --on-solid: #0c0a0d;
-  --font-display: 'Anton', 'Caprasimo', sans-serif;
+  --font-display: 'Anton', 'Bowlby One', sans-serif;
   --font-body: 'IBM Plex Mono', ui-monospace, monospace;
   --font-hand: 'Caveat', cursive;
   --glass: rgba(239,231,216,.05); --shine: rgba(239,231,216,.3);
@@ -385,6 +397,18 @@ input,textarea,select{font-size:16px}
             <div style="display:flex;flex-wrap:wrap;gap:9px;padding:14px 22px 18px">
               <sc-for list="{{ chips }}" as="c" hint-placeholder-count="6">
                 <div onClick="{{ c.pick }}" style="flex:none;padding:8px 14px;border-radius:999px;border:2px solid var(--ink);font:700 12px/1 var(--font-body);white-space:nowrap;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};opacity:{{ c.op }}">{{ c.label }}</div>
+              </sc-for>
+            </div>
+
+            <!-- Hybrid / Indica / Sativa.
+                 A second, quieter row: the section chips above decide WHAT you
+                 are looking at and these only narrow it, so they are smaller
+                 and outlined rather than filled. Hidden entirely when the shelf
+                 has only one type on it, which is most of the time — a filter
+                 that cannot change anything is just another thing to read. -->
+            <div style="display:{{ typeChipsDisplay }};flex-wrap:wrap;gap:7px;padding:0 22px 16px">
+              <sc-for list="{{ typeChips }}" as="k" hint-placeholder-count="4">
+                <div onClick="{{ k.pick }}" style="flex:none;padding:6px 12px;border-radius:999px;border:2px solid {{ k.bd }};font:700 10.5px/1 var(--font-body);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;cursor:pointer;background:{{ k.bg }};color:{{ k.fg }}">{{ k.label }}</div>
               </sc-for>
             </div>
 
@@ -672,6 +696,11 @@ input,textarea,select{font-size:16px}
                   <span style="font-family:var(--font-display);font-size:27px;color:var(--rust);flex:none">{{ total }}</span>
                 </div>
                 <div style="font:500 11.5px/1.5 var(--font-body);color:var(--muted-2);margin-top:4px">{{ t.nothingCharged }}</div>
+                <!-- What this order is worth in points, BEFORE they order.
+                     The balance was only ever visible afterwards, on the
+                     profile screen, which is the one place somebody deciding
+                     whether to add another eighth is not looking. -->
+                <div style="display:{{ earnDisplay }};margin-top:10px;padding:10px 13px;border-radius:14px;background:var(--green-pale);border:2px solid var(--green);font:700 12px/1.35 var(--font-body);color:var(--green-ink);text-align:center">{{ earnLine }}</div>
               </div>
             </div>
 
@@ -1827,6 +1856,8 @@ const COPY = {
     pfSave: 'Guardar mis datos', pfSaved: 'Guardado.',
     pfNeedName: 'Pon un nombre que él reconozca.',
     pfOrders: 'Tus órdenes', pfOrdersEmpty: 'Todavía no has hecho ninguna orden.',
+    typeAll: 'Todas',
+    earnPts: n => 'Esta orden te da ' + n + ' Mafupuntos.',
     ptsTitle: 'Mafupuntos', ptsRule: '1 Mafupunto por cada $1 que gastas.',
     ptsSoon: 'Premios pronto',
     ptsHistory: 'Cómo los ganaste',
@@ -2077,6 +2108,8 @@ const COPY = {
     pfSave: 'Save my details', pfSaved: 'Saved.',
     pfNeedName: 'Put a name he will recognise.',
     pfOrders: 'Your orders', pfOrdersEmpty: 'You have not ordered yet.',
+    typeAll: 'All',
+    earnPts: n => 'This order earns you ' + n + ' Mafupuntos.',
     ptsTitle: 'Mafupuntos', ptsRule: '1 Mafupunto for every $1 you spend.',
     ptsSoon: 'Rewards coming soon',
     ptsHistory: 'How you earned them',
@@ -2278,7 +2311,7 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = '2026-09-29.1830';
+const BUILD = "2026-10-31.2200";
 
 
 // The Mafupuntos ladder, and the ONE thing in here that has to agree with the
@@ -2395,6 +2428,7 @@ class Component extends DCLogic {
     selId: null, weightIdx: 0, cart: [], mode: 'pickup', slot: 0, zone: '', pay: '',
     last: null, hold: 0,
     filter: 'all',
+    typeFilter: 'all',
     form: { name: '', phone: '', addr: '', bday: '', pay: '' },
     signupErr: '',
 
@@ -3814,6 +3848,31 @@ class Component extends DCLogic {
       emptyMenuDisplay: cat.length === 0 ? 'block' : 'none',
       menuDisplay: cat.length === 0 ? 'none' : 'block',
 
+      // The types actually present in what is currently shown, never the
+      // full list of types the app knows about. Offering "Sativa" on a shelf
+      // with no sativa on it is a filter that can only ever return nothing.
+      typeChips: (() => {
+        const here = [...new Set(cat.filter(p => s.filter === 'all' || p.sec === s.filter)
+          .map(p => p.type).filter(Boolean))];
+        if (here.length < 2) return [];
+        return [{ id: 'all', label: t.typeAll }].concat(here.map(n => ({ id: n, label: n })))
+          .map(k => {
+            const on = s.typeFilter === k.id;
+            return {
+              label: k.label,
+              bg: on ? 'var(--ink)' : 'transparent',
+              fg: on ? 'var(--on-dark)' : 'var(--muted)',
+              bd: on ? 'var(--ink)' : 'var(--faint)',
+              pick: () => this.set('typeFilter', k.id)
+            };
+          });
+      })(),
+      typeChipsDisplay: (() => {
+        const here = new Set(cat.filter(p => s.filter === 'all' || p.sec === s.filter)
+          .map(p => p.type).filter(Boolean));
+        return here.size > 1 ? 'flex' : 'none';
+      })(),
+
       chips: [{ id: 'all', label: L === 'es' ? 'Todo' : 'Everything' }]
         .concat(secs.map(n => ({ id: n, label: secTitle[n] })))
         .map(c => ({
@@ -3825,7 +3884,7 @@ class Component extends DCLogic {
 
       sections: secs.filter(n => s.filter === 'all' || s.filter === n).map(name => ({
         title: secTitle[name], sub: secSub[name],
-        items: cat.filter(p => p.sec === name).map(p => ({
+        items: cat.filter(p => p.sec === name && (s.typeFilter === 'all' || p.type === s.typeFilter)).map(p => ({
           name: p.name, notes: this.tx(p.notes), thc: p.thc, type: p.type,
           initials: this.initials(p.name), stickerBg: p.bg,
           // Which container this kind of thing comes in, and how full it is.
@@ -3921,6 +3980,10 @@ class Component extends DCLogic {
       payNoteTitle, payNoteBody, payNoteBg, payNoteBorder,
 
       subtotal: cash(sub),
+      // Floored the same way the server floors it, so the number promised here
+      // is the number that lands. Hidden on an empty bag.
+      earnLine: t.earnPts(Math.floor(sub + (fee || 0))),
+      earnDisplay: sub > 0 ? 'block' : 'none',
       feeLabel: s.mode === 'delivery' && zone ? t.feeDelivery + ' · ' + zone.mi + ' mi' : t.feePickup,
       fee: fee ? cash(fee) : t.free,
       dueLabel: pay && !pay.fast ? t.dueCash : t.duePaid(this.payLabel()),

@@ -1134,6 +1134,22 @@ async function mafupuntos() {
   ck('a cancelled order banks nothing',
     Object.keys(pts.addCarry({}, [{ clientCode: 'Y', subtotal: 40, cancelled: true }])).length === 0);
 
+  section('the bag promises what the order actually pays');
+  // The bag now says "this order earns you N" BEFORE the order exists, which
+  // means the app is doing its own arithmetic for the first time. If it ever
+  // rounds differently from the server, the shop promises a number at
+  // checkout and banks a different one a second later — and the customer is
+  // right and we are wrong.
+  const fe = await import('node:fs').then(m => m.readFileSync(join(root, 'index.html'), 'utf8'));
+  ck('the bag floors it, like the server does',
+    /earnPts\(Math\.floor\(sub \+ \(fee \|\| 0\)\)\)/.test(fe), 'earnPts call shape');
+  for (const [subtotal, feeAmt] of [[25, 0], [24.5, 0], [100, 5], [39.99, 6.5], [0.4, 0]]) {
+    const promised = Math.floor(subtotal + feeAmt);
+    const banked = pts.orderPoints({ subtotal, fee: feeAmt });
+    ck('$' + subtotal + ' + $' + feeAmt + ' fee promises and banks ' + promised,
+      promised === banked, { promised, banked });
+  }
+
   section('a milestone is crossed once, not every order after it');
   ck('the order that passes it', pts.crossed(90, 110) === 100);
   ck('nothing for the one after', pts.crossed(110, 130) === null);
