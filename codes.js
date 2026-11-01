@@ -9,7 +9,7 @@ import { requireOwner, requireClient } from './lib/session.js';
 import { mintCode, withHistory } from './lib/invites.js';
 import { sendAll, codeText, pushConfigured, pushPublicKey } from './lib/notify.js';
 import { pointsFor, earnedRows, nextMilestone, expiresAt, pointsValue,
-  tierAt, gramsInWindow, TIERS, TIER_DAYS,
+  tierAt, gramsInWindow, expiredInfo, TIERS, TIER_DAYS,
   DOLLARS_PER_POINT, POINT_VALUE, EXPIRE_DAYS } from './lib/points.js';
 
 // What a customer may see of their own record, and nothing of anyone else's.
@@ -75,6 +75,7 @@ export default async (req) => route(req, {
       goal,
       toGo: goal ? goal - points : 0,
       earned: earnedRows(orders, session.code).slice(0, 20),
+      lost: expiredInfo(orders, session.code),
       ...tierBlock(orders, session.code)
     });
   },
@@ -99,6 +100,7 @@ export default async (req) => route(req, {
       worth: pointsValue(points),
       expiresAt: expiresAt(orders, code),
       earned: earnedRows(orders, code).slice(0, 40),
+      lost: expiredInfo(orders, code),
       ...tierBlock(orders, code)
     });
   },

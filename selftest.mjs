@@ -399,7 +399,7 @@ async function customerProfile() {
   // response has to be looked at: `me` is the reply that could most easily
   // start carrying somebody else's details without anyone noticing.
   ck('and nothing else is attached',
-    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,goal,nextTier,nextTierGrams,ok,perPoint,pointValue,points,profile,tier,tierDays,tierGrams,tierId,tierMult,toGo,worth', Object.keys(r));
+    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,goal,lost,nextTier,nextTierGrams,ok,perPoint,pointValue,points,profile,tier,tierDays,tierGrams,tierId,tierMult,toGo,worth', Object.keys(r));
   ck('the profile itself still carries only their own fields',
     Object.keys(r.profile).sort().join(',') === 'addr,code,devices,favs,name,notify,phone', Object.keys(r.profile));
 
@@ -1255,23 +1255,54 @@ async function mafupuntos() {
   ck('the first rung is a free eighth', afterCancel.goal === 25, afterCancel.goal);
   ck('with the distance to it', afterCancel.toGo === 22, afterCancel.toGo);
 
-  section('a month without ordering and you start again');
+  section('two months without ordering and you start again');
   const day = 86400000;
   const code = 'ZZ';
   const ord = (daysAgo, subtotal) => ({ clientCode: code, no: '#' + daysAgo, cancelled: false,
     subtotal, fee: 0, at: new Date(Date.now() - daysAgo * day).toISOString() });
   ck('a recent run all counts',
     pts.pointsFor([ord(1, 100), ord(10, 100), ord(20, 100)], code) === 12);
-  ck('nothing counts once the last order is over a month old',
-    pts.pointsFor([ord(40, 100), ord(50, 100)], code) === 0);
+  ck('nothing counts once the last order is past the window',
+    pts.pointsFor([ord(70, 100), ord(80, 100)], code) === 0);
+  // The reason the window moved: thirty days punished the shop's normal
+  // rhythm. Somebody buying roughly monthly must not be wiped by one slow
+  // cycle, which is exactly what was happening.
+  ck('a monthly buyer who slips a little keeps everything',
+    pts.pointsFor([ord(2, 100), ord(38, 100), ord(74, 100)], code) > 0);
   // The naive "is their last order old" version passes the two above and
   // fails this one: a gap in the middle has to burn everything before it.
   ck('a gap in the middle burns what came before it',
-    pts.pointsFor([ord(2, 100), ord(45, 100), ord(50, 100)], code) === 4);
+    pts.pointsFor([ord(2, 100), ord(75, 100), ord(80, 100)], code) === 4);
   ck('and ordering again does not bring expired points back',
-    pts.pointsFor([ord(0, 25), ord(60, 500)], code) === 1);
+    pts.pointsFor([ord(0, 25), ord(100, 500)], code) === 1);
   ck('the customer is told when it goes',
     typeof pts.expiresAt([ord(1, 100)], code) === 'string');
+
+  section('a zero balance says what was lost, not nothing');
+  // A balance that quietly reads 0 looks like a bug, or like the shop took
+  // something. Naming the number and the date makes it a rule that was
+  // explained, and gives them something to win back.
+  const lapsed = (daysAgo, sub, grams) => ({ clientCode: 'L', cancelled: false,
+    at: new Date(Date.now() - daysAgo * 86400000).toISOString(),
+    subtotal: sub, fee: 0, items: [{ grams, qty: 1 }] });
+  const goneAll = [lapsed(70, 140, 28), lapsed(77, 140, 28)];
+  ck('they really are on zero', pts.pointsFor(goneAll, 'L') === 0);
+  const info = pts.expiredInfo(goneAll, 'L');
+  ck('and the app can say how many went', info.points > 0, info);
+  ck('and when they went', /^\d{4}-\d{2}-\d{2}/.test(info.at), info.at);
+  ck('and what they were before', typeof info.tier === 'string' && info.tier.length > 0, info.tier);
+
+  const partly = [lapsed(2, 140, 28), lapsed(70, 140, 28)];
+  // 10, not 5: the surviving order was placed while they held Veterano, so
+  // it earned at double — which is the "earned at the tier you held" rule
+  // doing exactly what it should.
+  ck('a gap loses only what is behind it', pts.pointsFor(partly, 'L') === 10,
+    pts.pointsFor(partly, 'L'));
+  ck('and the lost half is still named', pts.expiredInfo(partly, 'L').points === 5,
+    pts.expiredInfo(partly, 'L'));
+  ck('somebody still active has lost nothing',
+    pts.expiredInfo([lapsed(1, 140, 28), lapsed(10, 140, 28)], 'L').points === 0);
+  ck('the window is the one the shop actually runs on', pts.EXPIRE_DAYS === 60);
 
   section('the owner can settle an argument');
   const seen = await call(codes, { action: 'history', code: hers.profile.code }, s.token);
