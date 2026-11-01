@@ -836,9 +836,56 @@ async function viewLayer() {
 
   // Every var(--x) the app actually draws with has to exist, or it paints
   // nothing at all.
+  //
+  // The two safe-area insets are deliberately NOT in the palette — a skin has
+  // no opinion about where a notch is — so they are named here and checked
+  // separately below rather than smuggled into both colour blocks to keep the
+  // parity test quiet.
+  const LAYOUT = ['safe-top', 'safe-bot'];
   const used = new Set([...html.matchAll(/var\(--([a-z0-9-]+)\)/g)].map(m => m[1]));
-  const undefinedTokens = [...used].filter(t => !year.has(t));
+  const undefinedTokens = [...used].filter(t => !year.has(t) && !LAYOUT.includes(t));
   ck('every colour referenced is a colour defined', undefinedTokens.length === 0, undefinedTokens);
+
+  section('the notch and the home bar are accounted for');
+  // What went wrong: the page sets viewport-fit=cover, so every screen paints
+  // under the status bar, and the profile screen had 26px of top padding
+  // against a 47px clock. The kicker rendered as "TUS D1:37" — the shop's own
+  // label overprinted by the phone's time, live, on a customer's phone.
+  const insets = /html\{--safe-top:env\(safe-area-inset-top,\s*0px\);--safe-bot:env\(safe-area-inset-bottom,\s*0px\)\}/.test(html);
+  ck('both insets are read from the device, with a 0px fallback', insets);
+  ck('and the page opts into the full screen, which is why it needs them',
+    /viewport-fit=cover/.test(html));
+
+  // Every full-height screen either starts its content below the notch or
+  // centres it. A bare pixel padding-top on a 100dvh screen is the bug.
+  const screens = [...html.matchAll(/<div style="([^"]*min-height:100dvh[^"]*)"/g)].map(m => m[1]);
+  ck('there are screens to check', screens.length > 15, screens.length);
+  const unsafeTop = screens.filter((s) => {
+    if (/justify-content:center/.test(s)) return false;        // centred, cannot collide
+    if (/--safe-top/.test(s)) return false;                     // handled on the screen itself
+    // Otherwise the screen must have no top padding at all, and push its own
+    // first child down — which is then checked by the next test.
+    return /padding(-top)?:\s*(?!0)[0-9]/.test(s);
+  });
+  ck('no screen puts content under the status bar', unsafeTop.length === 0, unsafeTop.map(s => s.slice(0, 70)));
+
+  // The screens that pad their first child instead of themselves — the door's
+  // ropes, the menu's poster, the product header, the lost-code band.
+  for (const [what, probe] of [
+    ['the door', /padding:max\(64px,calc\(20px \+ var\(--safe-top\)\)\) 92px 0/],
+    ['the menu poster', /padding-top:max\(54px,calc\(14px \+ var\(--safe-top\)\)\)/],
+    ['the product header', /padding:max\(64px,calc\(20px \+ var\(--safe-top\)\)\) 22px 26px/],
+    ['the lost-code back button', /top:max\(52px,calc\(10px \+ var\(--safe-top\)\)\)/]
+  ]) ck(what + ' clears it too', probe.test(html));
+
+  // And the home bar at the other end: the tab bar was a fixed 84px with its
+  // labels in the bottom 17px, which is inside the 34px the indicator owns.
+  const bars = [...html.matchAll(/<div style="(position:fixed;bottom:0[^"]*)"/g)].map(m => m[1]);
+  ck('every bar pinned to the bottom leaves room for the home bar',
+    bars.length >= 5 && bars.every(b => /--safe-bot/.test(b)),
+    { bars: bars.length, bad: bars.filter(b => !/--safe-bot/.test(b)).map(b => b.slice(0, 70)) });
+  ck('and the tab bar can grow instead of clipping its labels',
+    !bars.some(b => /(^|[^-])height:84px/.test(b)) && bars.some(b => /min-height:84px/.test(b)));
 
   // The skin is set by hand at maintenance time, so the one thing to guard is
   // that it is set to something real.
@@ -846,6 +893,39 @@ async function viewLayer() {
   ck('the page names a skin', !!skinAttr, skinAttr && skinAttr[0]);
   ck('and it is one that exists', !!skinAttr && ['year', 'halloween'].includes(skinAttr[1]),
     skinAttr && skinAttr[1]);
+
+  section('the points card reads as one thing, not three');
+  // The badge broke across two lines inside its own pill — "Mafutero · 1 ×"
+  // over "puntos". A pill is a pill because it holds one line.
+  const pill = /white-space:nowrap[^"]*\{\{ tierLabel \}\}|\{\{ tierLabel \}\}/.exec(html);
+  const pillBox = html.slice(Math.max(0, html.indexOf('{{ tierLabel }}') - 400),
+    html.indexOf('{{ tierLabel }}'));
+  ck('the tier badge cannot wrap', /white-space:nowrap/.test(pillBox), !!pill);
+  ck('and it is not squeezed by the title beside it', /flex:none/.test(pillBox));
+  ck('the title gives way instead', /min-width:0;font-family:var\(--font-display\);font-size:19px/.test(html));
+  // Two "how much further" lines straddled one progress bar, and the bar
+  // measures only one of them. The tier line now sits with the badge that
+  // names the tier, above the balance, not against the bar.
+  const card = html.slice(html.indexOf('{{ t.ptsTitle }}'), html.indexOf('{{ t.ptsHistory }}'));
+  ck('the tier line sits with the tier badge', card.indexOf('{{ tierNextLine }}') < card.indexOf('{{ ptsValue }}'),
+    { tier: card.indexOf('{{ tierNextLine }}'), balance: card.indexOf('{{ ptsValue }}') });
+  ck('and the only line touching the bar is the one the bar measures',
+    card.indexOf('{{ ptsPct }}') < card.indexOf('{{ ptsGoalLine }}') &&
+    card.indexOf('{{ tierNextLine }}') < card.indexOf('{{ ptsPct }}'));
+  // Both languages: the tier line must not open with the same words as the
+  // points goal, or separating them spatially only half-fixes it.
+  for (const lang of ['es', 'en']) {
+    const block = lang === 'es'
+      ? html.slice(html.indexOf('ptsWorth: v =>'), html.indexOf('ptsWorth: v =>', html.indexOf('ptsWorth: v =>') + 1))
+      : html.slice(html.indexOf('ptsWorth: v =>', html.indexOf('ptsWorth: v =>') + 1));
+    const goal = /ptsGoal: \(n, g\) =>([^\n]*)/.exec(block);
+    const next = /tierNext: \(g, t\) =>([^\n]*)/.exec(block);
+    const head = (s) => (/'([^']{4,14})/.exec(s || '') || ['', ''])[1].trim();
+    ck(lang + ': the tier line and the points goal do not open alike',
+      !!goal && !!next && head(goal[1]) !== head(next[1]), { goal: head(goal && goal[1]), next: head(next && next[1]) });
+    ck(lang + ': the badge says the multiplier and not a second noun',
+      /tierLine: \(t, m\) => t \+ ' \\u00b7 ' \+ m \+ '\\u00d7',/.test(block));
+  }
 
   section('no colour is typed in by hand any more');
   const strayHex = (html.match(/#[0-9a-fA-F]{6}\b/g) || []);
