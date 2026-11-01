@@ -985,6 +985,28 @@ async function shopDayBoundary() {
   ck('an unknown timezone falls back rather than throwing',
     /^\d{4}-\d{2}-\d{2}$/.test(shopDay({ hours: { tz: 'Nope/Nope' } }, at('2026-09-15T01:00:00Z'))));
 
+  section('the UTC date and the shop day are NOT interchangeable');
+  // This is the regression that matters, and the reason it hid for six weeks:
+  // the suite only noticed when it happened to run between midnight UTC and
+  // midnight in Florida. Pinned here against fixed instants instead, so it
+  // fails at any hour of any day.
+  for (const [instant, utcDay, flDay] of [
+    ['2026-11-01T00:05:00Z', '2026-11-01', '2026-10-31'],   // 8:05pm EDT
+    ['2026-11-01T03:30:00Z', '2026-11-01', '2026-10-31'],   // 11:30pm EDT
+    ['2026-07-04T02:00:00Z', '2026-07-04', '2026-07-03'],   // 10pm EDT, summer
+    ['2026-01-15T04:00:00Z', '2026-01-15', '2026-01-14']    // 11pm EST, winter
+  ]) {
+    const d = at(instant);
+    ck(instant + ' is ' + flDay + ' in the shop, not ' + utcDay,
+      shopDay(fl, d) === flDay && d.toISOString().slice(0, 10) === utcDay,
+      { shop: shopDay(fl, d), utc: d.toISOString().slice(0, 10) });
+  }
+  // And the thing that actually broke: nothing in orders.js may bucket an
+  // order by slicing its ISO string, because that slice is UTC.
+  const ordersSrc = (await import('node:fs')).readFileSync(join(root, 'orders.js'), 'utf8');
+  const sliced = ordersSrc.match(/String\(o\.at[^)]*\)\.slice\(0, ?10\)\s*===/g) || [];
+  ck('no order is bucketed by its UTC slice', sliced.length === 0, sliced);
+
   section('an evening order counts towards tonight');
   // Shop open around the clock so the hours gate cannot interfere.
   const s = await openShop({
@@ -1133,6 +1155,22 @@ async function mafupuntos() {
   ck('and still counted once it is gone', pts.pointsFor([], 'X', carry) === 40);
   ck('a cancelled order banks nothing',
     Object.keys(pts.addCarry({}, [{ clientCode: 'Y', subtotal: 40, cancelled: true }])).length === 0);
+
+  section('the bag promises what the order actually pays');
+  // The bag now says "this order earns you N" BEFORE the order exists, which
+  // means the app is doing its own arithmetic for the first time. If it ever
+  // rounds differently from the server, the shop promises a number at
+  // checkout and banks a different one a second later — and the customer is
+  // right and we are wrong.
+  const fe = await import('node:fs').then(m => m.readFileSync(join(root, 'index.html'), 'utf8'));
+  ck('the bag floors it, like the server does',
+    /earnPts\(Math\.floor\(sub \+ \(fee \|\| 0\)\)\)/.test(fe), 'earnPts call shape');
+  for (const [subtotal, feeAmt] of [[25, 0], [24.5, 0], [100, 5], [39.99, 6.5], [0.4, 0]]) {
+    const promised = Math.floor(subtotal + feeAmt);
+    const banked = pts.orderPoints({ subtotal, fee: feeAmt });
+    ck('$' + subtotal + ' + $' + feeAmt + ' fee promises and banks ' + promised,
+      promised === banked, { promised, banked });
+  }
 
   section('a milestone is crossed once, not every order after it');
   ck('the order that passes it', pts.crossed(90, 110) === 100);
