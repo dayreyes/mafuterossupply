@@ -462,6 +462,52 @@ TELEGRAM_BOT_TOKEN=... TELEGRAM_CHAT_ID=... npm run dev   # test real alerts
 
 ## Troubleshooting
 
+### "The shop cannot reach its storage"
+
+Everything the shop knows — orders, codes, config, points — lives in Netlify
+Blobs. If the app cannot reach it, nothing works, and **nothing is lost**: the
+records are still there, the shop just cannot read them.
+
+Open this on a phone. It is deliberately unauthenticated, because signing in
+needs storage, so a check that required a session would be useless exactly
+when you need it:
+
+```
+https://<your-site>.netlify.app/.netlify/functions/auth?diag=1
+```
+
+It reports names, sizes and error text — never a stored value, never a token.
+
+| What it says | What it means |
+|---|---|
+| `"probe": "ok"` | storage is fine; the problem is elsewhere |
+| `404` / page not found | the functions did not deploy — check the build log for `functions ready:` |
+| `"could not open the store: ... has not been configured ..."` | Netlify did not hand the function its credentials — see below |
+| `"not valid JSON"` on one key | one record is corrupt; the rest of the shop is fine |
+
+### When Netlify does not wire Blobs up by itself
+
+Normally the runtime hands the function a site ID and a token and
+`getStore()` finds them. When that does not happen there is nothing you can
+change in the repo to fix it, so the credentials can be supplied by hand.
+
+In **Site configuration → Environment variables**, add:
+
+| Variable | Value |
+|---|---|
+| `BLOBS_SITE_ID` | Site configuration → General → **Project ID** |
+| `BLOBS_TOKEN` | User settings → Applications → **New access token** |
+
+Then redeploy — environment variables only take effect on a fresh build.
+
+The diagnostic above will then show `"creds": "explicit"`. It never prints
+either value.
+
+`BLOBS_TOKEN` is a secret with access to your Netlify account. It belongs in
+the dashboard only, exactly like `TELEGRAM_BOT_TOKEN` and
+`VAPID_PRIVATE_KEY`, and never in this repo.
+
+
 **"Could not reach the shop"** — the functions aren't deployed. Check the deploy
 log for `netlify/functions` and confirm `netlify.toml` is at the repo root.
 

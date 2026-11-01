@@ -3,7 +3,7 @@
 // Actions: status · setup · login · unlock · session · logout
 
 import { route, json, ok, fail, tooMany, clientIp, str } from './lib/http.js';
-import { read, write, mutate, available, diagnose, KEYS } from './lib/store.js';
+import { read, write, mutate, probe, diagnose, KEYS } from './lib/store.js';
 import { loadConfig } from './lib/config.js';
 import {
   OWNER_PIN_LEN, CLIENT_CODE_LEN, hashPin, verifyPin, isOwnerPin, isClientCode,
@@ -43,10 +43,14 @@ export default async (req) => {
 
   // Public health check the app calls on boot to decide which screen to show.
   async status() {
-    if (!(await available())) {
+    const health = await probe();
+    if (!health.ok) {
       return ok({
         backend: true, storage: false, configured: false,
-        error: 'Netlify Blobs is not available for this site — see DEPLOY.md.'
+        // The reason, on the screen. "See DEPLOY.md" sent the owner to a file
+        // to guess from; the store already said exactly what was wrong.
+        error: 'The shop cannot reach its storage.' + (health.reason ? ' (' + health.reason + ')' : ''),
+        why: health.reason
       });
     }
     const cfg = await loadConfig();

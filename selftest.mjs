@@ -699,6 +699,38 @@ async function diagnose() {
   ck('and says it is a JSON problem, not an outage', /not valid JSON/.test(cfg.error || ''), cfg.error);
   ck('healthy records are marked readable', d.keys.find(k => k.key === 'products').readable === true);
 
+  section('the way the store is wired is visible, the token is not');
+  reset();
+  const st = await import(B + 'lib/store.js');
+  delete process.env.BLOBS_SITE_ID; delete process.env.BLOBS_TOKEN;
+  ck('automatic by default', st.credsMode() === 'automatic', st.credsMode());
+  process.env.BLOBS_SITE_ID = 'site_abc';
+  process.env.BLOBS_TOKEN = 'nfp_secret_value_here';
+  ck('explicit once both are set', st.credsMode() === 'explicit', st.credsMode());
+  const dd = await diag();
+  ck('the diagnostic says which way', dd.creds === 'explicit' && dd.siteIdSet && dd.tokenSet, dd.creds);
+  // The whole point of a diagnostic anyone can open on a phone is that it is
+  // safe to open on a phone.
+  ck('and never prints the token', !JSON.stringify(dd).includes('nfp_secret_value_here'));
+  ck('nor the site id', !JSON.stringify(dd).includes('site_abc'));
+  delete process.env.BLOBS_SITE_ID; delete process.env.BLOBS_TOKEN;
+
+  section('a dead store says WHY, on the screen');
+  // The shop went down tonight and told its owner "Netlify Blobs is not
+  // available for this site — see DEPLOY.md", which is a dead end: the real
+  // reason was one layer down, inside an exception nobody ever read. The
+  // cause of an outage is an operational fact, not a secret.
+  reset();
+  __setStoreFactory(() => ({
+    async get() { throw new Error('The environment has not been configured to use Netlify Blobs'); },
+    async set() {}, async setJSON() {}
+  }));
+  const down = await call(auth, { action: 'status' });
+  ck('the app is told storage is gone', down.ok === true && down.storage === false, down);
+  ck('and the reason travels with it', /not been configured/.test(down.why || ''), down.why);
+  ck('the message on screen carries it too', /not been configured/.test(down.error || ''), down.error);
+  ck('it does not just point at a file', !/DEPLOY\.md/.test(down.error || ''), down.error);
+
   section('it never leaks what is in the records');
   const dump = JSON.stringify(d);
   ck('no shop name', !dump.includes('Mafuteros'));
@@ -752,6 +784,20 @@ async function viewLayer() {
   // anything: the element quietly keeps the first skin's value, so a single
   // missing line leaves one control cream on a black screen. Nobody sees it
   // until they are looking at that one screen in that one skin.
+  section('every method a binding calls actually exists');
+  // How the menu broke tonight. The rebuild bound a strain card to
+  // `this.openProduct(p.id)`, which was never a method — so every card threw
+  // the moment it was tapped and the menu was dead on the customer side.
+  //
+  // Nothing caught it: the tests render the markup but do not press anything,
+  // and the screenshots I took after the rebuild never tapped a card. A
+  // dangling method is invisible until a finger lands on it.
+  const calls = new Set([...script.matchAll(/\bthis\.([a-zA-Z_]\w*)\s*\(/g)].map(m => m[1]));
+  const defs = new Set([...script.matchAll(/^\s{2}(?:async\s+)?([a-zA-Z_]\w*)\s*\([^)]*\)\s*\{/gm)].map(m => m[1]));
+  const fromRuntime = new Set(['setState', 'forceUpdate', 'render']);
+  const dangling = [...calls].filter(n => !defs.has(n) && !fromRuntime.has(n)).sort();
+  ck('no binding calls a method that is not there', dangling.length === 0, dangling);
+
   section('the two skins define the same colours');
   const blockOf = (sel) => {
     const at = html.indexOf(sel);
