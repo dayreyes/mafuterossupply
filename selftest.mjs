@@ -1300,14 +1300,15 @@ async function mafupuntos() {
     pts.gramsInWindow(Array.from({ length: 8 }, (_, i) => g(3.5, i + 1)), 'T') === 28);
   ck('one ounce alone is still Mafutero', pts.tierForGrams(28).id === 'mafutero');
   ck('an ounce and a half is Veterano', pts.tierForGrams(42).id === 'veterano');
-  ck('four and a half ounces is Patr\u00f3n', pts.tierForGrams(126).id === 'patron');
+  ck('three and a half ounces is Patr\u00f3n', pts.tierForGrams(98).id === 'patron');
+  ck('three ounces is still Veterano', pts.tierForGrams(84).id === 'veterano');
   ck('grams outside the window do not count',
     pts.gramsInWindow([g(112, 200), g(3.5, 1)], 'T') === 3.5);
 
   section('an order keeps the points it was earned at');
   // If today's tier were applied to the whole history, dropping a tier would
   // make old points evaporate and the breakdown would stop matching receipts.
-  const hist = [g(126, 80), { clientCode: 'T', cancelled: false,
+  const hist = [g(98, 80), { clientCode: 'T', cancelled: false,
     at: new Date(Date.now() - 70 * 86400000).toISOString(),
     subtotal: 100, fee: 0, items: [{ grams: 14, qty: 1 }] }];
   const wasPatron = pts.tierAt(hist, 'T', new Date(Date.now() - 70 * 86400000));

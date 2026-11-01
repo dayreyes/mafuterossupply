@@ -37,12 +37,11 @@ export const POINT_VALUE = 1;          // a point is a dollar off
 export const EXPIRE_DAYS = 30;
 export const TIER_DAYS = 90;
 
-// Thresholds in grams: an eighth is 3.5g, so these are 12 and 36 eighths —
-// about an ounce and a half, and about four and a half ounces.
+// Thresholds in grams: an ounce and a half, and three and a half ounces.
 export const TIERS = [
   { id: 'mafutero', name: 'Mafutero', grams: 0,   mult: 1 },
   { id: 'veterano', name: 'Veterano', grams: 42,  mult: 2 },
-  { id: 'patron',   name: 'Patr\u00f3n',   grams: 126, mult: 3 }
+  { id: 'patron',   name: 'Patr\u00f3n',   grams: 98,  mult: 3 }
 ];
 
 const EXPIRE_MS = EXPIRE_DAYS * 24 * 60 * 60 * 1000;
