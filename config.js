@@ -56,6 +56,13 @@ export const defaultConfig = () => ({
     tz: 'America/New_York',
     paused: false
   },
+  // Promos he turns on for a weekend and off again. Separate from tier
+  // perks, which are permanent and earned: a promo is a decision he makes on
+  // a Friday, so it defaults to OFF and nothing starts giving stock away
+  // because a tier quietly changed underneath him.
+  promos: {
+    bakersDozen: false   // a gram on the house with every ounce, for Patron
+  },
   setupComplete: false
 });
 
@@ -75,7 +82,7 @@ export function migrateConfig(stored) {
   const c = { ...d, ...(stored || {}) };
   // One level down as well, or a field added inside run/hours/notifs goes
   // missing in exactly the same way.
-  for (const key of ['run', 'fees', 'hours', 'notifs']) {
+  for (const key of ['run', 'fees', 'hours', 'notifs', 'promos']) {
     c[key] = { ...d[key], ...((stored && stored[key]) || {}) };
   }
   return c;
@@ -131,6 +138,12 @@ export function cleanConfig(incoming, current) {
     };
   } else {
     c.run = { ...c.run, zones: c.run.zones.filter((z) => c.zones.some((x) => x.id === z)) };
+  }
+
+  if (inp.promos && typeof inp.promos === 'object') {
+    const d = defaultConfig().promos;
+    c.promos = Object.fromEntries(Object.keys(d).map((k) =>
+      [k, inp.promos[k] === undefined ? (c.promos ? c.promos[k] === true : d[k]) : inp.promos[k] === true]));
   }
 
   if (inp.notifs && typeof inp.notifs === 'object') {
@@ -393,6 +406,7 @@ export const publicConfig = (c) => ({
   // Whether automatic messages are on for this shop at all, so the opt-in can
   // be offered or hidden. Never which kinds — that is the owner's business.
   notifsOn: Object.values((c.notifs || {})).some((v) => v === true),
+  promos: { bakersDozen: !!(c.promos && c.promos.bakersDozen) },
   pickupNote: c.pickupNote,
   contact: c.contact,
   payments: c.payments.filter((p) => p.enabled).map((p) => ({

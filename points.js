@@ -89,6 +89,18 @@ export const orderPoints = (o, mult = 1) =>
 // count, since archiving only tidies the queue.
 const counts = (o, code) => o.clientCode === code && !o.cancelled;
 
+// ── what a tier is actually worth, beyond earning faster ────────────────────
+//
+// Kept here rather than scattered through the handlers, so "what does Patron
+// get" has one answer that can be read in one place.
+export const PERKS = {
+  mafutero: { holdMinutes: 30, bakersDozen: false, queueFirst: false },
+  veterano: { holdMinutes: 60, bakersDozen: false, queueFirst: false },
+  patron:   { holdMinutes: 60, bakersDozen: true,  queueFirst: true }
+};
+
+export const perksFor = (tierId) => PERKS[tierId] || PERKS.mafutero;
+
 // ── expiry ──────────────────────────────────────────────────────────────────
 //
 // "A month without ordering and you start again." Expressed as a gap, not as

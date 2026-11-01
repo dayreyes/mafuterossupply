@@ -1288,6 +1288,59 @@ async function mafupuntos() {
   ck('one message when an order clears two rungs', pts.crossed(24, 120) === 100);
   ck('and nothing when the balance goes backwards', pts.crossed(300, 20) === null);
 
+  section('what a tier is worth beyond earning faster');
+  const perks = pts.perksFor;
+  ck('the base tier waits half an hour', perks('mafutero').holdMinutes === 30);
+  ck('a Veterano gets an hour', perks('veterano').holdMinutes === 60);
+  ck('only Patr\u00f3n gets the free gram', perks('patron').bakersDozen === true
+    && perks('veterano').bakersDozen === false);
+  ck('an unknown tier falls back to the base', perks('nonsense').holdMinutes === 30);
+
+  section("the baker's dozen needs BOTH gates");
+  // A promo without the tier is a giveaway to everybody; a tier without the
+  // promo is a standing cost he never agreed to. Neither alone may pay out.
+  const bakery = await openShop({ hours: { on: false } }, {
+    stock: 400,
+    tiers: [{ label: '3.5g', grams: 3.5, price: 25 }, { label: '7g', grams: 7, price: 40 },
+      { label: '1 oz', grams: 28, price: 140 }]
+  });
+  const big = await bakery.asCustomer('Whale');
+  const oz = (tok) => call(orders, { action: 'place',
+    items: [{ pid: bakery.pid, weightIdx: 2, qty: 1 }], mode: 'pickup', pay: 'cash' }, tok);
+  const left = async () => (await call(shop, { action: 'menu' })).products[0].stock;
+
+  // Four ounces takes them past 98g, so they are Patron — promo still off.
+  for (let i = 0; i < 4; i++) await oz(big);
+  const patronNoPromo = await oz(big);
+  ck('Patr\u00f3n alone gets nothing while the promo is off',
+    (patronNoPromo.order.gifted || []).length === 0, patronNoPromo.order.gifted);
+  ck('and exactly five ounces have left the shelf', await left() === 400 - 28 * 5, await left());
+
+  const cfgNow = (await call(shop, { action: 'config' }, bakery.token)).config;
+  await call(shop, { action: 'saveConfig',
+    config: { ...cfgNow, promos: { ...cfgNow.promos, bakersDozen: true } } }, bakery.token);
+
+  const withPromo = await oz(big);
+  ck('with the promo on, the gram is recorded',
+    (withPromo.order.gifted || []).length === 1 && withPromo.order.gifted[0].grams === 1,
+    withPromo.order.gifted);
+  ck('and twenty-nine grams left the shelf, not twenty-eight',
+    await left() === 400 - 28 * 6 - 1, await left());
+  ck('they were still only charged for the ounce', withPromo.order.subtotal === 140,
+    withPromo.order.subtotal);
+
+  // And the other half: promo on, but not a Patron.
+  const small = await bakery.asCustomer('Casual');
+  const casual = await oz(small);
+  ck('the promo alone gives a newcomer nothing',
+    (casual.order.gifted || []).length === 0, casual.order.gifted);
+
+  section('an eighth is not an ounce');
+  const eighth = await call(orders, { action: 'place',
+    items: [{ pid: bakery.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, big);
+  ck('the free gram only rides on the sizes he wants to sell',
+    (eighth.order.gifted || []).length === 0, eighth.order.gifted);
+
   section('the tier is grams, not visits');
   // The whole correction: eight eighths bought one at a time must NOT outrank
   // one ounce. Counting purchases got that backwards, which is the wrong way
