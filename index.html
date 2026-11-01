@@ -234,6 +234,24 @@ html,body{margin:0;padding:0;background:var(--slab-2);font-family:var(--font-bod
  * win on equal specificity. min-height keeps short screens filling the window. */
 html,body{height:auto!important;min-height:100%!important}
 #dc-root,#dc-root>.sc-host{height:auto!important;min-height:100%!important}
+
+/* The notch and the home bar.
+ *
+ * The page sets viewport-fit=cover, which is what lets the jungle behind the
+ * door run to the very top of the glass instead of stopping under a cream
+ * strip. The price is that EVERY screen then paints under the status bar too,
+ * and the clock is sitting on top of whatever is up there. On the profile
+ * screen that was 26px of padding against a 47px clock, so the kicker read
+ * "TUS D1:37" — the shop's own label and the phone's time, overprinted.
+ *
+ * These are the two insets, named once, so a screen can ask for "my designed
+ * gap, or enough to clear the notch, whichever is larger". Not colours, so
+ * they live here and not in the palette: a skin has no opinion about a notch.
+ *
+ * The fallback is 0px, which is what a desktop browser and an iPhone in
+ * Safari-with-chrome both report — there the designed number wins and nothing
+ * moves. */
+html{--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px)}
 a{color:var(--rust-4)}a:hover{color:var(--blush-2)}
 input,textarea,select{font-size:16px}
 @keyframes mfPop{0%{transform:scale(.86) rotate(-6deg);opacity:0}60%{transform:scale(1.04) rotate(2deg)}100%{transform:scale(1) rotate(-2deg);opacity:1}}
@@ -253,7 +271,7 @@ input,textarea,select{font-size:16px}
 
 
         <sc-if value="{{ isLang }}" hint-placeholder-val="{{ false }}">
-          <div style="position:relative;min-height:100dvh;background:var(--slab-2);background-image:radial-gradient(circle at 50% 26%,var(--green) 0%,var(--slab-2) 64%),radial-gradient(rgba(0,0,0,.3) 1px,transparent 1.4px);background-size:auto,9px 9px;padding:150px 34px 60px;display:flex;flex-direction:column;align-items:center;gap:34px;box-sizing:border-box">
+          <div style="position:relative;min-height:100dvh;background:var(--slab-2);background-image:radial-gradient(circle at 50% 26%,var(--green) 0%,var(--slab-2) 64%),radial-gradient(rgba(0,0,0,.3) 1px,transparent 1.4px);background-size:auto,9px 9px;padding:max(150px,calc(96px + var(--safe-top))) 34px calc(60px + var(--safe-bot));display:flex;flex-direction:column;align-items:center;gap:34px;box-sizing:border-box">
             <div style="position:absolute;top:90px;right:-46px;width:170px;height:170px;border-radius:50%;background:var(--rust-2);opacity:.22"></div>
             <div style="position:absolute;bottom:150px;left:-40px;width:190px;height:190px;border-radius:50%;background:var(--green-2);opacity:.18"></div>
             <div style="position:relative;text-align:center">
@@ -281,7 +299,7 @@ input,textarea,select{font-size:16px}
             <div style="position:absolute;inset:0 0 auto 0;height:min(46vh,420px);background:linear-gradient(180deg,var(--jungle-haze) 0%,var(--jungle-mid) 55%,var(--slab) 100%)"></div>
 
             <!-- the ropes -->
-            <div style="position:relative;display:flex;justify-content:space-between;padding:64px 92px 0;height:118px;box-sizing:border-box">
+            <div style="position:relative;display:flex;justify-content:space-between;padding:max(64px,calc(20px + var(--safe-top))) 92px 0;height:118px;box-sizing:border-box">
               <div style="width:3px;height:100%;background:var(--rope)"></div>
               <div style="width:3px;height:100%;background:var(--rope)"></div>
             </div>
@@ -321,7 +339,7 @@ input,textarea,select{font-size:16px}
 
             <div style="position:relative;display:{{ codeErrDisplay }};margin:0 auto;padding:6px 14px;font-family:var(--font-hand);font-size:18px;line-height:1.2;color:var(--rust-4);text-align:center;max-width:280px">{{ codeErr }}</div>
 
-            <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:6px 24px 22px;font:500 13px/1.45 var(--font-body);color:var(--green-pale);text-align:center">
+            <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:6px 24px calc(22px + var(--safe-bot));font:500 13px/1.45 var(--font-body);color:var(--green-pale);text-align:center">
               <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">{{ t.noCode }} <span onClick="{{ goSignup }}" style="font-weight:700;color:var(--green-glow);cursor:pointer">{{ t.ask }}</span></div>
               <div onClick="{{ goLost }}" style="display:{{ lostLinkDisplay }};font-size:12.5px;color:var(--green-3);cursor:pointer;text-decoration:underline">{{ t.lostCode }}</div>
               <div onClick="{{ toLang }}" style="font-size:12px;color:var(--green-3);cursor:pointer;text-decoration:underline">{{ t.switchLang }}</div>
@@ -330,7 +348,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
-          <div style="min-height:100dvh;background:var(--paper);background-image:radial-gradient(var(--dot-paper-07) 1px,transparent 1.3px);background-size:8px 8px;padding:60px 0 0;box-sizing:border-box;display:flex;flex-direction:column">
+          <div style="min-height:100dvh;background:var(--paper);background-image:radial-gradient(var(--dot-paper-07) 1px,transparent 1.3px);background-size:8px 8px;padding:max(60px,calc(16px + var(--safe-top))) 0 0;box-sizing:border-box;display:flex;flex-direction:column">
             <div style="padding:0 22px;display:flex;align-items:center;gap:12px">
               <div onClick="{{ toLock }}" style="width:42px;height:42px;border-radius:50%;background:var(--card);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" style-active="transform:translate(2px,2px)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
@@ -368,7 +386,7 @@ input,textarea,select{font-size:16px}
               </div>
             </div>
 
-            <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;margin-top:auto;padding:26px 22px 40px;background:var(--paper);border-top:2px solid var(--ink)">
+            <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;margin-top:auto;padding:26px 22px max(40px,calc(14px + var(--safe-bot)));background:var(--paper);border-top:2px solid var(--ink)">
               <div onClick="{{ submitSignup }}" style="height:56px;border-radius:999px;background:{{ signupBg }};border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--on-solid);font-family:var(--font-display);font-size:18px;opacity:{{ signupOp }}" style-active="box-shadow:0 0 0 var(--ink);transform:translate(3px,3px)">{{ t.submitSignup }}</div>
               <div style="display:{{ signupMissingDisplay }};font:600 12px/1.45 var(--font-body);color:var(--rust);margin-top:8px;text-align:center">{{ signupMissing }}</div>
             </div>
@@ -383,7 +401,7 @@ input,textarea,select{font-size:16px}
                learn by asking, which is the point. -->
           <div style="min-height:100dvh;background:var(--paper);display:flex;flex-direction:column;box-sizing:border-box">
             <div style="height:170px;flex:none;background:var(--rust-2) url(isla-fronds-band.webp) center bottom/cover;position:relative">
-              <div onClick="{{ toLock }}" style="position:absolute;left:16px;top:52px;width:40px;height:40px;border-radius:50%;background:var(--scrim-5);color:var(--paper);display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <div onClick="{{ toLock }}" style="position:absolute;left:16px;top:max(52px,calc(10px + var(--safe-top)));width:40px;height:40px;border-radius:50%;background:var(--scrim-5);color:var(--paper);display:flex;align-items:center;justify-content:center;cursor:pointer">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
               </div>
             </div>
@@ -399,7 +417,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isWaiting }}" hint-placeholder-val="{{ false }}">
-          <div style="min-height:100dvh;background:var(--slab-2);background-image:radial-gradient(circle at 50% 18%,var(--green) 0%,var(--slab-2) 66%),radial-gradient(rgba(0,0,0,.3) 1px,transparent 1.4px);background-size:auto,9px 9px;padding:96px 26px 60px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:18px">
+          <div style="min-height:100dvh;background:var(--slab-2);background-image:radial-gradient(circle at 50% 18%,var(--green) 0%,var(--slab-2) 66%),radial-gradient(rgba(0,0,0,.3) 1px,transparent 1.4px);background-size:auto,9px 9px;padding:max(96px,calc(44px + var(--safe-top))) 26px calc(60px + var(--safe-bot));box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:18px">
             <div style="width:140px;height:140px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 6px 0 rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-4deg);animation:mfPop .5s ease both;flex:none">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--rust)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
               <div style="font:800 9px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:9px">Mafutero&rsquo;s</div>
@@ -431,10 +449,10 @@ input,textarea,select{font-size:16px}
           <!-- The menu, as the design draws it: a printed poster at the top
                and the shelf below it on dark. Not our old list in new
                colours — a different object. -->
-          <div style="min-height:100dvh;background:var(--slab);padding-bottom:116px;box-sizing:border-box">
+          <div style="min-height:100dvh;background:var(--slab);padding-bottom:calc(116px + var(--safe-bot));box-sizing:border-box">
 
             <!-- the poster -->
-            <div style="background:linear-gradient(175deg,var(--poster-1) 0%,var(--poster-2) 55%,var(--poster-3) 100%);position:relative;padding-top:54px">
+            <div style="background:linear-gradient(175deg,var(--poster-1) 0%,var(--poster-2) 55%,var(--poster-3) 100%);position:relative;padding-top:max(54px,calc(14px + var(--safe-top)))">
               <div style="padding:12px 20px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
                 <div style="display:flex;flex-direction:column;min-width:0">
                   <span style="font-family:var(--font-hand);font-size:17px;line-height:1;color:var(--ink)">{{ t.greet }} {{ clientName }}</span>
@@ -515,8 +533,8 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isProduct }}" hint-placeholder-val="{{ true }}">
-          <div style="min-height:100dvh;background:var(--paper);padding:0 0 132px;box-sizing:border-box">
-            <div style="position:relative;padding:64px 22px 26px;background:{{ selBg }};background-image:radial-gradient(var(--dot-18) 1.3px,transparent 1.5px);background-size:7px 7px;border-bottom:2px solid var(--ink)">
+          <div style="min-height:100dvh;background:var(--paper);padding:0 0 calc(132px + var(--safe-bot));box-sizing:border-box">
+            <div style="position:relative;padding:max(64px,calc(20px + var(--safe-top))) 22px 26px;background:{{ selBg }};background-image:radial-gradient(var(--dot-18) 1.3px,transparent 1.5px);background-size:7px 7px;border-bottom:2px solid var(--ink)">
               <div onClick="{{ back }}" style="width:42px;height:42px;border-radius:50%;background:var(--card);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:translate(2px,2px)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
               </div>
@@ -572,7 +590,7 @@ input,textarea,select{font-size:16px}
               <div style="font:500 12px/1.5 var(--font-body);color:var(--muted-2);margin-top:12px">{{ selFootnote }}</div>
             </div>
 
-            <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;padding:14px 22px 40px;background:var(--paper);border-top:2px solid var(--ink);display:flex;gap:12px;align-items:center">
+            <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;padding:14px 22px max(40px,calc(14px + var(--safe-bot)));background:var(--paper);border-top:2px solid var(--ink);display:flex;gap:12px;align-items:center">
               <div style="flex:none">
                 <div style="font:600 9.5px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2)">{{ t.selected }}</div>
                 <div style="font-family:var(--font-display);font-size:21px;line-height:1.2;color:var(--ink)">{{ selPrice }}</div>
@@ -586,7 +604,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isBag }}" hint-placeholder-val="{{ true }}">
-          <div style="min-height:100dvh;background:var(--paper);padding:60px 0 0;box-sizing:border-box;display:flex;flex-direction:column">
+          <div style="min-height:100dvh;background:var(--paper);padding:max(60px,calc(16px + var(--safe-top))) 0 0;box-sizing:border-box;display:flex;flex-direction:column">
             <div style="padding:0 22px;display:flex;align-items:center;gap:12px">
               <div onClick="{{ goHome }}" style="width:42px;height:42px;border-radius:50%;background:var(--card);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" style-active="transform:translate(2px,2px)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
@@ -711,14 +729,14 @@ input,textarea,select{font-size:16px}
               </div>
             </div>
 
-            <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;margin-top:auto;padding-top:26px;padding:14px 22px 40px;background:var(--paper);border-top:2px solid var(--ink)">
+            <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;margin-top:auto;padding:14px 22px max(40px,calc(14px + var(--safe-bot)));background:var(--paper);border-top:2px solid var(--ink)">
               <div onClick="{{ place }}" style="height:56px;border-radius:999px;background:{{ placeBg }};border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:flex;align-items:center;justify-content:center;cursor:{{ placeCursor }};color:var(--on-solid);font-family:var(--font-display);font-size:18px" style-active="box-shadow:0 0 0 var(--ink);transform:translate(3px,3px)">{{ placeLabel }}</div>
             </div>
           </div>
         </sc-if>
 
         <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
-          <div style="min-height:100dvh;padding:26px 22px 120px;box-sizing:border-box">
+          <div style="min-height:100dvh;padding:max(26px,calc(14px + var(--safe-top))) 22px calc(120px + var(--safe-bot));box-sizing:border-box">
             <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--rust)">{{ t.pfWho }}</div>
             <div style="font-family:var(--font-display);font-size:30px;line-height:1.08;color:var(--ink);margin-top:6px">{{ t.pfTitle }}</div>
 
@@ -728,13 +746,26 @@ input,textarea,select{font-size:16px}
                  number up as something it can already buy. -->
             <div style="margin-top:18px;background:var(--slab);border:2px solid var(--ink);border-radius:24px;padding:18px;box-shadow:3px 3px 0 var(--rust)">
               <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
-                <div style="font-family:var(--font-display);font-size:19px;color:var(--on-dark)">{{ t.ptsTitle }}</div>
+                <div style="min-width:0;font-family:var(--font-display);font-size:19px;color:var(--on-dark)">{{ t.ptsTitle }}</div>
                 <!-- The tier, where the "coming soon" badge used to sit. It is
                      the thing worth looking at: it says what every future
-                     order is worth, not what a past one was. -->
-                <div style="font-family:var(--font-display);font-size:12px;line-height:1;letter-spacing:.04em;padding:6px 10px;border-radius:999px;background:var(--green-glow);color:var(--ink)">{{ tierLabel }}</div>
+                     order is worth, not what a past one was.
+                     nowrap and flex:none because it broke across two lines
+                     INSIDE the pill on a phone — "Mafutero · 1 ×" over
+                     "puntos" — which is also why the word is gone from the
+                     copy: the card is titled Mafupuntos, so "1×" in a badge
+                     on it is not ambiguous about what it multiplies. -->
+                <div style="flex:none;white-space:nowrap;font-family:var(--font-display);font-size:12px;line-height:1;letter-spacing:.04em;padding:6px 10px;border-radius:999px;background:var(--green-glow);color:var(--ink)">{{ tierLabel }}</div>
               </div>
-              <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;flex-wrap:wrap">
+              <!-- How far off the next tier is, directly under the badge that
+                   names this one.
+                   It used to sit just above the progress bar, with the points
+                   goal just below it, so two lines of "you need N more"
+                   straddled one bar and neither owned it — and the bar
+                   measures the POINTS goal, not the tier. The tier belongs to
+                   the badge; the rule under the bar belongs to the bar. -->
+              <div style="font-family:var(--font-hand);font-size:16px;line-height:1.2;color:var(--green-3);margin-top:6px;padding-bottom:12px;border-bottom:2px solid var(--veil-1)">{{ tierNextLine }}</div>
+              <div style="display:flex;align-items:baseline;gap:10px;margin-top:12px;flex-wrap:wrap">
                 <span style="font-family:var(--font-display);font-size:52px;line-height:1.02;color:var(--green-glow)">{{ ptsValue }}</span>
                 <!-- What it is actually worth, next to what it is.
                      A points balance nobody can price is a number, not a
@@ -752,8 +783,6 @@ input,textarea,select{font-size:16px}
                 <div style="font:700 12px/1.35 var(--font-body);color:var(--rust-4)">{{ lostLine }}</div>
                 <div style="display:{{ lostTierDisplay }};font-family:var(--font-hand);font-size:15px;line-height:1.3;color:var(--green-pale);margin-top:3px">{{ lostTierLine }}</div>
               </div>
-              <div style="font-family:var(--font-hand);font-size:16px;line-height:1.2;color:var(--green-3);margin-top:7px">{{ tierNextLine }}</div>
-
               <div style="display:{{ ptsGoalDisplay }};margin-top:15px">
                 <div style="height:10px;border-radius:999px;background:var(--veil-14);overflow:hidden">
                   <div style="height:100%;width:{{ ptsPct }};background:var(--rust-2);border-radius:999px"></div>
@@ -832,7 +861,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isConfirm }}" hint-placeholder-val="{{ true }}">
-          <div style="min-height:100dvh;background:var(--green);background-image:radial-gradient(rgba(0,0,0,.22) 1px,transparent 1.4px);background-size:9px 9px;padding:96px 30px 128px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px">
+          <div style="min-height:100dvh;background:var(--green);background-image:radial-gradient(rgba(0,0,0,.22) 1px,transparent 1.4px);background-size:9px 9px;padding:max(96px,calc(44px + var(--safe-top))) 30px calc(128px + var(--safe-bot));box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px">
             <div style="width:148px;height:148px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 6px 0 var(--shadow-35);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-5deg);animation:mfPop .5s ease both">
               <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
               <div style="font:800 9.5px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--rust);margin-top:8px">{{ t.orderSent }}</div>
@@ -897,7 +926,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isExpired }}" hint-placeholder-val="{{ false }}">
-          <div style="min-height:100dvh;background:var(--rust);background-image:radial-gradient(rgba(0,0,0,.24) 1px,transparent 1.4px);background-size:9px 9px;padding:104px 30px 128px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px">
+          <div style="min-height:100dvh;background:var(--rust);background-image:radial-gradient(rgba(0,0,0,.24) 1px,transparent 1.4px);background-size:9px 9px;padding:max(104px,calc(50px + var(--safe-top))) 30px calc(128px + var(--safe-bot));box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px">
             <div style="width:152px;height:152px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 6px 0 var(--shadow-4);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(4deg);animation:mfPop .5s ease both">
               <div style="font-family:var(--font-display);font-size:34px;line-height:1;color:var(--rust)">00:00</div>
               <div style="font:800 9px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:8px">{{ t.expiredStamp }}</div>
@@ -927,7 +956,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
-          <div style="min-height:100dvh;background:var(--paper);padding:60px 0 120px;box-sizing:border-box">
+          <div style="min-height:100dvh;background:var(--paper);padding:max(60px,calc(16px + var(--safe-top))) 0 calc(120px + var(--safe-bot));box-sizing:border-box">
             <div style="padding:0 22px">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
                 <div>
@@ -1170,7 +1199,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isQueue }}" hint-placeholder-val="{{ true }}">
-          <div style="min-height:100dvh;background:var(--paper);padding:60px 0 120px;box-sizing:border-box">
+          <div style="min-height:100dvh;background:var(--paper);padding:max(60px,calc(16px + var(--safe-top))) 0 calc(120px + var(--safe-bot));box-sizing:border-box">
             <div style="padding:0 22px">
               <div style="font-family:var(--font-display);font-size:30px;color:var(--ink);letter-spacing:-.02em">{{ t.ordersTitle }}</div>
               <div style="font:500 13px/1.4 var(--font-body);color:var(--muted);margin-top:4px">{{ t.ordersSub }}</div>
@@ -1302,7 +1331,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isInv }}" hint-placeholder-val="{{ true }}">
-          <div style="min-height:100dvh;background:var(--paper);padding:60px 0 120px;box-sizing:border-box">
+          <div style="min-height:100dvh;background:var(--paper);padding:max(60px,calc(16px + var(--safe-top))) 0 calc(120px + var(--safe-bot));box-sizing:border-box">
             <div style="padding:0 22px">
               <div style="font-family:var(--font-display);font-size:30px;color:var(--ink);letter-spacing:-.02em">{{ t.stockTitle }}</div>
               <div style="font:500 13px/1.4 var(--font-body);color:var(--muted);margin-top:4px">{{ t.stockSub }}</div>
@@ -1432,7 +1461,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isCodes }}" hint-placeholder-val="{{ true }}">
-          <div style="min-height:100dvh;background:var(--paper);padding:60px 0 120px;box-sizing:border-box">
+          <div style="min-height:100dvh;background:var(--paper);padding:max(60px,calc(16px + var(--safe-top))) 0 calc(120px + var(--safe-bot));box-sizing:border-box">
             <div style="padding:0 22px">
               <div style="font-family:var(--font-display);font-size:30px;color:var(--ink);letter-spacing:-.02em">{{ t.whoTitle }}</div>
               <div style="font:500 13px/1.4 var(--font-body);color:var(--muted);margin-top:4px">{{ t.whoSub }}</div>
@@ -1511,7 +1540,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ false }}">
-          <div style="min-height:100dvh;background:var(--slab-2);background-image:radial-gradient(circle at 50% 18%,var(--green) 0%,var(--slab-2) 62%);padding:60px 0 40px;box-sizing:border-box">
+          <div style="min-height:100dvh;background:var(--slab-2);background-image:radial-gradient(circle at 50% 18%,var(--green) 0%,var(--slab-2) 62%);padding:max(60px,calc(16px + var(--safe-top))) 0 calc(40px + var(--safe-bot));box-sizing:border-box">
             <div style="padding:0 24px">
               <div onClick="{{ suBack }}" style="width:42px;height:42px;border-radius:50%;background:var(--veil-12);border:2px solid var(--on-dark);display:flex;align-items:center;justify-content:center;cursor:pointer">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--on-dark)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
@@ -1547,7 +1576,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
-          <div style="min-height:100dvh;background:var(--paper);padding:60px 0 130px;box-sizing:border-box">
+          <div style="min-height:100dvh;background:var(--paper);padding:max(60px,calc(16px + var(--safe-top))) 0 calc(130px + var(--safe-bot));box-sizing:border-box">
             <div style="padding:0 22px">
               <div style="font-family:var(--font-display);font-size:30px;color:var(--ink);letter-spacing:-.02em">{{ t.stTitle }}</div>
               <div style="font:500 13px/1.4 var(--font-body);color:var(--muted);margin-top:4px">{{ t.stSub }}</div>
@@ -1784,7 +1813,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isClientNav }}" hint-placeholder-val="{{ false }}">
-          <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;height:84px;background:var(--slab-2);border-top:2px solid var(--ink);display:flex;align-items:flex-start;padding:10px 8px 0">
+          <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;min-height:84px;box-sizing:border-box;background:var(--slab-2);border-top:2px solid var(--ink);display:flex;align-items:flex-start;padding:10px 8px max(4px,var(--safe-bot))">
             <div onClick="{{ goHome }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:5px 0;color:{{ navHomeFg }}">
               <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:{{ navHomePill }}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 10v10h14V10"></path></svg>
@@ -1813,7 +1842,7 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isOwner }}" hint-placeholder-val="{{ false }}">
-          <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;height:84px;background:var(--slab-2);border-top:2px solid var(--ink);display:flex;align-items:flex-start;padding:10px 8px 0">
+          <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;min-height:84px;box-sizing:border-box;background:var(--slab-2);border-top:2px solid var(--ink);display:flex;align-items:flex-start;padding:10px 8px max(4px,var(--safe-bot))">
             <sc-for list="{{ ownerTabs }}" as="t3" hint-placeholder-count="4">
               <div onClick="{{ t3.go }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:5px 0;color:{{ t3.fg }}">
                 <div style="width:38px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:{{ t3.pill }}">
@@ -1942,8 +1971,10 @@ const COPY = {
     ptsHistory: 'Cómo los ganaste',
     ptsEmpty: 'Todavía no tienes Mafupuntos. Haz una orden y empiezas.',
     ptsGoal: (n, g) => n === 1 ? 'Te falta 1 pa’ un octavo gratis.' : 'Te faltan ' + n + ' pa’ un octavo gratis.',
-    tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7 puntos',
-    tierNext: (g, t) => 'Te faltan ' + g + 'g pa\u2019 ' + t + '.',
+    tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7',
+    // Not "te faltan": that is how the POINTS goal under the bar reads, and
+    // two "te faltan" lines on one card is how it got confusing.
+    tierNext: (g, t) => 'Otros ' + g + 'g y eres ' + t + '.',
     tierTop: 'Est\u00e1s en lo m\u00e1s alto.',
     ptsTop: 'Pasaste todas las metas. Bestia.',
     saving: 'Guardando…',
@@ -2214,7 +2245,7 @@ const COPY = {
     ptsHistory: 'How you earned them',
     ptsEmpty: 'No Mafupuntos yet. Place an order and you are away.',
     ptsGoal: (n, g) => n === 1 ? '1 more and the next eighth is free.' : n + ' more and an eighth is free.',
-    tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7 points',
+    tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7',
     tierNext: (g, t) => g + 'g more and you are ' + t + '.',
     tierTop: 'Top tier. Nothing above this.',
     ptsTop: 'You have passed every goal. Animal.',
