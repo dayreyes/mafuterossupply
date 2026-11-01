@@ -688,7 +688,10 @@ input,textarea,select{font-size:16px}
             <div style="margin-top:18px;background:var(--slab);border:2px solid var(--ink);border-radius:24px;padding:18px;box-shadow:3px 3px 0 var(--rust)">
               <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
                 <div style="font-family:var(--font-display);font-size:19px;color:var(--on-dark)">{{ t.ptsTitle }}</div>
-                <div style="font:800 9.5px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--rust-2)">{{ t.ptsSoon }}</div>
+                <!-- The tier, where the "coming soon" badge used to sit. It is
+                     the thing worth looking at: it says what every future
+                     order is worth, not what a past one was. -->
+                <div style="font-family:var(--font-display);font-size:12px;line-height:1;letter-spacing:.04em;padding:6px 10px;border-radius:999px;background:var(--green-glow);color:var(--ink)">{{ tierLabel }}</div>
               </div>
               <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;flex-wrap:wrap">
                 <span style="font-family:var(--font-display);font-size:52px;line-height:1.02;color:var(--green-glow)">{{ ptsValue }}</span>
@@ -700,6 +703,7 @@ input,textarea,select{font-size:16px}
               </div>
               <div style="font:500 11.5px/1.45 var(--font-body);color:var(--faint);margin-top:3px">{{ t.ptsRule }}</div>
               <div style="display:{{ ptsGoneDisplay }};font:600 11px/1.45 var(--font-body);color:var(--rust-4);margin-top:6px">{{ ptsGoneLine }}</div>
+              <div style="font-family:var(--font-hand);font-size:16px;line-height:1.2;color:var(--green-3);margin-top:7px">{{ tierNextLine }}</div>
 
               <div style="display:{{ ptsGoalDisplay }};margin-top:15px">
                 <div style="height:10px;border-radius:999px;background:var(--veil-14);overflow:hidden">
@@ -1409,7 +1413,11 @@ input,textarea,select{font-size:16px}
                   <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--ink);border-radius:20px;padding:13px 14px">
                     <div style="flex:1;min-width:0">
                       <div style="font:800 14.5px/1.2 var(--font-body);color:var(--ink)">{{ c.name }}</div>
-                      <div style="font:500 11.5px/1.35 var(--font-body);color:var(--muted);margin-top:3px">{{ c.meta }}</div>
+                      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:3px">
+                        <span style="font:500 11.5px/1.35 var(--font-body);color:var(--muted)">{{ c.meta }}</span>
+                        <span style="display:{{ c.tierDisplay }};align-items:center;font-family:var(--font-display);font-size:9.5px;letter-spacing:.04em;padding:3px 7px;border-radius:999px;background:var(--green-glow);color:var(--ink)">{{ c.tier }}</span>
+                      </div>
+                      <div style="display:{{ c.contactDisplay }};font:500 11px/1.4 var(--font-body);color:var(--muted-2);margin-top:3px">{{ c.contact }}</div>
                       <div style="font:500 11px/1.35 var(--font-body);color:var(--muted-2);margin-top:2px">{{ c.last }}</div>
                     </div>
                     <div style="font-family:var(--font-display);font-size:20px;letter-spacing:.1em;color:var(--blush-ink);padding:5px 11px;border-radius:12px;background:var(--blush);border:2px solid var(--ink);flex:none">{{ c.code }}</div>
@@ -1835,11 +1843,14 @@ const COPY = {
     ptsWorth: v => 'Valen $' + v + '.',
     ptsGone: d => 'Se vencen si no pides antes del ' + d + '.',
     noCode: '¿No tienes código?', ask: 'Pídelo aquí',
-    ptsTitle: 'Mafupuntos', ptsRule: 'Un octavo te da 1 Mafupunto. Con 5 te ganas un octavo gratis.',
+    ptsTitle: 'Mafupuntos', ptsRule: 'Un octavo te da 1 Mafupunto. 25 puntos = un octavo gratis.',
     ptsSoon: 'Premios pronto',
     ptsHistory: 'Cómo los ganaste',
     ptsEmpty: 'Todavía no tienes Mafupuntos. Haz una orden y empiezas.',
     ptsGoal: (n, g) => n === 1 ? 'Te falta 1 pa’ un octavo gratis.' : 'Te faltan ' + n + ' pa’ un octavo gratis.',
+    tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7 puntos',
+    tierNext: (g, t) => 'Te faltan ' + g + 'g pa\u2019 ' + t + '.',
+    tierTop: 'Est\u00e1s en lo m\u00e1s alto.',
     ptsTop: 'Pasaste todas las metas. Bestia.',
     saving: 'Guardando…',
     confirmTitle: 'Confirma que te llegó el pago',
@@ -2090,11 +2101,14 @@ const COPY = {
     ptsWorth: v => 'Worth $' + v + '.',
     ptsGone: d => 'They expire if you do not order before ' + d + '.',
     noCode: 'No code?', ask: 'Ask for one',
-    ptsTitle: 'Mafupuntos', ptsRule: 'An eighth earns 1 Mafupunto. Five gets you an eighth free.',
+    ptsTitle: 'Mafupuntos', ptsRule: 'An eighth earns 1 Mafupunto. 25 points = an eighth free.',
     ptsSoon: 'Rewards coming soon',
     ptsHistory: 'How you earned them',
     ptsEmpty: 'No Mafupuntos yet. Place an order and you are away.',
     ptsGoal: (n, g) => n === 1 ? '1 more and the next eighth is free.' : n + ' more and an eighth is free.',
+    tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7 points',
+    tierNext: (g, t) => g + 'g more and you are ' + t + '.',
+    tierTop: 'Top tier. Nothing above this.',
     ptsTop: 'You have passed every goal. Animal.',
     saving: 'Saving\u2026',
     confirmTitle: 'Confirm the payment landed',
@@ -2291,7 +2305,7 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = "2026-11-01.0450";
+const BUILD = "2026-11-01.0540";
 
 
 // The Mafupuntos ladder, and the ONE thing in here that has to agree with the
@@ -2299,7 +2313,7 @@ const BUILD = "2026-11-01.0450";
 // earned. This copy exists only to draw the progress bar between one rung and
 // the next, so if the two ever drift the bar is wrong and the number is right —
 // which is the correct way round for a mistake to land.
-const PTS_RUNGS = [5, 10, 20, 40];
+const PTS_RUNGS = [25, 50, 100, 200];
 // Mirrored from lib/points.js, which owns the real figures and decides what
 // anyone has actually earned. These exist only to draw the bar and promise a
 // number at checkout, so if the two ever drift the drawing is wrong and the
@@ -2398,6 +2412,7 @@ class Component extends DCLogic {
     pts: 0,
     ptsGoal: 0,
     ptsWorth: 0,
+    tier: '', tierMult: 1, nextTier: '', nextTierGrams: 0,
     ptsExpires: '',
     ptsToGo: 0,
     ptsEarned: [],
@@ -2728,6 +2743,8 @@ class Component extends DCLogic {
           favs: (res.profile && res.profile.favs) || [],
           pts: res.points || 0,
           ptsWorth: res.worth || 0,
+          tier: res.tier || '', tierMult: res.tierMult || 1,
+          nextTier: res.nextTier || '', nextTierGrams: res.nextTierGrams || 0,
           ptsExpires: res.expiresAt || '',
           ptsGoal: res.goal || 0,
           ptsToGo: res.toGo || 0,
@@ -3713,6 +3730,10 @@ class Component extends DCLogic {
       // the two to disagree about.
       ptsValue: (s.pts || 0).toLocaleString('en-US'),
       ptsWorthLine: t.ptsWorth((s.ptsWorth || 0).toLocaleString('en-US')),
+      tierLabel: t.tierLine(s.tier || 'Mafutero', s.tierMult || 1),
+      // Grams still needed, not the threshold. "42g" means nothing to
+      // somebody holding a phone; "another half ounce" means everything.
+      tierNextLine: s.nextTier ? t.tierNext(s.nextTierGrams, s.nextTier) : t.tierTop,
       // Only once there is something to lose. Warning a customer with no
       // points that they are about to lose none of them is just noise.
       ptsGoneDisplay: (s.pts || 0) > 0 && s.ptsExpires ? 'block' : 'none',
@@ -4604,6 +4625,13 @@ class Component extends DCLogic {
         // on every code he has just issued.
         meta: t.ordersN(c.orders || 0) + ' · ' + cash(c.spent || 0) +
           ((c.points || 0) > 0 ? ' · ' + (c.points || 0).toLocaleString('en-US') + ' pts' : ''),
+        // What he needs to actually reach somebody: the number to ring and
+        // the door to drive to. It was always his data; keeping it off his
+        // own screen only meant he kept a worse copy of it somewhere else.
+        contact: [c.phone || '', c.addr || ''].filter(Boolean).join(' · '),
+        contactDisplay: (c.phone || c.addr) ? 'block' : 'none',
+        tier: c.tier || '',
+        tierDisplay: c.tier && c.tier !== 'Mafutero' ? 'inline-flex' : 'none',
         last: c.lastOrder ? t.lastOrder(stamp(c.lastOrder)) : t.neverOrdered,
         state: c.active ? t.active : t.revoked,
         bg: c.active ? 'var(--green-pale)' : 'var(--chip)', fg: c.active ? 'var(--green-ink)' : 'var(--muted-2)',

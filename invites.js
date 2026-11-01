@@ -9,7 +9,7 @@ import { randomInt } from 'node:crypto';
 import { read, mutate, KEYS } from './store.js';
 import { str, newId } from './http.js';
 import { CLIENT_CODE_LEN } from './session.js';
-import { pointsFor } from './points.js';
+import { pointsFor, tierAt } from './points.js';
 
 export const genCode = () =>
   String(randomInt(0, 10 ** CLIENT_CODE_LEN)).padStart(CLIENT_CODE_LEN, '0');
@@ -74,6 +74,7 @@ export async function withHistory(codes) {
     return {
       ...c, ...row,
       points: pointsFor(orders, c.code),
+      tier: tierAt(orders, c.code).name,
       // The owner's own list, so it carries what he needs to reach somebody:
       // where to drive and what number to ring. This is already his data —
       // he took it at signup — and withholding it from his own screen only

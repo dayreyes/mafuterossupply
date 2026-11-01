@@ -9,6 +9,7 @@ import { requireOwner, requireClient } from './lib/session.js';
 import { mintCode, withHistory } from './lib/invites.js';
 import { sendAll, codeText, pushConfigured, pushPublicKey } from './lib/notify.js';
 import { pointsFor, earnedRows, nextMilestone, expiresAt, pointsValue,
+  tierAt, gramsInWindow, TIERS, TIER_DAYS,
   DOLLARS_PER_POINT, POINT_VALUE, EXPIRE_DAYS } from './lib/points.js';
 
 // What a customer may see of their own record, and nothing of anyone else's.
@@ -24,6 +25,26 @@ const publicSelf = (c) => ({
 
 const MAX_DEVICES = 5;
 const MAX_FAVS = 60;
+
+// Where they stand, and what it would take to climb.
+//
+// The next tier is given as GRAMS still needed rather than as a threshold,
+// because "42g" means nothing to somebody holding a phone and "another half
+// ounce" means everything.
+const tierBlock = (orders, code) => {
+  const grams = gramsInWindow(orders, code);
+  const tier = tierAt(orders, code);
+  const next = TIERS.find((t) => t.grams > grams) || null;
+  return {
+    tier: tier.name,
+    tierId: tier.id,
+    tierMult: tier.mult,
+    tierGrams: Math.round(grams * 10) / 10,
+    tierDays: TIER_DAYS,
+    nextTier: next ? next.name : '',
+    nextTierGrams: next ? Math.round((next.grams - grams) * 10) / 10 : 0
+  };
+};
 
 export default async (req) => route(req, {
 
@@ -53,7 +74,8 @@ export default async (req) => route(req, {
       expiresAt: expiresAt(orders, session.code),
       goal,
       toGo: goal ? goal - points : 0,
-      earned: earnedRows(orders, session.code).slice(0, 20)
+      earned: earnedRows(orders, session.code).slice(0, 20),
+      ...tierBlock(orders, session.code)
     });
   },
 
@@ -76,7 +98,8 @@ export default async (req) => route(req, {
       points,
       worth: pointsValue(points),
       expiresAt: expiresAt(orders, code),
-      earned: earnedRows(orders, code).slice(0, 40)
+      earned: earnedRows(orders, code).slice(0, 40),
+      ...tierBlock(orders, code)
     });
   },
 

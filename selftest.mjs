@@ -399,7 +399,7 @@ async function customerProfile() {
   // response has to be looked at: `me` is the reply that could most easily
   // start carrying somebody else's details without anyone noticing.
   ck('and nothing else is attached',
-    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,goal,ok,perPoint,pointValue,points,profile,toGo,worth', Object.keys(r));
+    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,goal,nextTier,nextTierGrams,ok,perPoint,pointValue,points,profile,tier,tierDays,tierGrams,tierId,tierMult,toGo,worth', Object.keys(r));
   ck('the profile itself still carries only their own fields',
     Object.keys(r.profile).sort().join(',') === 'addr,code,devices,favs,name,notify,phone', Object.keys(r.profile));
 
@@ -1207,11 +1207,12 @@ async function mafupuntos() {
   let me = await call(codes, { action: 'me' }, ana);
   ck('a customer with no orders has none', me.points === 0, me.points);
   ck('and is told what a point costs', me.perPoint === 25, me);
-  ck('and what one is worth', me.pointValue === 5, me);
+  ck('and what one is worth', me.pointValue === 1, me);
+  ck('and starts at the bottom tier', me.tier === 'Mafutero' && me.tierMult === 1, me.tier);
   await buy(ana, 4);                       // 4 x 3.5g at $25 = $100
   me = await call(codes, { action: 'me' }, ana);
   ck('a $100 order is four points', me.points === 4, me.points);
-  ck('and is worth twenty dollars', me.worth === 20, me.worth);
+  ck('and is worth four dollars at base tier', me.worth === 4, me.worth);
 
   section('the economics are not a giveaway');
   // The first draft gave a point per dollar AND made a point worth a dollar,
@@ -1219,12 +1220,13 @@ async function mafupuntos() {
   // have caught that before it shipped.
   const spend = 1000;
   const back = pts.pointsValue(pts.orderPoints({ subtotal: spend, fee: 0 }));
-  ck('a $1000 spend returns $200, not $1000', back === 200, back);
-  ck('which is 20% of it', back / spend === 0.2, back / spend);
-  // Five eighths bought, the sixth free. The ratio IS the scheme, so it is
-  // pinned rather than left to drift with whatever the constants become.
-  ck('five eighths earns a free one',
-    pts.pointsValue(5 * pts.orderPoints({ subtotal: 25, fee: 0 })) === 25);
+  ck('a $1000 spend returns $40 at base tier', back === 40, back);
+  ck('which is 4% of it', back / spend === 0.04, back / spend);
+  // The tier is the whole motivation, so the ladder is pinned: the same
+  // spend has to pay three times as much at the top as at the bottom.
+  const atTier = (m) => pts.pointsValue(pts.orderPoints({ subtotal: spend, fee: 0 }, m));
+  ck('Veterano doubles it', atTier(2) === 80, atTier(2));
+  ck('Patr\u00f3n triples it', atTier(3) === 120, atTier(3));
 
   section('the list adds up to the number');
   await buy(ana, 1);
@@ -1250,8 +1252,8 @@ async function mafupuntos() {
   ck('and it drops out of the breakdown', afterCancel.earned.length === 2, afterCancel.earned);
 
   section('the goal ahead of them');
-  ck('the first rung is a free eighth', afterCancel.goal === 5, afterCancel.goal);
-  ck('with the distance to it', afterCancel.toGo === 2, afterCancel.toGo);
+  ck('the first rung is a free eighth', afterCancel.goal === 25, afterCancel.goal);
+  ck('with the distance to it', afterCancel.toGo === 22, afterCancel.toGo);
 
   section('a month without ordering and you start again');
   const day = 86400000;
@@ -1281,10 +1283,35 @@ async function mafupuntos() {
   ck('a customer cannot read anyone else\'s', (await call(codes, { action: 'history', code: hers.profile.code }, ana)).ok === false);
 
   section('a milestone is crossed once, not every order after it');
-  ck('the order that passes it', pts.crossed(4, 6) === 5);
-  ck('nothing for the one after', pts.crossed(6, 8) === null);
-  ck('one message when an order clears two rungs', pts.crossed(4, 22) === 20);
-  ck('and nothing when the balance goes backwards', pts.crossed(30, 4) === null);
+  ck('the order that passes it', pts.crossed(24, 26) === 25);
+  ck('nothing for the one after', pts.crossed(26, 30) === null);
+  ck('one message when an order clears two rungs', pts.crossed(24, 120) === 100);
+  ck('and nothing when the balance goes backwards', pts.crossed(300, 20) === null);
+
+  section('the tier is grams, not visits');
+  // The whole correction: eight eighths bought one at a time must NOT outrank
+  // one ounce. Counting purchases got that backwards, which is the wrong way
+  // round for a shop that would rather sell the ounce.
+  const g = (grams, daysAgo) => ({ clientCode: 'T', cancelled: false,
+    at: new Date(Date.now() - daysAgo * 86400000).toISOString(),
+    subtotal: 0, fee: 0, items: [{ grams, qty: 1 }] });
+  ck('an ounce counts as an ounce', pts.gramsInWindow([g(28, 1)], 'T') === 28);
+  ck('eight eighths count the same as one ounce',
+    pts.gramsInWindow(Array.from({ length: 8 }, (_, i) => g(3.5, i + 1)), 'T') === 28);
+  ck('one ounce alone is still Mafutero', pts.tierForGrams(28).id === 'mafutero');
+  ck('an ounce and a half is Veterano', pts.tierForGrams(42).id === 'veterano');
+  ck('four and a half ounces is Patr\u00f3n', pts.tierForGrams(126).id === 'patron');
+  ck('grams outside the window do not count',
+    pts.gramsInWindow([g(112, 200), g(3.5, 1)], 'T') === 3.5);
+
+  section('an order keeps the points it was earned at');
+  // If today's tier were applied to the whole history, dropping a tier would
+  // make old points evaporate and the breakdown would stop matching receipts.
+  const hist = [g(126, 80), { clientCode: 'T', cancelled: false,
+    at: new Date(Date.now() - 70 * 86400000).toISOString(),
+    subtotal: 100, fee: 0, items: [{ grams: 14, qty: 1 }] }];
+  const wasPatron = pts.tierAt(hist, 'T', new Date(Date.now() - 70 * 86400000));
+  ck('it was earned at the tier held that day', wasPatron.id === 'patron', wasPatron.id);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
