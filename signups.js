@@ -12,7 +12,7 @@ import { read, mutate, KEYS } from './lib/store.js';
 import { requireOwner, checkThrottle, recordFailure } from './lib/session.js';
 import { loadConfig } from './lib/config.js';
 import { mintCode, withHistory } from './lib/invites.js';
-import { sendAll, signupText, codeText } from './lib/notify.js';
+import { sendAll, signupText, codeText, lostCodeText } from './lib/notify.js';
 
 const MIN_AGE = 21;
 
@@ -39,6 +39,35 @@ function ageFrom(bday) {
 }
 
 export default async (req) => route(req, {
+
+  // "I lost my code."
+  //
+  // The customer gives the phone number the shop already has for them; the
+  // owner gets a nudge and sends the code himself. Nothing is ever returned
+  // to the browser — not the code, and not whether the number matched.
+  //
+  // That last part is the whole design. An endpoint that answered "yes, that
+  // number is one of ours" is a way to test phone numbers against a cannabis
+  // shop's customer list from anywhere in the world, one request at a time.
+  // The reply here is identical either way, so there is nothing to learn by
+  // asking. The owner is told which it was, because he is the one deciding.
+  async lost(body, req) {
+    const ip = clientIp(req);
+    const gate = await checkThrottle('signup', ip, false);
+    if (!gate.allowed) return tooMany('Too many requests. Try again later.', gate.retryAfter);
+    await recordFailure('signup', ip, false);
+
+    const phone = str(body.phone, 32);
+    if (phone.replace(/\D/g, '').length < 7) return fail('Put the number he has for you.');
+
+    const digits = (v) => String(v || '').replace(/\D/g, '');
+    const known = (await read(KEYS.codes, []))
+      .some((c) => c.active === true && digits(c.phone) && digits(c.phone) === digits(phone));
+
+    await sendAll(lostCodeText(phone, known));
+    // Same answer whether or not it matched.
+    return ok({ asked: true });
+  },
 
   async submit(body, req) {
     const ip = clientIp(req);

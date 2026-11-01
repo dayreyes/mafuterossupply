@@ -688,10 +688,22 @@ input,textarea,select{font-size:16px}
             <div style="margin-top:18px;background:var(--slab);border:2px solid var(--ink);border-radius:24px;padding:18px;box-shadow:3px 3px 0 var(--rust)">
               <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
                 <div style="font-family:var(--font-display);font-size:19px;color:var(--on-dark)">{{ t.ptsTitle }}</div>
-                <div style="font:800 9.5px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--rust-2)">{{ t.ptsSoon }}</div>
+                <!-- The tier, where the "coming soon" badge used to sit. It is
+                     the thing worth looking at: it says what every future
+                     order is worth, not what a past one was. -->
+                <div style="font-family:var(--font-display);font-size:12px;line-height:1;letter-spacing:.04em;padding:6px 10px;border-radius:999px;background:var(--green-glow);color:var(--ink)">{{ tierLabel }}</div>
               </div>
-              <div style="font-family:var(--font-display);font-size:52px;line-height:1.02;color:var(--green-glow);margin-top:8px">{{ ptsValue }}</div>
+              <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;flex-wrap:wrap">
+                <span style="font-family:var(--font-display);font-size:52px;line-height:1.02;color:var(--green-glow)">{{ ptsValue }}</span>
+                <!-- What it is actually worth, next to what it is.
+                     A points balance nobody can price is a number, not a
+                     reward: "540 points" means nothing until it says $540 or
+                     $27, and the gap between those two is the whole scheme. -->
+                <span style="font-family:var(--font-hand);font-size:19px;line-height:1;color:var(--on-dark)">{{ ptsWorthLine }}</span>
+              </div>
               <div style="font:500 11.5px/1.45 var(--font-body);color:var(--faint);margin-top:3px">{{ t.ptsRule }}</div>
+              <div style="display:{{ ptsGoneDisplay }};font:600 11px/1.45 var(--font-body);color:var(--rust-4);margin-top:6px">{{ ptsGoneLine }}</div>
+              <div style="font-family:var(--font-hand);font-size:16px;line-height:1.2;color:var(--green-3);margin-top:7px">{{ tierNextLine }}</div>
 
               <div style="display:{{ ptsGoalDisplay }};margin-top:15px">
                 <div style="height:10px;border-radius:999px;background:var(--veil-14);overflow:hidden">
@@ -1113,6 +1125,9 @@ input,textarea,select{font-size:16px}
             <div style="padding:0 22px">
               <div style="font-family:var(--font-display);font-size:30px;color:var(--ink);letter-spacing:-.02em">{{ t.ordersTitle }}</div>
               <div style="font:500 13px/1.4 var(--font-body);color:var(--muted);margin-top:4px">{{ t.ordersSub }}</div>
+              <!-- What the nudge actually did. Clears itself; he is holding a
+                   bag, not reading a changelog. -->
+              <div style="display:{{ queueMsgDisplay }};margin-top:10px;padding:9px 13px;border-radius:14px;background:var(--green-pale);border:2px solid var(--green);font:700 12px/1.35 var(--font-body);color:var(--green-ink)">{{ queueMsg }}</div>
 
               <div style="margin-top:16px;display:flex;align-items:center;gap:12px;background:var(--slab-2);border:2px solid var(--ink);border-radius:22px;padding:13px 15px;animation:mfSlide .4s ease both">
                 <div style="width:38px;height:38px;border-radius:11px;background:var(--rust-2);display:flex;align-items:center;justify-content:center;flex:none;font-family:var(--font-display);font-size:17px;color:var(--on-solid)">M</div>
@@ -1211,6 +1226,13 @@ input,textarea,select{font-size:16px}
                          performs the obvious next act — move it along while it
                          is live, file it away once it is done. -->
                     <div style="display:flex;gap:9px;margin-top:13px;align-items:center">
+                      <!-- "It is ready." Sends the line and changes nothing,
+                           for the man at the door with a bag whose customer
+                           has not turned up. Not shown once the order is
+                           settled, and not shown if they cannot be reached. -->
+                      <div onClick="{{ o.ping }}" title="{{ o.pingLabel }}" style="display:{{ o.pingDisplay }};width:46px;height:46px;border-radius:50%;border:2px solid var(--ink);background:var(--green-glow);align-items:center;justify-content:center;cursor:pointer;flex:none" style-active="transform:translate(2px,2px)">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+                      </div>
                       <div onClick="{{ o.stepBack }}" title="{{ o.stepBackLabel }}" style="display:{{ o.backDisplay }};width:46px;height:46px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);align-items:center;justify-content:center;cursor:pointer;flex:none" style-hover="background:var(--chip)">
                         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"></path><path d="M4 9h11a5 5 0 0 1 0 10h-1"></path></svg>
                       </div>
@@ -1401,7 +1423,11 @@ input,textarea,select{font-size:16px}
                   <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--ink);border-radius:20px;padding:13px 14px">
                     <div style="flex:1;min-width:0">
                       <div style="font:800 14.5px/1.2 var(--font-body);color:var(--ink)">{{ c.name }}</div>
-                      <div style="font:500 11.5px/1.35 var(--font-body);color:var(--muted);margin-top:3px">{{ c.meta }}</div>
+                      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:3px">
+                        <span style="font:500 11.5px/1.35 var(--font-body);color:var(--muted)">{{ c.meta }}</span>
+                        <span style="display:{{ c.tierDisplay }};align-items:center;font-family:var(--font-display);font-size:9.5px;letter-spacing:.04em;padding:3px 7px;border-radius:999px;background:var(--green-glow);color:var(--ink)">{{ c.tier }}</span>
+                      </div>
+                      <div style="display:{{ c.contactDisplay }};font:500 11px/1.4 var(--font-body);color:var(--muted-2);margin-top:3px">{{ c.contact }}</div>
                       <div style="font:500 11px/1.35 var(--font-body);color:var(--muted-2);margin-top:2px">{{ c.last }}</div>
                     </div>
                     <div style="font-family:var(--font-display);font-size:20px;letter-spacing:.1em;color:var(--blush-ink);padding:5px 11px;border-radius:12px;background:var(--blush);border:2px solid var(--ink);flex:none">{{ c.code }}</div>
@@ -1823,13 +1849,20 @@ const COPY = {
     pfNeedName: 'Pon un nombre que él reconozca.',
     pfOrders: 'Tus órdenes', pfOrdersEmpty: 'Todavía no has hecho ninguna orden.',
     typeAll: 'Todas',
-    earnPts: n => 'Esta orden te da ' + n + ' Mafupuntos.',
+    earnPts: n => n === 1 ? 'Esta orden te da 1 Mafupunto.' : 'Esta orden te da ' + n + ' Mafupuntos.',
+    ptsWorth: v => 'Valen $' + v + '.',
+    ptsGone: d => 'Se vencen si no pides antes del ' + d + '.',
     noCode: '¿No tienes código?', ask: 'Pídelo aquí',
-    ptsTitle: 'Mafupuntos', ptsRule: '1 Mafupunto por cada $1 que gastas.',
+    pingReady: 'Avisarle que está lista', pingSent: 'Le llegó el aviso.',
+    pingNobody: 'No tiene avisos prendidos — mejor llámalo.',
+    ptsTitle: 'Mafupuntos', ptsRule: 'Un octavo te da 1 Mafupunto. 25 puntos = un octavo gratis.',
     ptsSoon: 'Premios pronto',
     ptsHistory: 'Cómo los ganaste',
     ptsEmpty: 'Todavía no tienes Mafupuntos. Haz una orden y empiezas.',
-    ptsGoal: (n, g) => 'Te faltan ' + n + ' pa’ llegar a ' + g + '.',
+    ptsGoal: (n, g) => n === 1 ? 'Te falta 1 pa’ un octavo gratis.' : 'Te faltan ' + n + ' pa’ un octavo gratis.',
+    tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7 puntos',
+    tierNext: (g, t) => 'Te faltan ' + g + 'g pa\u2019 ' + t + '.',
+    tierTop: 'Est\u00e1s en lo m\u00e1s alto.',
     ptsTop: 'Pasaste todas las metas. Bestia.',
     saving: 'Guardando…',
     confirmTitle: 'Confirma que te llegó el pago',
@@ -2076,13 +2109,20 @@ const COPY = {
     pfNeedName: 'Put a name he will recognise.',
     pfOrders: 'Your orders', pfOrdersEmpty: 'You have not ordered yet.',
     typeAll: 'All',
-    earnPts: n => 'This order earns you ' + n + ' Mafupuntos.',
+    earnPts: n => n === 1 ? 'This order earns you 1 Mafupunto.' : 'This order earns you ' + n + ' Mafupuntos.',
+    ptsWorth: v => 'Worth $' + v + '.',
+    ptsGone: d => 'They expire if you do not order before ' + d + '.',
     noCode: 'No code?', ask: 'Ask for one',
-    ptsTitle: 'Mafupuntos', ptsRule: '1 Mafupunto for every $1 you spend.',
+    pingReady: 'Tell them it is ready', pingSent: 'They got the nudge.',
+    pingNobody: 'No alerts on their phone — better ring them.',
+    ptsTitle: 'Mafupuntos', ptsRule: 'An eighth earns 1 Mafupunto. 25 points = an eighth free.',
     ptsSoon: 'Rewards coming soon',
     ptsHistory: 'How you earned them',
     ptsEmpty: 'No Mafupuntos yet. Place an order and you are away.',
-    ptsGoal: (n, g) => n + ' to go before you hit ' + g + '.',
+    ptsGoal: (n, g) => n === 1 ? '1 more and the next eighth is free.' : n + ' more and an eighth is free.',
+    tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7 points',
+    tierNext: (g, t) => g + 'g more and you are ' + t + '.',
+    tierTop: 'Top tier. Nothing above this.',
     ptsTop: 'You have passed every goal. Animal.',
     saving: 'Saving\u2026',
     confirmTitle: 'Confirm the payment landed',
@@ -2279,7 +2319,7 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = "2026-11-01.0320";
+const BUILD = "2026-11-01.0620";
 
 
 // The Mafupuntos ladder, and the ONE thing in here that has to agree with the
@@ -2287,7 +2327,12 @@ const BUILD = "2026-11-01.0320";
 // earned. This copy exists only to draw the progress bar between one rung and
 // the next, so if the two ever drift the bar is wrong and the number is right —
 // which is the correct way round for a mistake to land.
-const PTS_RUNGS = [100, 250, 500, 1000, 2500, 5000];
+const PTS_RUNGS = [25, 50, 100, 200];
+// Mirrored from lib/points.js, which owns the real figures and decides what
+// anyone has actually earned. These exist only to draw the bar and promise a
+// number at checkout, so if the two ever drift the drawing is wrong and the
+// balance is right — which is the correct way round for a mistake to land.
+const PTS_PER = 25;
 
 // What each kind of thing comes in, and how much a full one holds.
 //
@@ -2380,6 +2425,10 @@ class Component extends DCLogic {
     favs: [],
     pts: 0,
     ptsGoal: 0,
+    ptsWorth: 0,
+    queueMsg: '',
+    tier: '', tierMult: 1, nextTier: '', nextTierGrams: 0,
+    ptsExpires: '',
     ptsToGo: 0,
     ptsEarned: [],
     pfDraft: null,
@@ -2708,6 +2757,10 @@ class Component extends DCLogic {
           // number that is never out of step with this one.
           favs: (res.profile && res.profile.favs) || [],
           pts: res.points || 0,
+          ptsWorth: res.worth || 0,
+          tier: res.tier || '', tierMult: res.tierMult || 1,
+          nextTier: res.nextTier || '', nextTierGrams: res.nextTierGrams || 0,
+          ptsExpires: res.expiresAt || '',
           ptsGoal: res.goal || 0,
           ptsToGo: res.toGo || 0,
           ptsEarned: res.earned || []
@@ -2725,6 +2778,24 @@ class Component extends DCLogic {
   // customer is scrolling, and a tap that waits on a round trip before it
   // fills reads as a tap that missed. If the save fails it goes back, because
   // a heart that says saved and did not is worse than one that refused.
+  // Tell a customer their order is ready, without moving the order.
+  //
+  // Says what happened rather than claiming success: if they had no device
+  // listening he needs to know now, because the next thing he does is ring
+  // them instead.
+  pingReady(id) {
+    if (this.state.busy) return;
+    this.setState({ busy: true });
+    buzz(10);
+    this.api('orders', 'ping', { id }).then(res => {
+      this.setState({ busy: false });
+      if (this.expired(res)) return;
+      this.setState({ queueMsg: !res || !res.ok ? ((res && res.error) || this.t().offline)
+        : res.reached ? this.t().pingSent : this.t().pingNobody });
+      setTimeout(() => this.setState({ queueMsg: '' }), 4000);
+    });
+  }
+
   toggleFav(pid) {
     const had = (this.state.favs || []).includes(pid);
     const next = had ? this.state.favs.filter(x => x !== pid) : [pid].concat(this.state.favs || []);
@@ -3423,6 +3494,7 @@ class Component extends DCLogic {
 
     // The queue shows one side or the other, never both: active orders by
     // default, archived ones when he asks for them.
+    const codeFor = (code) => (s.codes || []).find(c => c.code === code);
     const queue = s.orders.filter(o => (s.showArchived ? o.archived : !o.archived));
 
     // ── a month of trading, read back ────────────────────────────────────
@@ -3691,6 +3763,17 @@ class Component extends DCLogic {
       // app never adds a point of its own, so there is no second opinion for
       // the two to disagree about.
       ptsValue: (s.pts || 0).toLocaleString('en-US'),
+      queueMsg: s.queueMsg || '',
+      queueMsgDisplay: s.queueMsg ? 'block' : 'none',
+      ptsWorthLine: t.ptsWorth((s.ptsWorth || 0).toLocaleString('en-US')),
+      tierLabel: t.tierLine(s.tier || 'Mafutero', s.tierMult || 1),
+      // Grams still needed, not the threshold. "42g" means nothing to
+      // somebody holding a phone; "another half ounce" means everything.
+      tierNextLine: s.nextTier ? t.tierNext(s.nextTierGrams, s.nextTier) : t.tierTop,
+      // Only once there is something to lose. Warning a customer with no
+      // points that they are about to lose none of them is just noise.
+      ptsGoneDisplay: (s.pts || 0) > 0 && s.ptsExpires ? 'block' : 'none',
+      ptsGoneLine: s.ptsExpires ? t.ptsGone(stamp(s.ptsExpires).split(' \u00b7 ')[0]) : '',
       ptsGoalDisplay: s.ptsGoal ? 'block' : 'none',
       ptsGoalLine: s.ptsGoal ? t.ptsGoal((s.ptsToGo || 0).toLocaleString('en-US'), s.ptsGoal.toLocaleString('en-US')) : t.ptsTop,
       // The bar fills across the gap between the rung just cleared and the one
@@ -4179,7 +4262,7 @@ class Component extends DCLogic {
       subtotal: cash(sub),
       // Floored the same way the server floors it, so the number promised here
       // is the number that lands. Hidden on an empty bag.
-      earnLine: t.earnPts(Math.floor(sub + (fee || 0))),
+      earnLine: t.earnPts(Math.floor((sub + (fee || 0)) / PTS_PER)),
       earnDisplay: sub > 0 ? 'block' : 'none',
       feeLabel: s.mode === 'delivery' && zone ? t.feeDelivery + ' · ' + zone.mi + ' mi' : t.feePickup,
       fee: fee ? cash(fee) : t.free,
@@ -4444,6 +4527,12 @@ class Component extends DCLogic {
           undoDisplay: app && o.payOk && !o.cancelled ? 'flex' : 'none',
           undoPay: () => this.patchOrder(o.id, false),
           undoPayLabel: t.undoPay,
+          // Only while there is something to tell them, and only if they
+          // actually asked for messages — a button that silently reaches
+          // nobody is worse than no button.
+          pingDisplay: !settled && o.clientCode && (codeFor(o.clientCode) || {}).notify ? 'flex' : 'none',
+          pingLabel: t.pingReady,
+          ping: () => this.pingReady(o.id),
           backDisplay: (o.step || 0) > 0 || o.cancelled ? 'flex' : 'none',
           stepBack: () => this.orderAction(o.id, 'stepBack'),
           stepBackLabel: t.stepBackLabel,
@@ -4578,6 +4667,13 @@ class Component extends DCLogic {
         // on every code he has just issued.
         meta: t.ordersN(c.orders || 0) + ' · ' + cash(c.spent || 0) +
           ((c.points || 0) > 0 ? ' · ' + (c.points || 0).toLocaleString('en-US') + ' pts' : ''),
+        // What he needs to actually reach somebody: the number to ring and
+        // the door to drive to. It was always his data; keeping it off his
+        // own screen only meant he kept a worse copy of it somewhere else.
+        contact: [c.phone || '', c.addr || ''].filter(Boolean).join(' · '),
+        contactDisplay: (c.phone || c.addr) ? 'block' : 'none',
+        tier: c.tier || '',
+        tierDisplay: c.tier && c.tier !== 'Mafutero' ? 'inline-flex' : 'none',
         last: c.lastOrder ? t.lastOrder(stamp(c.lastOrder)) : t.neverOrdered,
         state: c.active ? t.active : t.revoked,
         bg: c.active ? 'var(--green-pale)' : 'var(--chip)', fg: c.active ? 'var(--green-ink)' : 'var(--muted-2)',

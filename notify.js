@@ -96,6 +96,21 @@ export const signupText = (r) => [
   'Approve them in the app to send a code.'
 ].join('\n');
 
+// Somebody at the door who cannot get in.
+//
+// Deliberately says only what they typed and whether it matched anybody — NOT
+// the code. This message lands in a Telegram chat on a phone that lives in a
+// pocket, and a code in a notification preview is a code on a lock screen.
+// He looks them up and sends it himself, which is the step that makes it a
+// decision rather than an automatic disclosure.
+export const lostCodeText = (typed, known) => [
+  '<b>SOMEBODY LOST THEIR CODE</b>',
+  'They typed: ' + esc(typed),
+  known
+    ? 'That matches a customer on your list. Open Codes to check and text it to them.'
+    : 'No customer matches that. Could be a wrong number, could be somebody fishing.'
+].join('\n');
+
 export const codeText = (name, code) =>
   '<b>CODE ISSUED</b>\n' + esc(name) + ' → <code>' + esc(code) + '</code>';
 

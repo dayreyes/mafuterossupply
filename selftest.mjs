@@ -399,7 +399,7 @@ async function customerProfile() {
   // response has to be looked at: `me` is the reply that could most easily
   // start carrying somebody else's details without anyone noticing.
   ck('and nothing else is attached',
-    Object.keys(r).sort().join(',') === 'earned,goal,ok,perDollar,points,profile,toGo', Object.keys(r));
+    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,goal,nextTier,nextTierGrams,ok,perPoint,pointValue,points,profile,tier,tierDays,tierGrams,tierId,tierMult,toGo,worth', Object.keys(r));
   ck('the profile itself still carries only their own fields',
     Object.keys(r.profile).sort().join(',') === 'addr,code,devices,favs,name,notify,phone', Object.keys(r.profile));
 
@@ -626,6 +626,28 @@ async function automaticMessages() {
   await call(orders, { action: 'advance', id: placed.order.id }, s.token);
   msgs = await during(() => call(orders, { action: 'advance', id: placed.order.id }, s.token));
   ck('a step that cannot move says nothing', msgs.length === 0, msgs);
+
+  section('he can say "it is ready" without faking a step');
+  const ready = await call(orders, { action: 'place',
+    items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, ana.token);
+  const stepBefore = (await call(orders, { action: 'list' }, s.token))
+    .orders.find(o => o.id === ready.order.id).step;
+  msgs = await during(() => call(orders, { action: 'ping', id: ready.order.id }, s.token));
+  ck('the customer gets it', msgs.length === 1 && /ana/.test(msgs[0].endpoint), msgs.map(m => m.endpoint));
+  ck('and it says what he typed', /ready/i.test(msgs[0].msg.body), msgs[0].msg);
+  const stepAfter = (await call(orders, { action: 'list' }, s.token))
+    .orders.find(o => o.id === ready.order.id).step;
+  // The whole point: a nudge is not progress. Pressing it must not advance
+  // the order, or the queue starts lying about where things are.
+  ck('the order has not moved', stepBefore === stepAfter, { stepBefore, stepAfter });
+  ck('pressing it twice is harmless',
+    (await call(orders, { action: 'ping', id: ready.order.id }, s.token)).ok === true);
+  ck('a customer cannot ping anybody',
+    (await call(orders, { action: 'ping', id: ready.order.id }, ana.token)).ok === false);
+  const quietPing = await call(orders, { action: 'place',
+    items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, quiet.token);
+  const none = await call(orders, { action: 'ping', id: quietPing.order.id }, s.token);
+  ck('and he is told when it reached nobody', none.reached === false, none);
 
   section('switching off means off');
   msgs = await during(() => call(codes, { action: 'notify', on: false }, tito.token));
@@ -1133,6 +1155,39 @@ async function uniqueIds() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// LOST CODE
+//
+// An unauthenticated endpoint on the front door of a cannabis shop. The thing
+// that matters is not that it works — it is that it gives nothing away.
+// ════════════════════════════════════════════════════════════════════════════
+async function lostCode() {
+  const sent = [];
+  const s = await openShop({ hours: { on: false } }, { stock: 100 });
+  const c = await call(codes, { action: 'issue', name: 'Ana' }, s.token);
+  await call(codes, { action: 'saveMe', name: 'Ana', phone: '(813) 555-0101', addr: '1 St' },
+    (await call(auth, { action: 'unlock', code: c.code })).token);
+
+  section('the answer is the same whether the number is known or not');
+  const hit = await call(signups, { action: 'lost', phone: '(813) 555-0101' });
+  const miss = await call(signups, { action: 'lost', phone: '(813) 555-9999' });
+  ck('a number he has gets a plain yes', hit.ok === true, hit);
+  ck('a number he does not also gets a plain yes', miss.ok === true, miss);
+  // If these two ever differ, the endpoint becomes a way to test phone numbers
+  // against a cannabis shop's customer list from anywhere, one request a time.
+  ck('and the two replies are identical',
+    JSON.stringify(hit) === JSON.stringify(miss), { hit, miss });
+
+  section('it never hands back the code itself');
+  ck('not on a match', !JSON.stringify(hit).includes(c.code), hit);
+  ck('nor anything but an acknowledgement',
+    Object.keys(hit).sort().join(',') === 'asked,ok', Object.keys(hit));
+
+  section('rubbish is refused before it reaches the owner');
+  const bad = await call(signups, { action: 'lost', phone: '123' });
+  ck('too short to be a phone number', bad.ok === false, bad);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // MAFUPUNTOS
 //
 // A balance is the customer's money in all but name, so the things that matter
@@ -1146,15 +1201,32 @@ async function mafupuntos() {
   const tito = await s.asCustomer('Tito');
   const buy = (tok, qty) => call(orders,
     { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty }], mode: 'pickup', pay: 'cash' }, tok);
+  const pts = await import(B + 'lib/points.js');
 
-  section('a point for a dollar, counted off the orders');
+  section('an eighth earns a point');
   let me = await call(codes, { action: 'me' }, ana);
   ck('a customer with no orders has none', me.points === 0, me.points);
-  ck('and is told the rate', me.perDollar === 1, me);
+  ck('and is told what a point costs', me.perPoint === 25, me);
+  ck('and what one is worth', me.pointValue === 1, me);
+  ck('and starts at the bottom tier', me.tier === 'Mafutero' && me.tierMult === 1, me.tier);
   await buy(ana, 4);                       // 4 x 3.5g at $25 = $100
   me = await call(codes, { action: 'me' }, ana);
-  ck('a $100 order is 100 points', me.points === 100, me.points);
-  ck('the breakdown has the order in it', me.earned.length === 1 && me.earned[0].points === 100, me.earned);
+  ck('a $100 order is four points', me.points === 4, me.points);
+  ck('and is worth four dollars at base tier', me.worth === 4, me.worth);
+
+  section('the economics are not a giveaway');
+  // The first draft gave a point per dollar AND made a point worth a dollar,
+  // which hands back every dollar of revenue. This is the check that would
+  // have caught that before it shipped.
+  const spend = 1000;
+  const back = pts.pointsValue(pts.orderPoints({ subtotal: spend, fee: 0 }));
+  ck('a $1000 spend returns $40 at base tier', back === 40, back);
+  ck('which is 4% of it', back / spend === 0.04, back / spend);
+  // The tier is the whole motivation, so the ladder is pinned: the same
+  // spend has to pay three times as much at the top as at the bottom.
+  const atTier = (m) => pts.pointsValue(pts.orderPoints({ subtotal: spend, fee: 0 }, m));
+  ck('Veterano doubles it', atTier(2) === 80, atTier(2));
+  ck('Patr\u00f3n triples it', atTier(3) === 120, atTier(3));
 
   section('the list adds up to the number');
   await buy(ana, 1);
@@ -1165,68 +1237,86 @@ async function mafupuntos() {
   ck('newest first', me.earned.length === 3 && me.earned[0].at >= me.earned[1].at, me.earned);
 
   section('nobody earns on somebody else\'s money');
-  const his = await call(codes, { action: 'me' }, tito);
-  ck('a different customer has their own balance', his.points === 0, his.points);
   await buy(tito, 1);
-  const hisNow = await call(codes, { action: 'me' }, tito);
+  const his = await call(codes, { action: 'me' }, tito);
   const hers = await call(codes, { action: 'me' }, ana);
-  ck('and it only moves for their own orders', hisNow.points === 25 && hers.points === 175,
-    { tito: hisNow.points, ana: hers.points });
+  ck('each balance is their own', his.points === 1 && hers.points === 7,
+    { tito: his.points, ana: hers.points });
 
   section('a cancelled order takes its points with it');
   const all = (await call(orders, { action: 'list' }, s.token)).orders;
   const anaOrder = all.find(o => o.clientCode === hers.profile.code && o.subtotal === 100);
   await call(orders, { action: 'cancel', id: anaOrder.id }, s.token);
   const afterCancel = await call(codes, { action: 'me' }, ana);
-  ck('the sale did not happen, so the points did not either', afterCancel.points === 75, afterCancel.points);
+  ck('the sale did not happen, so the points did not either', afterCancel.points === 3, afterCancel.points);
   ck('and it drops out of the breakdown', afterCancel.earned.length === 2, afterCancel.earned);
 
   section('the goal ahead of them');
-  ck('the next rung is named', afterCancel.goal === 100, afterCancel);
-  ck('with the distance to it', afterCancel.toGo === 25, afterCancel);
+  ck('the first rung is a free eighth', afterCancel.goal === 25, afterCancel.goal);
+  ck('with the distance to it', afterCancel.toGo === 22, afterCancel.toGo);
 
-  section('the owner sees the same number');
-  const row = (await call(codes, { action: 'list' }, s.token)).codes
-    .find(c => c.code === afterCancel.profile.code);
-  ck('no disagreement between the two screens', row.points === afterCancel.points,
-    { owner: row.points, customer: afterCancel.points });
+  section('a month without ordering and you start again');
+  const day = 86400000;
+  const code = 'ZZ';
+  const ord = (daysAgo, subtotal) => ({ clientCode: code, no: '#' + daysAgo, cancelled: false,
+    subtotal, fee: 0, at: new Date(Date.now() - daysAgo * day).toISOString() });
+  ck('a recent run all counts',
+    pts.pointsFor([ord(1, 100), ord(10, 100), ord(20, 100)], code) === 12);
+  ck('nothing counts once the last order is over a month old',
+    pts.pointsFor([ord(40, 100), ord(50, 100)], code) === 0);
+  // The naive "is their last order old" version passes the two above and
+  // fails this one: a gap in the middle has to burn everything before it.
+  ck('a gap in the middle burns what came before it',
+    pts.pointsFor([ord(2, 100), ord(45, 100), ord(50, 100)], code) === 4);
+  ck('and ordering again does not bring expired points back',
+    pts.pointsFor([ord(0, 25), ord(60, 500)], code) === 1);
+  ck('the customer is told when it goes',
+    typeof pts.expiresAt([ord(1, 100)], code) === 'string');
 
-  section('points survive an order ageing off the end of the list');
-  // The cap is 2000 and nobody is placing 2000 orders in a test, so the carry
-  // is exercised directly — it is the mechanism, not the cap, that matters.
-  const pts = await import(B + 'lib/points.js');
-  const dropped = [{ clientCode: 'X', subtotal: 40, fee: 0, cancelled: false }];
-  const carry = pts.addCarry({}, dropped);
-  ck('the points of a dropped order are banked', carry.X === 40, carry);
-  ck('and still counted once it is gone', pts.pointsFor([], 'X', carry) === 40);
-  ck('a cancelled order banks nothing',
-    Object.keys(pts.addCarry({}, [{ clientCode: 'Y', subtotal: 40, cancelled: true }])).length === 0);
-
-  section('the bag promises what the order actually pays');
-  // The bag now says "this order earns you N" BEFORE the order exists, which
-  // means the app is doing its own arithmetic for the first time. If it ever
-  // rounds differently from the server, the shop promises a number at
-  // checkout and banks a different one a second later — and the customer is
-  // right and we are wrong.
-  const fe = await import('node:fs').then(m => m.readFileSync(join(root, 'index.html'), 'utf8'));
-  ck('the bag floors it, like the server does',
-    /earnPts\(Math\.floor\(sub \+ \(fee \|\| 0\)\)\)/.test(fe), 'earnPts call shape');
-  for (const [subtotal, feeAmt] of [[25, 0], [24.5, 0], [100, 5], [39.99, 6.5], [0.4, 0]]) {
-    const promised = Math.floor(subtotal + feeAmt);
-    const banked = pts.orderPoints({ subtotal, fee: feeAmt });
-    ck('$' + subtotal + ' + $' + feeAmt + ' fee promises and banks ' + promised,
-      promised === banked, { promised, banked });
-  }
+  section('the owner can settle an argument');
+  const seen = await call(codes, { action: 'history', code: hers.profile.code }, s.token);
+  ck('he gets the same total the customer sees', seen.points === afterCancel.points,
+    { owner: seen.points, customer: afterCancel.points });
+  ck('and the working, not just the figure',
+    seen.earned.length === afterCancel.earned.length && seen.earned[0].no === afterCancel.earned[0].no,
+    seen.earned);
+  ck('a customer cannot read anyone else\'s', (await call(codes, { action: 'history', code: hers.profile.code }, ana)).ok === false);
 
   section('a milestone is crossed once, not every order after it');
-  ck('the order that passes it', pts.crossed(90, 110) === 100);
-  ck('nothing for the one after', pts.crossed(110, 130) === null);
-  ck('one message when an order clears two rungs', pts.crossed(90, 300) === 250);
-  ck('and nothing when the balance goes backwards', pts.crossed(300, 90) === null);
+  ck('the order that passes it', pts.crossed(24, 26) === 25);
+  ck('nothing for the one after', pts.crossed(26, 30) === null);
+  ck('one message when an order clears two rungs', pts.crossed(24, 120) === 100);
+  ck('and nothing when the balance goes backwards', pts.crossed(300, 20) === null);
+
+  section('the tier is grams, not visits');
+  // The whole correction: eight eighths bought one at a time must NOT outrank
+  // one ounce. Counting purchases got that backwards, which is the wrong way
+  // round for a shop that would rather sell the ounce.
+  const g = (grams, daysAgo) => ({ clientCode: 'T', cancelled: false,
+    at: new Date(Date.now() - daysAgo * 86400000).toISOString(),
+    subtotal: 0, fee: 0, items: [{ grams, qty: 1 }] });
+  ck('an ounce counts as an ounce', pts.gramsInWindow([g(28, 1)], 'T') === 28);
+  ck('eight eighths count the same as one ounce',
+    pts.gramsInWindow(Array.from({ length: 8 }, (_, i) => g(3.5, i + 1)), 'T') === 28);
+  ck('one ounce alone is still Mafutero', pts.tierForGrams(28).id === 'mafutero');
+  ck('an ounce and a half is Veterano', pts.tierForGrams(42).id === 'veterano');
+  ck('three and a half ounces is Patr\u00f3n', pts.tierForGrams(98).id === 'patron');
+  ck('three ounces is still Veterano', pts.tierForGrams(84).id === 'veterano');
+  ck('grams outside the window do not count',
+    pts.gramsInWindow([g(112, 200), g(3.5, 1)], 'T') === 3.5);
+
+  section('an order keeps the points it was earned at');
+  // If today's tier were applied to the whole history, dropping a tier would
+  // make old points evaporate and the breakdown would stop matching receipts.
+  const hist = [g(98, 80), { clientCode: 'T', cancelled: false,
+    at: new Date(Date.now() - 70 * 86400000).toISOString(),
+    subtotal: 100, fee: 0, items: [{ grams: 14, qty: 1 }] }];
+  const wasPatron = pts.tierAt(hist, 'T', new Date(Date.now() - 70 * 86400000));
+  ck('it was earned at the tier held that day', wasPatron.id === 'patron', wasPatron.id);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, configMigration, automaticMessages, mafupuntos, diagnose, viewLayer]) {
+for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, configMigration, automaticMessages, mafupuntos, lostCode, diagnose, viewLayer]) {
   await suite();
 }
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');

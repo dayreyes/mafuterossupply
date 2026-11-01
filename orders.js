@@ -13,7 +13,7 @@ import { route, ok, fail, unauthorized, str, num, newId } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { mileFee, migrateProduct, shopOpen, shopDay, loadConfig } from './lib/config.js';
-import { pointsFor, orderPoints, crossed, addCarry } from './lib/points.js';
+import { pointsFor, orderPoints, crossed } from './lib/points.js';
 import {
   sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText,
   pushTo, orderStatusMsg, lowStockCustomerMsg, pointsMsg
@@ -246,19 +246,12 @@ export default async (req) => route(req, {
     };
 
     // Points before this order, taken off the very list it is being added to,
-    // so the two can never be read a moment apart. Anything pushed off the end
-    // of the cap has its points banked — see lib/points.js.
+    // so the two can never be read a moment apart.
     let ptsBefore = 0;
-    let aged = [];
     await mutate(KEYS.orders, [], (list) => {
       ptsBefore = pointsFor(list, order.clientCode);
-      const next = [order].concat(list);
-      aged = next.slice(2000);
-      return next.slice(0, 2000);
+      return [order].concat(list).slice(0, 2000);
     });
-    if (aged.length) {
-      await mutate(KEYS.ptsCarry, {}, (c) => addCarry(c, aged));
-    }
 
     // Commit the stock only once the order is safely stored.
     const low = [];
@@ -318,6 +311,32 @@ export default async (req) => route(req, {
     if (!(await requireOwner(req))) return unauthorized();
     const orders = await read(KEYS.orders, []);
     return ok(await snapshot(orders));
+  },
+
+  // "Your order is ready" — sent on purpose, not as a side effect.
+  //
+  // `advance` already messages the customer when a step moves, but that only
+  // fires the once and only if the step actually changed. The owner standing
+  // at the door with a bag in his hand needs to be able to nudge somebody who
+  // has not turned up, without pretending the order moved again.
+  //
+  // Goes only to the one customer on the order, and only if they asked for
+  // messages at all — the same two gates as every other automatic message.
+  // Nothing about the order changes, so it can be pressed twice without
+  // corrupting anything; the push service collapses repeats by tag.
+  async ping(body, req) {
+    if (!(await requireOwner(req))) return unauthorized();
+    const id = str(body.id, 40);
+    const order = (await read(KEYS.orders, [])).find((o) => o.id === id);
+    if (!order) return fail('No such order.');
+    if (order.cancelled) return fail('That order was cancelled.');
+    if (!order.clientCode) return fail('That order has no customer attached.');
+
+    const line = str(body.line, 120) || 'It is ready.';
+    const res = await pushTo([order.clientCode], orderStatusMsg(order, line));
+    // Say plainly when it reached nobody, rather than claiming it was sent.
+    // He is about to decide whether to phone them instead.
+    return ok({ sent: res.sent, reached: res.sent > 0 });
   },
 
   async advance(body, req) {
