@@ -323,6 +323,7 @@ input,textarea,select{font-size:16px}
 
             <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:6px 24px 22px;font:500 13px/1.45 var(--font-body);color:var(--green-pale);text-align:center">
               <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">{{ t.noCode }} <span onClick="{{ goSignup }}" style="font-weight:700;color:var(--green-glow);cursor:pointer">{{ t.ask }}</span></div>
+              <div onClick="{{ goLost }}" style="display:{{ lostLinkDisplay }};font-size:12.5px;color:var(--green-3);cursor:pointer;text-decoration:underline">{{ t.lostCode }}</div>
               <div onClick="{{ toLang }}" style="font-size:12px;color:var(--green-3);cursor:pointer;text-decoration:underline">{{ t.switchLang }}</div>
             </div>
           </div>
@@ -370,6 +371,29 @@ input,textarea,select{font-size:16px}
             <div style="position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;z-index:30;margin-top:auto;padding:26px 22px 40px;background:var(--paper);border-top:2px solid var(--ink)">
               <div onClick="{{ submitSignup }}" style="height:56px;border-radius:999px;background:{{ signupBg }};border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--on-solid);font-family:var(--font-display);font-size:18px;opacity:{{ signupOp }}" style-active="box-shadow:0 0 0 var(--ink);transform:translate(3px,3px)">{{ t.submitSignup }}</div>
               <div style="display:{{ signupMissingDisplay }};font:600 12px/1.45 var(--font-body);color:var(--rust);margin-top:8px;text-align:center">{{ signupMissing }}</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isLost }}" hint-placeholder-val="{{ false }}">
+          <!-- "I lost my code."
+               They give the number the shop already has; he gets a nudge and
+               sends it himself. The reply here is the same whether or not the
+               number matched anybody — see signups.js. There is nothing to
+               learn by asking, which is the point. -->
+          <div style="min-height:100dvh;background:var(--paper);display:flex;flex-direction:column;box-sizing:border-box">
+            <div style="height:170px;flex:none;background:var(--rust-2) url(isla-fronds-band.webp) center bottom/cover;position:relative">
+              <div onClick="{{ toLock }}" style="position:absolute;left:16px;top:52px;width:40px;height:40px;border-radius:50%;background:var(--scrim-5);color:var(--paper);display:flex;align-items:center;justify-content:center;cursor:pointer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+              </div>
+            </div>
+            <div style="padding:22px 24px 30px;display:flex;flex-direction:column;gap:13px">
+              <div style="font-family:var(--font-display);font-size:30px;line-height:.95;color:var(--green);text-transform:uppercase">{{ t.lostTitle }}</div>
+              <div style="font:500 14px/1.5 var(--font-body);color:var(--muted)">{{ t.lostBody }}</div>
+              <div style="font:700 12px/1 var(--font-body);color:var(--muted);margin-top:4px">{{ t.lostPhone }}</div>
+              <input value="{{ lostPhone }}" onChange="{{ setLostPhone }}" inputMode="tel" placeholder="{{ t.fPhonePh }}" style="width:100%;box-sizing:border-box;height:50px;border-radius:14px;border:1.5px solid var(--chip);background:var(--card);padding:0 14px;font:600 15px/1 var(--font-body);color:var(--ink);outline:none">
+              <div onClick="{{ sendLost }}" style="height:56px;border-radius:999px;background:{{ lostBtnBg }};display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:var(--font-display);font-size:18px;color:var(--on-solid)" style-active="transform:scale(.98)">{{ lostBtnLabel }}</div>
+              <div style="display:{{ lostMsgDisplay }};font-family:var(--font-hand);font-size:18px;line-height:1.3;color:{{ lostMsgFg }}">{{ lostMsg }}</div>
             </div>
           </div>
         </sc-if>
@@ -1853,6 +1877,12 @@ const COPY = {
     ptsWorth: v => 'Valen $' + v + '.',
     ptsGone: d => 'Se vencen si no pides antes del ' + d + '.',
     noCode: '¿No tienes código?', ask: 'Pídelo aquí',
+    lostCode: '¿Se te perdió tu código?',
+    lostTitle: 'Te lo mandamos',
+    lostBody: 'Pon el número que El Mafu tiene tuyo. Él te lo manda — aquí no te lo enseñamos.',
+    lostPhone: 'Tu teléfono', lostSend: 'Avísale',
+    lostNeedPhone: 'Pon el número completo.',
+    lostSent: 'Ya le avisamos. Él te escribe.',
     pingReady: 'Avisarle que está lista', pingSent: 'Le llegó el aviso.',
     pingNobody: 'No tiene avisos prendidos — mejor llámalo.',
     ptsTitle: 'Mafupuntos', ptsRule: 'Un octavo te da 1 Mafupunto. 25 puntos = un octavo gratis.',
@@ -2113,6 +2143,12 @@ const COPY = {
     ptsWorth: v => 'Worth $' + v + '.',
     ptsGone: d => 'They expire if you do not order before ' + d + '.',
     noCode: 'No code?', ask: 'Ask for one',
+    lostCode: 'Lost your code?',
+    lostTitle: 'We will send it over',
+    lostBody: 'Put the number El Mafu has for you. He sends it himself — it is never shown here.',
+    lostPhone: 'Your phone', lostSend: 'Let him know',
+    lostNeedPhone: 'Put the whole number.',
+    lostSent: 'He has been told. He will message you.',
     pingReady: 'Tell them it is ready', pingSent: 'They got the nudge.',
     pingNobody: 'No alerts on their phone — better ring them.',
     ptsTitle: 'Mafupuntos', ptsRule: 'An eighth earns 1 Mafupunto. 25 points = an eighth free.',
@@ -2319,7 +2355,7 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = "2026-11-01.0620";
+const BUILD = "2026-11-01.0710";
 
 
 // The Mafupuntos ladder, and the ONE thing in here that has to agree with the
@@ -2427,6 +2463,9 @@ class Component extends DCLogic {
     ptsGoal: 0,
     ptsWorth: 0,
     queueMsg: '',
+    lostPhone: '',
+    lostMsg: '',
+    lostOk: false,
     tier: '', tierMult: 1, nextTier: '', nextTierGrams: 0,
     ptsExpires: '',
     ptsToGo: 0,
@@ -2783,6 +2822,26 @@ class Component extends DCLogic {
   // Says what happened rather than claiming success: if they had no device
   // listening he needs to know now, because the next thing he does is ring
   // them instead.
+  // Ask the shop to send the code again.
+  //
+  // The reply is deliberately the same whether or not the number matched
+  // anybody, so this says "he has been told" and nothing more. Claiming "we
+  // found you" would leak exactly what the server refuses to.
+  sendLost() {
+    const phone = (this.state.lostPhone || '').trim();
+    if (this.state.busy) return;
+    if (phone.replace(/\D/g, '').length < 7) {
+      this.setState({ lostMsg: this.t().lostNeedPhone, lostOk: false });
+      return;
+    }
+    this.setState({ busy: true });
+    this.api('signups', 'lost', { phone }).then(res => {
+      this.setState({ busy: false });
+      if (!res || !res.ok) { this.setState({ lostMsg: (res && res.error) || this.t().offline, lostOk: false }); return; }
+      this.setState({ lostMsg: this.t().lostSent, lostOk: true, lostPhone: '' });
+    });
+  }
+
   pingReady(id) {
     if (this.state.busy) return;
     this.setState({ busy: true });
@@ -3702,6 +3761,20 @@ class Component extends DCLogic {
       isDown: s.screen === 'down',
       isLang: s.screen === 'lang', isLock: s.screen === 'lock', isHome: s.screen === 'home',
       isSignup: s.screen === 'signup', isWaiting: s.screen === 'waiting',
+      isLost: s.screen === 'lost',
+      // Only offered to customers. An owner who forgets his PIN has the
+      // OWNER_PIN escape hatch in the dashboard, and this would just send him
+      // a message about himself.
+      lostLinkDisplay: s.pending === 'owner' ? 'none' : 'block',
+      goLost: () => this.setState({ screen: 'lost', lostPhone: '', lostMsg: '' }),
+      lostPhone: s.lostPhone || '',
+      setLostPhone: e => this.setState({ lostPhone: e.target.value, lostMsg: '' }),
+      sendLost: () => this.sendLost(),
+      lostBtnLabel: s.busy ? t.saving : t.lostSend,
+      lostBtnBg: s.busy ? 'var(--faint)' : 'var(--green)',
+      lostMsg: s.lostMsg || '',
+      lostMsgDisplay: s.lostMsg ? 'block' : 'none',
+      lostMsgFg: s.lostOk ? 'var(--green)' : 'var(--rust)',
       isSetup: s.screen === 'setup', isSettings: s.screen === 'settings',
       isProduct: s.screen === 'product', isBag: s.screen === 'bag', isConfirm: s.screen === 'confirm',
       isProfile: s.screen === 'profile',
