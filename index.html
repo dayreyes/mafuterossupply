@@ -99,6 +99,10 @@
   --jungle-haze: rgba(19,38,27,.15);
   --jungle-mid: rgba(19,38,27,.35);
   --dot-35: rgba(19,38,27,.35);
+  --shadow-25: rgba(19,38,27,.25);
+  --slot-deep: rgba(19,38,27,.6);
+  /* the printed poster at the top of the menu */
+  --poster-1: #e0a43a;  --poster-2: #d98a3b;  --poster-3: #c4623f;
   /* the vessels: glass, its lid, and the shine down one side */
   --glass: rgba(19,38,27,.05);   --shine: rgba(255,255,255,.5);
   --lid: #a9b58c;                --lid-2: #7a6d62;
@@ -176,6 +180,9 @@
   --jungle-haze: rgba(12,10,13,.2);
   --jungle-mid: rgba(12,10,13,.45);
   --dot-35: rgba(12,10,13,.35);
+  --shadow-25: rgba(12,10,13,.25);
+  --slot-deep: rgba(12,10,13,.6);
+  --poster-1: #ff8a3d;  --poster-2: #e8631a;  --poster-3: #c2410c;
   --glass: rgba(239,231,216,.05); --shine: rgba(239,231,216,.3);
   --lid: #7a6e85;                --lid-2: #4a4252;
   --vessel-ink: rgba(239,231,216,.42);
@@ -397,166 +404,88 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
-          <div style="min-height:100dvh;background:var(--paper);background-image:radial-gradient(var(--dot-paper-07) 1px,transparent 1.3px);background-size:8px 8px;padding:60px 0 108px;box-sizing:border-box">
-            <div style="padding:0 22px 8px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-              <div>
-                <div style="display:flex;align-items:center;gap:8px">
-                  <div style="font:700 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--rust)">{{ openTillLine }}</div>
-                  <div onClick="{{ flipLang }}" style="font:800 9.5px/1 var(--font-body);letter-spacing:.1em;padding:5px 9px;border-radius:999px;border:2px solid var(--ink);background:var(--card);color:var(--ink);cursor:pointer" style-hover="background:var(--blush)">{{ langFlip }}</div>
+          <!-- The menu, as the design draws it: a printed poster at the top
+               and the shelf below it on dark. Not our old list in new
+               colours — a different object. -->
+          <div style="min-height:100dvh;background:var(--slab);padding-bottom:116px;box-sizing:border-box">
+
+            <!-- the poster -->
+            <div style="background:linear-gradient(175deg,var(--poster-1) 0%,var(--poster-2) 55%,var(--poster-3) 100%);position:relative;padding-top:54px">
+              <div style="padding:12px 20px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                <div style="display:flex;flex-direction:column;min-width:0">
+                  <span style="font-family:var(--font-hand);font-size:17px;line-height:1;color:var(--ink)">{{ t.greet }} {{ clientName }}</span>
+                  <span style="font-family:var(--font-display);font-size:40px;line-height:.86;color:var(--ink);margin-top:4px">MAFU<br>TERO&rsquo;S</span>
                 </div>
-                <div style="font-family:var(--font-display);font-size:31px;line-height:1.02;color:var(--ink);letter-spacing:-.02em;margin-top:6px">{{ t.greet }}<br>{{ clientName }}</div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none">
+                  <div onClick="{{ goBag }}" style="position:relative;width:50px;height:50px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.94)">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--paper)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    <sc-if value="{{ hasCart }}" hint-placeholder-val="{{ true }}">
+                      <div style="position:absolute;top:-5px;right:-5px;min-width:21px;height:21px;border-radius:999px;background:var(--green-glow);color:var(--ink);font:800 11px/1 var(--font-body);display:flex;align-items:center;justify-content:center">{{ cartCount }}</div>
+                    </sc-if>
+                  </div>
+                  <div onClick="{{ flipLang }}" style="font:800 9.5px/1 var(--font-body);letter-spacing:.1em;padding:6px 10px;border-radius:999px;background:var(--scrim-15);color:var(--ink);cursor:pointer">{{ langFlip }}</div>
+                </div>
               </div>
-              <div onClick="{{ goBag }}" style="position:relative;width:50px;height:50px;border-radius:50%;background:var(--rust-2);border:2px solid var(--ink);box-shadow:2px 2px 0 var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" style-active="box-shadow:0 0 0 var(--ink);transform:translate(2px,2px)">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--on-dark)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                <sc-if value="{{ hasCart }}" hint-placeholder-val="{{ true }}">
-                  <div style="position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;border-radius:999px;background:var(--green);border:2px solid var(--ink);color:var(--on-solid);font:800 11px/1 var(--font-body);display:flex;align-items:center;justify-content:center">{{ cartCount }}</div>
-                </sc-if>
+
+              <!-- the sections, as tabs printed on the poster -->
+              <div style="display:flex;gap:16px;padding:14px 20px 0;position:relative;z-index:1;overflow-x:auto">
+                <sc-for list="{{ cats }}" as="ct" hint-placeholder-count="3">
+                  <div onClick="{{ ct.on }}" style="padding:0 0 7px;cursor:pointer;font-family:var(--font-display);font-size:15px;line-height:1;color:{{ ct.fg }};border-bottom:3px solid {{ ct.line }};white-space:nowrap;flex:none">{{ ct.label }}</div>
+                </sc-for>
+              </div>
+              <div style="height:34px;background:url(isla-fronds-band.webp) center top/cover;mix-blend-mode:multiply"></div>
+            </div>
+
+            <!-- is he driving tonight -->
+            <div style="margin:12px 16px 0;border-radius:16px;background:{{ runBannerBg }};padding:11px 14px;display:flex;gap:12px;align-items:center">
+              <span style="width:36px;height:36px;border-radius:50%;background:var(--rust-2);color:var(--card);display:flex;align-items:center;justify-content:center;flex:none">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"></path><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"></path><circle cx="7.5" cy="17.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg>
+              </span>
+              <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                <span style="font-family:var(--font-display);font-size:13px;line-height:1.1;color:var(--green)">{{ runBannerTitle }}</span>
+                <span style="font:500 12px/1.35 var(--font-body);color:var(--muted)">{{ runBannerSub }}</span>
               </div>
             </div>
 
-            <div style="padding:12px 22px 0">
-              <div style="display:flex;align-items:center;gap:11px;background:{{ runBannerBg }};border:2px solid var(--ink);border-radius:20px;padding:11px 14px">
-                <div style="width:34px;height:34px;border-radius:50%;background:var(--card);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;flex:none">
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"></path><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"></path><circle cx="7.5" cy="17.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg>
-                </div>
-                <div style="flex:1;min-width:0">
-                  <div style="font:800 12.5px/1.2 var(--font-body);color:var(--blush-ink)">{{ runBannerTitle }}</div>
-                  <div style="font:600 11.5px/1.35 var(--font-body);color:var(--blush-ink-2);margin-top:3px">{{ runBannerSub }}</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Wraps rather than scrolls. A row that runs off the edge looks
-                 like a clipped pill, not like something you can swipe: the last
-                 category sat half-cut against the screen edge and read as a
-                 layout fault. There are only a handful of these, so a second
-                 line costs nothing and hides nothing. -->
-            <div style="display:flex;flex-wrap:wrap;gap:9px;padding:14px 22px 18px">
-              <sc-for list="{{ chips }}" as="c" hint-placeholder-count="6">
-                <div onClick="{{ c.pick }}" style="flex:none;padding:8px 14px;border-radius:999px;border:2px solid var(--ink);font:700 12px/1 var(--font-body);white-space:nowrap;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};opacity:{{ c.op }}">{{ c.label }}</div>
-              </sc-for>
-            </div>
-
-            <!-- Hybrid / Indica / Sativa.
-                 A second, quieter row: the section chips above decide WHAT you
-                 are looking at and these only narrow it, so they are smaller
-                 and outlined rather than filled. Hidden entirely when the shelf
-                 has only one type on it, which is most of the time — a filter
-                 that cannot change anything is just another thing to read. -->
-            <div style="display:{{ typeChipsDisplay }};flex-wrap:wrap;gap:7px;padding:0 22px 16px">
+            <!-- hybrid / indica / sativa -->
+            <div style="display:{{ typeChipsDisplay }};gap:6px;padding:12px 16px 10px;flex-wrap:wrap">
               <sc-for list="{{ typeChips }}" as="k" hint-placeholder-count="4">
-                <div onClick="{{ k.pick }}" style="flex:none;padding:6px 12px;border-radius:999px;border:2px solid {{ k.bd }};font:700 10.5px/1 var(--font-body);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;cursor:pointer;background:{{ k.bg }};color:{{ k.fg }}">{{ k.label }}</div>
+                <div onClick="{{ k.pick }}" style="border:1.5px solid {{ k.bd }};border-radius:999px;padding:6px 11px;font:700 12px/1 var(--font-body);cursor:pointer;background:{{ k.bg }};color:{{ k.fg }};white-space:nowrap;display:flex;align-items:center;gap:5px">
+                  <span style="width:7px;height:7px;border-radius:50%;background:{{ k.dot }}"></span>{{ k.label }}
+                </div>
               </sc-for>
             </div>
 
-            <div style="display:{{ shutDisplay }};align-items:center;gap:12px;margin:14px 22px 0;padding:14px 16px;background:var(--blush);border:2px solid var(--rust);border-radius:22px">
-              <div style="flex:none;width:38px;height:38px;border-radius:50%;background:var(--card);border:2px solid var(--rust);display:flex;align-items:center;justify-content:center">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--rust)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
-              </div>
-              <div style="flex:1;min-width:0">
-                <div style="font:800 13.5px/1.25 var(--font-body);color:var(--blush-ink)">{{ shutTitle }}</div>
-                <div style="font:500 11.5px/1.4 var(--font-body);color:var(--rust);margin-top:3px">{{ shutBody }}</div>
-              </div>
-            </div>
-            <div style="display:{{ emptyMenuDisplay }};margin:18px 22px 0;padding:22px 20px;background:var(--card);border:2px dashed var(--faint);border-radius:24px;text-align:center"><div style="font-family:var(--font-display);font-size:19px;color:var(--ink)">{{ t.emptyMenuTitle }}</div><div style="font:500 12.5px/1.5 var(--font-body);color:var(--muted);margin-top:6px">{{ t.emptyMenuBody }}</div></div>
-            <sc-for list="{{ sections }}" as="s" hint-placeholder-count="4">
-              <div style="padding:0 22px 26px">
-                <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
-                  <div style="font-family:var(--font-display);font-size:23px;color:var(--ink);letter-spacing:-.01em">{{ s.title }}</div>
-                  <div style="flex:1;height:2px;background:var(--slab);opacity:.18"></div>
-                  <div style="font:700 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)">{{ s.sub }}</div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
-                  <sc-for list="{{ s.items }}" as="p" hint-placeholder-count="3">
-                    <div onClick="{{ p.open }}" style="display:flex;gap:14px;align-items:center;background:var(--card);border:2px solid var(--ink);border-radius:22px;padding:12px;box-shadow:3px 3px 0 var(--shadow-22);cursor:pointer" style-active="box-shadow:0 0 0 var(--shadow-22);transform:translate(3px,3px)">
-                      <!-- The strain, as the thing it comes in.
-                           A pastel disc with initials on it told you nothing
-                           you could not read in the line beside it. A jar
-                           filled to where the stock actually is can be read at
-                           arm's length, and it is the same glance that tells
-                           you the shop is nearly out. -->
-                      <div style="flex:none;width:62px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:78px">
-
-                        <sc-if value="{{ p.vJar }}" hint-placeholder-val="{{ true }}">
-                          <div style="width:34px;height:9px;border-radius:4px 4px 2px 2px;background:var(--lid);border:1.5px solid var(--ink);box-sizing:border-box"></div>
-                          <div style="width:23px;height:4px;background:var(--lid-2);border-left:1.5px solid var(--ink);border-right:1.5px solid var(--ink);box-sizing:border-box"></div>
-                          <div style="position:relative;width:52px;height:60px;border-radius:7px 7px 15px 15px;border:1.5px solid var(--ink);box-sizing:border-box;overflow:hidden;background:var(--glass)">
-                            <div style="position:absolute;left:-2px;right:-2px;bottom:-2px;height:{{ p.fillPct }};background:{{ p.stickerBg }};border-radius:46% 54% 5px 5px / 14px 12px 5px 5px;opacity:.9"></div>
-                            <div style="position:absolute;top:5px;left:6px;width:5px;height:54%;border-radius:999px;background:var(--shine)"></div>
-                            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:15px;letter-spacing:.04em;color:var(--vessel-ink)">{{ p.initials }}</div>
-                          </div>
-                        </sc-if>
-
-                        <sc-if value="{{ p.vMason }}" hint-placeholder-val="{{ false }}">
-                          <div style="width:37px;height:6px;border-radius:3px 3px 1px 1px;background:var(--lid);border:1.5px solid var(--ink);box-sizing:border-box"></div>
-                          <div style="width:41px;height:7px;border-radius:2px;background:var(--lid-2);border:1.5px solid var(--ink);box-sizing:border-box"></div>
-                          <div style="position:relative;width:54px;height:58px;border-radius:4px 4px 10px 10px;border:1.5px solid var(--ink);box-sizing:border-box;overflow:hidden;background:var(--glass)">
-                            <div style="position:absolute;left:-2px;right:-2px;bottom:-2px;height:{{ p.fillPct }};background:{{ p.stickerBg }};border-radius:44% 56% 4px 4px / 11px 9px 4px 4px;opacity:.88"></div>
-                            <div style="position:absolute;top:7px;left:0;right:0;height:1px;background:var(--veil-15)"></div>
-                            <div style="position:absolute;top:12px;left:0;right:0;height:1px;background:var(--veil-15)"></div>
-                            <div style="position:absolute;top:17px;left:6px;width:5px;height:42%;border-radius:999px;background:var(--shine)"></div>
-                            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:15px;letter-spacing:.04em;color:var(--vessel-ink)">{{ p.initials }}</div>
-                          </div>
-                        </sc-if>
-
-                        <sc-if value="{{ p.vPuck }}" hint-placeholder-val="{{ false }}">
-                          <div style="width:44px;height:10px;border-radius:4px 4px 2px 2px;background:var(--lid);border:1.5px solid var(--ink);box-sizing:border-box"></div>
-                          <div style="position:relative;width:47px;height:32px;border-radius:5px 5px 11px 11px;border:1.5px solid var(--ink);box-sizing:border-box;overflow:hidden;background:var(--glass)">
-                            <div style="position:absolute;left:-2px;right:-2px;bottom:-2px;height:{{ p.fillPct }};background:{{ p.stickerBg }};opacity:.9"></div>
-                            <div style="position:absolute;top:4px;left:5px;width:4px;height:44%;border-radius:999px;background:var(--shine)"></div>
-                            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:12px;color:var(--vessel-ink)">{{ p.initials }}</div>
-                          </div>
-                        </sc-if>
-
-                        <sc-if value="{{ p.vCart }}" hint-placeholder-val="{{ false }}">
-                          <div style="width:9px;height:11px;border-radius:3px 3px 1px 1px;background:var(--lid);border:1.5px solid var(--ink);box-sizing:border-box"></div>
-                          <div style="position:relative;width:21px;height:40px;border-radius:2px;border:1.5px solid var(--ink);box-sizing:border-box;overflow:hidden;background:var(--glass)">
-                            <div style="position:absolute;left:0;right:0;bottom:0;height:72%;background:{{ p.stickerBg }};opacity:.85"></div>
-                            <div style="position:absolute;top:3px;left:3px;width:3px;height:40%;border-radius:999px;background:var(--shine)"></div>
-                          </div>
-                          <div style="width:15px;height:7px;border-radius:0 0 2px 2px;background:var(--lid-2);border:1.5px solid var(--ink);box-sizing:border-box"></div>
-                        </sc-if>
-
-                        <sc-if value="{{ p.vTin }}" hint-placeholder-val="{{ false }}">
-                          <div style="width:44px;height:13px;border-radius:20px 20px 3px 3px;background:var(--lid);border:1.5px solid var(--ink);box-sizing:border-box"></div>
-                          <div style="position:relative;width:41px;height:26px;border-radius:2px 2px 5px 5px;border:1.5px solid var(--ink);box-sizing:border-box;overflow:hidden;background:var(--glass)">
-                            <div style="position:absolute;left:0;right:0;top:0;height:10px;background:{{ p.stickerBg }};opacity:.55"></div>
-                            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:11px;color:var(--vessel-ink)">{{ p.initials }}</div>
-                          </div>
-                        </sc-if>
-
-                        <!-- Countables get counted. A jar at 2g should look
-                             nearly empty, but nine carts should read as nine,
-                             not as three quarters of something. -->
-                        <div style="display:{{ p.pipsDisplay }};width:56px;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:5px">
-                          <sc-for list="{{ p.pips }}" as="pip" hint-placeholder-count="12">
-                            <div style="width:7px;height:7px;border-radius:50%;background:{{ pip.bg }};border:1.5px solid {{ pip.br }};box-sizing:border-box"></div>
-                          </sc-for>
-                        </div>
-                      </div>
-                      <div style="flex:1;min-width:0">
-                        <div style="font:700 15.5px/1.2 var(--font-body);color:var(--ink)">{{ p.name }}</div>
-                        <div style="font:500 12px/1.4 var(--font-body);color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.notes }}</div>
-                        <div style="display:flex;gap:6px;margin-top:7px;align-items:center">
-                          <span style="flex:none;white-space:nowrap;font:800 10px/1.2 var(--font-body);letter-spacing:.06em;padding:5px 8px;border-radius:999px;background:var(--green-pale);border:1.5px solid var(--green);color:var(--green-ink)">THC {{ p.thc }}</span>
-                          <span style="flex:none;white-space:nowrap;font:700 10.5px/1.2 var(--font-body);color:{{ p.stockFg }}">{{ p.stockLabel }}</span>
-                        </div>
-                      </div>
-                      <div style="flex:none;text-align:right">
-                        <div style="font:600 9.5px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2)">{{ t.from }}</div>
-                        <div style="font-family:var(--font-display);font-size:22px;line-height:1.1;color:var(--rust)">{{ p.fromPrice }}</div>
-                      </div>
+            <!-- the shelf -->
+            <div style="padding:2px 16px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start">
+              <sc-for list="{{ menuList }}" as="p" hint-placeholder-count="4">
+                <div onClick="{{ p.open }}" style="border-radius:20px;background:url(isla-wood.svg) center/cover;padding:11px;display:flex;flex-direction:column;gap:7px;box-shadow:inset 0 0 0 1px var(--dot-18);cursor:pointer;opacity:{{ p.op }}">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+                    <span style="background:var(--paper);color:var(--chip-ink);font:700 11px/1 var(--font-body);padding:4px 9px;border-radius:999px;display:flex;align-items:center;gap:5px;min-width:0">
+                      <span style="width:7px;height:7px;border-radius:50%;background:{{ p.color }};flex:none"></span>{{ p.typeL }}
+                    </span>
+                    <div onClick="{{ p.toggleFav }}" style="width:30px;height:30px;border-radius:50%;background:var(--slot);color:var(--paper);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" style-active="transform:scale(.9)">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="{{ p.favFill }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
                     </div>
-                  </sc-for>
+                  </div>
+                  <div style="display:flex;align-items:baseline;gap:6px">
+                    <span style="font-family:var(--font-display);font-size:32px;line-height:.9;color:var(--paper);text-shadow:0 2px 0 var(--shadow-25)">{{ p.thc }}</span>
+                    <span style="font:700 10px/1 var(--font-body);color:var(--blush-3);letter-spacing:.08em">THC</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:2px;min-height:34px">
+                    <span style="font:700 14px/1.15 var(--font-body);color:var(--card)">{{ p.name }}</span>
+                    <span style="font-family:var(--font-hand);font-size:14px;line-height:1;color:{{ p.tagColor }}">{{ p.tag }}</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                    <sc-for list="{{ p.weights }}" as="w" hint-placeholder-count="4">
+                      <span style="background:var(--slot-deep);border-radius:8px;padding:4px 6px;display:flex;justify-content:space-between;gap:4px;font:500 11px/1.3 var(--font-body);color:var(--paper)">
+                        <span style="opacity:.85">{{ w.label }}</span><b style="color:var(--green-glow)">{{ w.price }}</b>
+                      </span>
+                    </sc-for>
+                  </div>
                 </div>
-              </div>
-            </sc-for>
-
-            <div style="padding:0 22px 8px">
-              <div style="border:2px dashed var(--faint);border-radius:22px;padding:14px 16px;text-align:center">
-                <div style="font:700 12.5px/1.3 var(--font-body);color:var(--muted)">{{ t.notStockedTitle }}</div>
-                <div style="font:500 12px/1.4 var(--font-body);color:var(--muted-2);margin-top:3px">{{ t.notStockedSub }}</div>
-              </div>
+              </sc-for>
+              <div style="display:{{ menuEmptyDisplay }};grid-column:1/3;padding:30px 0;text-align:center;font-family:var(--font-hand);font-size:20px;line-height:1.2;color:var(--green-3)">{{ t.none }}</div>
             </div>
           </div>
         </sc-if>
@@ -2350,7 +2279,7 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = "2026-10-31.2200";
+const BUILD = "2026-11-01.0130";
 
 
 // The Mafupuntos ladder, and the ONE thing in here that has to agree with the
@@ -2448,6 +2377,7 @@ class Component extends DCLogic {
     shopOpen: true,
     opensAt: '',
     profile: null,
+    favs: [],
     pts: 0,
     ptsGoal: 0,
     ptsToGo: 0,
@@ -2676,6 +2606,11 @@ class Component extends DCLogic {
         this.setState({ role: 'owner', screen: 'dash' });
       });
     }
+    // Their hearts come down with the menu, not when they happen to open
+    // their profile — the menu is where the hearts are drawn.
+    this.api('codes', 'me').then(res => {
+      if (res && res.ok && res.profile) this.setState({ favs: res.profile.favs || [] });
+    });
     return this.loadMenu().then(() => this.setState({ role: 'client', clientName: name, screen: 'home' }));
   }
 
@@ -2771,6 +2706,7 @@ class Component extends DCLogic {
           // own: they are read off the same order list the server already has
           // open, so asking separately would cost a second round trip for a
           // number that is never out of step with this one.
+          favs: (res.profile && res.profile.favs) || [],
           pts: res.points || 0,
           ptsGoal: res.goal || 0,
           ptsToGo: res.toGo || 0,
@@ -2783,6 +2719,24 @@ class Component extends DCLogic {
       if (res && res.ok) this.setState({ mine: res.orders || [] });
     });
   }
+  // Tapping the heart.
+  //
+  // Painted first and saved second: the heart is on a card in a grid the
+  // customer is scrolling, and a tap that waits on a round trip before it
+  // fills reads as a tap that missed. If the save fails it goes back, because
+  // a heart that says saved and did not is worse than one that refused.
+  toggleFav(pid) {
+    const had = (this.state.favs || []).includes(pid);
+    const next = had ? this.state.favs.filter(x => x !== pid) : [pid].concat(this.state.favs || []);
+    this.setState({ favs: next });
+    buzz(8);
+    this.api('codes', 'fav', { pid, on: !had }).then(res => {
+      if (this.expired(res)) return;
+      if (!res || !res.ok) { this.setState({ favs: this.state.favs.filter(x => x !== pid).concat(had ? [pid] : []) }); return; }
+      this.setState({ favs: res.favs || [] });
+    });
+  }
+
   editPf(fn) {
     const d = { ...(this.state.pfDraft || this.state.profile || { name: '', phone: '', addr: '' }) };
     fn(d);
@@ -3389,6 +3343,12 @@ class Component extends DCLogic {
       const n = stockOf(id), u = unitOf(id);
       return n === 0 ? t.soldOut : n <= lowAt(id) ? t.onlyLeft(fmtQty(n, u)) : t.inStock(fmtQty(n, u));
     };
+    // A dot per strain type, so the chip and the card agree at a glance.
+    const typeDot = (ty) => ({
+      Hybrid: 'var(--green-glow)', Indica: 'var(--rust-2)',
+      Sativa: 'var(--green-3)', Cart: 'var(--blush-2)'
+    })[ty] || 'var(--faint)';
+
     const stockFg = id => { const n = stockOf(id); return n === 0 ? 'var(--rust)' : n <= lowAt(id) ? 'var(--rust-3)' : 'var(--green)'; };
 
     // How full the jar is drawn.
@@ -3417,6 +3377,11 @@ class Component extends DCLogic {
         br: i < on ? 'var(--green-3)' : 'var(--faint)'
       }));
     };
+
+    // What the grid is actually showing: the chosen shelf, narrowed by type.
+    const menuShown = cat.filter(p =>
+      (s.filter === 'all' || p.sec === s.filter) &&
+      (s.typeFilter === 'all' || p.type === s.typeFilter));
 
     const secs = SECS.filter(n => cat.some(p => p.sec === n));
     // Every entry in SECS needs a label here. Adding Edibles to the list
@@ -3762,6 +3727,195 @@ class Component extends DCLogic {
           stBorder: o.cancelled ? 'var(--faint)' : (o.step || 0) >= 3 ? 'var(--green)' : 'var(--rust)'
         };
       }),
+      isExpired: s.screen === 'expired',
+      isDash: s.screen === 'dash', isQueue: s.screen === 'queue', isInv: s.screen === 'inv', isCodes: s.screen === 'codes',
+      isOwner: ['dash', 'queue', 'inv', 'codes', 'settings'].indexOf(s.screen) > -1,
+
+      fatal: s.fatal || t.offline,
+      retry: () => { this.setState({ screen: 'boot', fatal: '' }); this.refreshStatus(); },
+
+      // ── lock ──────────────────────────────────────────────────────────────
+      goSignup: () => this.set('screen', 'signup'),
+      toLock: () => this.setState({ screen: 'lock', codeErr: '' }),
+      pickClient: () => this.setState({ pending: 'client', code: '', codeErr: '' }),
+      pickOwner: () => this.setState({ pending: 'owner', code: '', codeErr: '' }),
+      clientBg: s.pending === 'owner' ? 'transparent' : 'var(--rust-2)',
+      clientFg: s.pending === 'owner' ? 'var(--green-glow)' : 'var(--on-solid)',
+      ownerBg: s.pending === 'owner' ? 'var(--rust-2)' : 'transparent',
+      ownerFg: s.pending === 'owner' ? 'var(--on-solid)' : 'var(--green-glow)',
+      lockHint: s.backend === 'setup'
+        ? (s.pending === 'owner' ? t.hintSetup : t.hintSetupClient)
+        : (s.pending === 'owner' ? t.hintOwner(s.ownerPinLen) : t.hintClient),
+      // The only badge left is a real one: this shop has not been set up yet.
+      modeBadge: s.backend === 'setup' ? t.badgeSetup : '',
+      modeBadgeDisplay: s.backend === 'setup' ? 'block' : 'none',
+      modeBadgeBg: 'var(--rust-2)',
+      codeErr: s.codeErr || '',
+      codeErrDisplay: s.codeErr ? 'block' : 'none',
+      // The slots carved into the sign.
+      //
+      // The code stays MASKED. The mockup prints the digits across the plank,
+      // and it looks lovely — but this is a door code typed on a street with
+      // somebody stood behind you, so the slot fills and does not announce.
+      dots: Array.from({ length: this.pinLength() }, (_, i) => ({
+        mark: i < s.code.length ? '\u25cf' : '',
+        // Only the newest slot animates. Keying the animation off the code
+        // length means it replays on every press rather than once per mount.
+        scale: i === s.code.length - 1 ? 'mfDot .22s ease' : 'none'
+      })),
+      // Printed on the sign: what you are signing in as.
+      plankTitle: s.pending === 'owner' ? t.tabOwner : t.tabClient,
+      keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].map(k => ({
+        label: k,
+        bg: k === '' ? 'transparent' : k === '\u232b' ? 'var(--veil-08)' : 'var(--paper)',
+        fg: k === '' ? 'transparent' : k === '\u232b' ? 'var(--paper)' : 'var(--ink)',
+        cursor: k === '' ? 'default' : 'pointer',
+        // A digit gets a short tick; backspace a slightly longer one, so
+        // deleting feels different from entering without having to look.
+        press: k === '' || s.checking ? () => {}
+          : k === '⌫' ? () => { buzz(14); this.set('code', s.code.slice(0, -1)); }
+          : () => { buzz(8); this.press(k); }
+      })),
+
+      // ── owner first run ───────────────────────────────────────────────────
+      suStage: s.setup.stage,
+      suIsPin: s.setup.stage === 'pin',
+      suIsConfirm: s.setup.stage === 'confirm',
+      suShopName: s.setup.shopName,
+      setSuShopName: e => this.setSetup('shopName', e.target.value),
+      suSetupCode: s.setup.setupCode,
+      setSuSetupCode: e => this.setSetup('setupCode', e.target.value),
+      suNeedsCode: s.needsSetupCode,
+      suCodeDisplay: s.needsSetupCode ? 'block' : 'none',
+      suPin2: s.setup.pin2,
+      setSuPin2: e => this.setSetup('pin2', e.target.value.replace(/\D/g, '').slice(0, s.ownerPinLen)),
+      suPinLen: String(s.ownerPinLen),
+      suErr: s.setup.err,
+      suErrDisplay: s.setup.err ? 'block' : 'none',
+      suReady: s.setup.pin2.length === s.ownerPinLen && !!s.setup.shopName.trim() && !s.busy,
+      suBg: s.setup.pin2.length === s.ownerPinLen && s.setup.shopName.trim() && !s.busy ? 'var(--green)' : 'var(--faint)',
+      submitSetup: () => this.submitSetup(),
+      suBack: () => this.setState({ screen: 'lock', setup: Object.assign({}, s.setup, { pin: '', pin2: '', stage: 'pin', err: '' }) }),
+
+      // ── signup ────────────────────────────────────────────────────────────
+      fName: s.form.name, fPhone: s.form.phone, fAddr: s.form.addr, fBday: s.form.bday,
+      setName: e => this.field('name', e.target.value),
+      setPhone: e => this.field('phone', e.target.value),
+      setAddr: e => this.field('addr', e.target.value),
+      setBday: e => {
+        // Insert the slashes for them; typing eight digits on a phone keypad is
+        // what people actually do.
+        const d = e.target.value.replace(/\D/g, '').slice(0, 8);
+        const out = d.length > 4 ? d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4)
+          : d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2)
+          : d;
+        this.field('bday', out);
+      },
+      ageWarn: (() => { const a = this.ageFrom(s.form.bday); return a !== null && a < 21 ? t.tooYoung : (s.signupErr || ''); })(),
+      ageWarnDisplay: (() => { const a = this.ageFrom(s.form.bday); return (a !== null && a < 21) || s.signupErr ? 'block' : 'none'; })(),
+      payPicks: this.payments().map(p => ({
+        label: L === 'es' && p.labelEs ? p.labelEs : p.label,
+        bg: s.form.pay === p.id ? 'var(--rust-2)' : 'var(--card)',
+        fg: s.form.pay === p.id ? 'var(--on-dark)' : 'var(--ink)',
+        pick: () => this.field('pay', p.id)
+      })),
+      signupMissing: (() => {
+        const f = s.form, a = this.ageFrom(f.bday), miss = [];
+        if (!f.name.trim()) miss.push(t.fName);
+        if (!f.phone.trim()) miss.push(t.fPhone);
+        if (!f.addr.trim()) miss.push(t.fAddr);
+        if (a === null) miss.push(t.fBday);
+        return miss.length ? t.stillNeed + miss.join(', ') : '';
+      })(),
+      signupMissingDisplay: this.formReady() ? 'none' : 'block',
+      signupReady: this.formReady() && !s.busy,
+      signupBg: this.formReady() && !s.busy ? 'var(--green)' : 'var(--faint)',
+      signupOp: this.formReady() && !s.busy ? '1' : '.65',
+      submitSignup: () => this.submitSignup(),
+      rules: t.rules(cfg, this.fmtTime.bind(this)),
+
+      // ── owner: new customer requests ──────────────────────────────────────
+      newReqs: s.signups.map(r => ({
+        name: r.name, phone: r.phone, addr: r.addr,
+        when: stamp(r.at),
+        meta: t.yearsOld(r.age) + ' · ' + t.idOk + (r.pay ? ' · ' + r.pay : ''),
+        initials: this.initials(r.name),
+        approve: () => this.approveReq(r.id),
+        ignore: () => this.ignoreReq(r.id)
+      })),
+      hasReqs: s.signups.length > 0,
+      reqsDisplay: s.signups.length ? 'block' : 'none',
+
+      // ── menu ──────────────────────────────────────────────────────────────
+      openTillLine: delOpen ? t.openTill(this.fmtTime(cfg.run.end)) : t.closedToday,
+      runBannerBg: delOpen ? 'var(--green-pale)' : 'var(--blush)',
+      runBannerTitle: !cfg.run.on ? t.runOff : this.runFull() ? t.deliveryFull : t.deliveryOn(win.label),
+      runBannerSub: !cfg.run.on || this.runFull() || !allowed.length ? t.pickupOnlyToday : zonesLabel,
+
+      emptyMenu: cat.length === 0,
+      emptyMenuDisplay: cat.length === 0 ? 'block' : 'none',
+      menuDisplay: cat.length === 0 ? 'none' : 'block',
+
+      // ── the menu, as the design lays it out ───────────────────────────
+      //
+      // Sections became tabs on the poster and the grid shows one at a time,
+      // so "Everything" leads and the rest follow in the order he stocks them.
+      cats: [{ id: 'all', label: L === 'es' ? 'TODO' : 'ALL' }]
+        .concat(secs.map(n => ({ id: n, label: (secTitle[n] || n).toUpperCase() })))
+        .map(c => ({
+          label: c.label,
+          fg: s.filter === c.id ? 'var(--ink)' : 'var(--on-takings)',
+          line: s.filter === c.id ? 'var(--ink)' : 'transparent',
+          on: () => this.setState({ filter: c.id, typeFilter: 'all' })
+        })),
+
+      // Hybrid / Indica / Sativa, built from what is actually on the shelf
+      // rather than the types the app knows about — a filter that can only
+      // ever return nothing is one more thing to read for no reason.
+      typeChips: (() => {
+        const here = [...new Set(cat.filter(p => s.filter === 'all' || p.sec === s.filter)
+          .map(p => p.type).filter(Boolean))];
+        if (here.length < 2) return [];
+        return [{ id: 'all', label: t.typeAll }].concat(here.map(n => ({ id: n, label: n })))
+          .map(k => {
+            const on = s.typeFilter === k.id;
+            return {
+              label: k.label,
+              bg: on ? 'var(--paper)' : 'transparent',
+              fg: on ? 'var(--ink)' : 'var(--green-pale)',
+              bd: on ? 'var(--paper)' : 'var(--faint)',
+              dot: typeDot(k.id),
+              pick: () => this.set('typeFilter', k.id)
+            };
+          });
+      })(),
+      typeChipsDisplay: (() => {
+        const here = new Set(cat.filter(p => s.filter === 'all' || p.sec === s.filter)
+          .map(p => p.type).filter(Boolean));
+        return here.size > 1 ? 'flex' : 'none';
+      })(),
+
+      // One flat grid rather than grouped lists, because the tabs above have
+      // already answered "which shelf".
+      menuList: menuShown.map(p => ({
+        name: p.name,
+        thc: p.thc || '—',
+        typeL: p.type || '',
+        color: typeDot(p.type),
+        // Sold out stays on the shelf, faded. Taking it off looks like he
+        // never had it; fading it says it went.
+        op: (p.stock || 0) <= 0 ? '.5' : '1',
+        tag: stockNote(p.id),
+        tagColor: stockFg(p.id),
+        // Every price on the card. "From $25" made you open a strain to find
+        // out what an ounce costs, which is the one number people came for.
+        weights: (p.tiers || []).slice(0, 4).map(w => ({ label: w.label, price: cash(w.price) })),
+        favFill: (s.favs || []).includes(p.id) ? 'currentColor' : 'none',
+        toggleFav: e => { if (e && e.stopPropagation) e.stopPropagation(); this.toggleFav(p.id); },
+        open: () => this.openProduct(p.id)
+      })),
+      menuEmptyDisplay: menuShown.length ? 'none' : 'block',
+
       isExpired: s.screen === 'expired',
       isDash: s.screen === 'dash', isQueue: s.screen === 'queue', isInv: s.screen === 'inv', isCodes: s.screen === 'codes',
       isOwner: ['dash', 'queue', 'inv', 'codes', 'settings'].indexOf(s.screen) > -1,
