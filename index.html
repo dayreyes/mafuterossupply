@@ -93,6 +93,12 @@
   --font-display: 'Bowlby One', 'Caprasimo', serif;
   --font-body: 'Bricolage Grotesque', system-ui, sans-serif;
   --font-hand: 'Caveat Brush', cursive;
+  /* the door: rope, the wood sign's slots, and the haze over the jungle */
+  --rope: #3a2a1c;            --slot: rgba(19,38,27,.55);
+  --plank-fg: #fff8ea;
+  --jungle-haze: rgba(19,38,27,.15);
+  --jungle-mid: rgba(19,38,27,.35);
+  --dot-35: rgba(19,38,27,.35);
   /* the vessels: glass, its lid, and the shine down one side */
   --glass: rgba(19,38,27,.05);   --shine: rgba(255,255,255,.5);
   --lid: #a9b58c;                --lid-2: #7a6d62;
@@ -165,6 +171,11 @@
   --font-display: 'Anton', 'Bowlby One', sans-serif;
   --font-body: 'IBM Plex Mono', ui-monospace, monospace;
   --font-hand: 'Caveat', cursive;
+  --rope: #3a2a1c;            --slot: rgba(12,10,13,.6);
+  --plank-fg: #efe7d8;
+  --jungle-haze: rgba(12,10,13,.2);
+  --jungle-mid: rgba(12,10,13,.45);
+  --dot-35: rgba(12,10,13,.35);
   --glass: rgba(239,231,216,.05); --shine: rgba(239,231,216,.3);
   --lid: #7a6e85;                --lid-2: #4a4252;
   --vessel-ink: rgba(239,231,216,.42);
@@ -252,34 +263,60 @@ input,textarea,select{font-size:16px}
         </sc-if>
 
         <sc-if value="{{ isLock }}" hint-placeholder-val="{{ true }}">
-          <div style="position:relative;min-height:100dvh;background:var(--slab-2);background-image:radial-gradient(circle at 50% 22%,var(--green) 0%,var(--slab-2) 62%),radial-gradient(rgba(0,0,0,.3) 1px,transparent 1.4px);background-size:auto,9px 9px;padding:120px 34px 60px;display:flex;flex-direction:column;align-items:center;gap:26px;box-sizing:border-box">
-            <div style="position:absolute;top:64px;left:-34px;width:150px;height:150px;border-radius:50%;background:var(--rust-2);opacity:.25"></div>
-            <div style="position:absolute;bottom:120px;right:-40px;width:180px;height:180px;border-radius:50%;background:var(--green-2);opacity:.2"></div>
-            <div style="position:relative;text-align:center">
-              <div style="font-family:var(--font-display);font-size:40px;line-height:.95;color:var(--on-dark);letter-spacing:-.02em">Mafutero&rsquo;s</div>
-              <div style="font:700 12px/1 var(--font-body);letter-spacing:.44em;text-transform:uppercase;color:var(--green-pale-2);margin-top:10px">Supply</div>
+          <!-- The door.
+               Jungle behind, a wooden sign hanging off two ropes, and the
+               keypad underneath it. The sign is the thing: it carries the
+               wordmark, what you are signing in AS, and the code as you type
+               it — so the one object you are looking at is the one you are
+               filling in. -->
+          <div style="position:relative;min-height:100dvh;background:var(--slab);display:flex;flex-direction:column;box-sizing:border-box;overflow:hidden">
+            <div style="position:absolute;inset:0 0 auto 0;height:min(46vh,420px);background:url(isla-jungle-right.webp) center 20%/cover"></div>
+            <div style="position:absolute;inset:0 0 auto 0;height:min(46vh,420px);background:linear-gradient(180deg,var(--jungle-haze) 0%,var(--jungle-mid) 55%,var(--slab) 100%)"></div>
+
+            <!-- the ropes -->
+            <div style="position:relative;display:flex;justify-content:space-between;padding:64px 92px 0;height:118px;box-sizing:border-box">
+              <div style="width:3px;height:100%;background:var(--rope)"></div>
+              <div style="width:3px;height:100%;background:var(--rope)"></div>
             </div>
-            <div style="position:relative;display:{{ modeBadgeDisplay }};background:{{ modeBadgeBg }};border:2px solid var(--ink);border-radius:999px;padding:7px 14px;font:800 10.5px/1.3 var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--on-solid);text-align:center;max-width:280px">{{ modeBadge }}</div>
-            <div style="position:relative;display:flex;gap:6px;background:var(--scrim-5);border:2px solid var(--on-dark);padding:5px;border-radius:999px">
-              <div onClick="{{ pickClient }}" style="padding:10px 18px;border-radius:999px;font:700 12.5px/1 var(--font-body);cursor:pointer;color:{{ clientFg }};background:{{ clientBg }};transition:background .2s ease">{{ t.tabClient }}</div>
-              <div onClick="{{ pickOwner }}" style="padding:10px 18px;border-radius:999px;font:700 12.5px/1 var(--font-body);cursor:pointer;color:{{ ownerFg }};background:{{ ownerBg }};transition:background .2s ease">{{ t.tabOwner }}</div>
+
+            <!-- the sign -->
+            <div style="position:relative;margin:-40px 26px 0;transform:rotate(-2deg);border-radius:14px;background:url(isla-wood.svg) center/cover;padding:18px 18px 20px;box-shadow:0 14px 30px var(--shadow-4),inset 0 0 0 2px var(--dot-18);display:flex;flex-direction:column;align-items:center;gap:10px">
+              <div style="position:absolute;top:8px;left:58px;width:9px;height:9px;border-radius:50%;background:var(--rope)"></div>
+              <div style="position:absolute;top:8px;right:58px;width:9px;height:9px;border-radius:50%;background:var(--rope)"></div>
+              <div style="display:flex;align-items:flex-end;gap:5px;margin-top:6px">
+                <span style="font-family:var(--font-display);font-size:28px;line-height:.9;color:var(--card);text-shadow:0 2px 0 var(--shadow-3)">MAFUTERO&rsquo;S</span>
+                <span style="font-family:var(--font-hand);font-size:20px;line-height:1;color:var(--ink);transform:rotate(-6deg)">supply</span>
+              </div>
+              <div style="width:100%;height:2px;background:var(--dot-35)"></div>
+              <span style="font-family:var(--font-display);font-size:15px;line-height:1;letter-spacing:.06em;color:var(--plank-fg)">{{ plankTitle }}</span>
+              <div style="display:flex;gap:10px">
+                <sc-for list="{{ dots }}" as="d" hint-placeholder-count="4">
+                  <div style="width:42px;height:50px;border-radius:10px;background:var(--slot);display:flex;align-items:center;justify-content:center;font-family:var(--font-hand);font-size:30px;line-height:1;color:var(--paper);animation:{{ d.scale }}">{{ d.mark }}</div>
+                </sc-for>
+              </div>
             </div>
-            <div style="position:relative;font:600 13px/1.4 var(--font-body);color:var(--green-glow);text-align:center;max-width:250px">{{ lockHint }}</div>
-            <div style="position:relative;display:flex;gap:14px">
-              <sc-for list="{{ dots }}" as="d" hint-placeholder-count="4">
-                <div style="width:16px;height:16px;border-radius:50%;border:2px solid {{ d.ring }};background:{{ d.fill }};animation:{{ d.scale }}"></div>
-              </sc-for>
+
+            <!-- who you are signing in as -->
+            <div style="position:relative;margin-top:18px;display:flex;justify-content:center">
+              <div style="display:flex;gap:6px;background:var(--scrim-5);border:2px solid var(--on-dark);padding:5px;border-radius:999px">
+                <div onClick="{{ pickClient }}" style="padding:9px 17px;border-radius:999px;font:700 12.5px/1 var(--font-body);cursor:pointer;color:{{ clientFg }};background:{{ clientBg }};transition:background .2s ease">{{ t.tabClient }}</div>
+                <div onClick="{{ pickOwner }}" style="padding:9px 17px;border-radius:999px;font:700 12.5px/1 var(--font-body);cursor:pointer;color:{{ ownerFg }};background:{{ ownerBg }};transition:background .2s ease">{{ t.tabOwner }}</div>
+              </div>
             </div>
-            <div style="position:relative;display:grid;grid-template-columns:repeat(3,72px);gap:14px;justify-content:center;margin-top:4px">
+            <div style="position:relative;display:{{ modeBadgeDisplay }};margin:12px auto 0;background:{{ modeBadgeBg }};border:2px solid var(--ink);border-radius:999px;padding:7px 14px;font:800 10.5px/1.3 var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--on-solid);text-align:center;max-width:280px">{{ modeBadge }}</div>
+
+            <!-- the keypad -->
+            <div style="position:relative;margin-top:auto;padding:14px 34px 6px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px 18px;justify-items:center">
               <sc-for list="{{ keys }}" as="k" hint-placeholder-count="12">
-                <div onClick="{{ k.press }}" style="height:72px;border-radius:50%;border:2px solid {{ k.border }};background:{{ k.bg }};color:var(--on-solid);font-family:var(--font-display);font-size:26px;display:flex;align-items:center;justify-content:center;cursor:{{ k.cursor }};user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .06s ease,background .12s ease" style-hover="background:{{ k.hoverBg }}" style-active="background:{{ k.pressBg }};transform:scale(.9);border-color:var(--blush-2)">{{ k.label }}</div>
+                <div onClick="{{ k.press }}" style="width:64px;height:64px;border-radius:50%;background:{{ k.bg }};color:{{ k.fg }};font:600 26px/1 var(--font-body);display:flex;align-items:center;justify-content:center;cursor:{{ k.cursor }};user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .06s ease,background .12s ease" style-active="transform:scale(.94)">{{ k.label }}</div>
               </sc-for>
             </div>
-            <div style="position:relative;display:{{ codeErrDisplay }};padding:8px 14px;border-radius:999px;background:var(--danger);border:2px solid var(--ink);font:700 12px/1.3 var(--font-body);color:var(--blush-3);text-align:center;max-width:270px">{{ codeErr }}</div>
-            <div style="position:relative;margin-top:4px;font:500 11.5px/1.5 var(--font-body);color:var(--green-3);text-align:center;max-width:270px">{{ t.codeFoot }}</div>
-            <div style="position:relative;display:flex;gap:9px;flex-wrap:wrap;justify-content:center">
-              <div onClick="{{ toLang }}" style="padding:8px 14px;border-radius:999px;border:2px solid var(--veil-4);font:700 11px/1 var(--font-body);color:var(--green-glow);cursor:pointer" style-hover="background:var(--veil-12)">{{ t.switchLang }}</div>
-              <div onClick="{{ goSignup }}" style="padding:8px 14px;border-radius:999px;border:2px solid var(--blush-2);background:var(--glow-35);font:700 11px/1 var(--font-body);color:var(--blush);cursor:pointer" style-hover="background:var(--glow-6)">{{ t.newHere }}</div>
+
+            <div style="position:relative;display:{{ codeErrDisplay }};margin:0 auto;padding:6px 14px;font-family:var(--font-hand);font-size:18px;line-height:1.2;color:var(--rust-4);text-align:center;max-width:280px">{{ codeErr }}</div>
+
+            <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:6px 24px 22px;font:500 13px/1.45 var(--font-body);color:var(--green-pale);text-align:center">
+              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">{{ t.noCode }} <span onClick="{{ goSignup }}" style="font-weight:700;color:var(--green-glow);cursor:pointer">{{ t.ask }}</span></div>
+              <div onClick="{{ toLang }}" style="font-size:12px;color:var(--green-3);cursor:pointer;text-decoration:underline">{{ t.switchLang }}</div>
             </div>
           </div>
         </sc-if>
@@ -1858,6 +1895,7 @@ const COPY = {
     pfOrders: 'Tus órdenes', pfOrdersEmpty: 'Todavía no has hecho ninguna orden.',
     typeAll: 'Todas',
     earnPts: n => 'Esta orden te da ' + n + ' Mafupuntos.',
+    noCode: '¿No tienes código?', ask: 'Pídelo aquí',
     ptsTitle: 'Mafupuntos', ptsRule: '1 Mafupunto por cada $1 que gastas.',
     ptsSoon: 'Premios pronto',
     ptsHistory: 'Cómo los ganaste',
@@ -2110,6 +2148,7 @@ const COPY = {
     pfOrders: 'Your orders', pfOrdersEmpty: 'You have not ordered yet.',
     typeAll: 'All',
     earnPts: n => 'This order earns you ' + n + ' Mafupuntos.',
+    noCode: 'No code?', ask: 'Ask for one',
     ptsTitle: 'Mafupuntos', ptsRule: '1 Mafupunto for every $1 you spend.',
     ptsSoon: 'Rewards coming soon',
     ptsHistory: 'How you earned them',
@@ -3748,20 +3787,24 @@ class Component extends DCLogic {
       modeBadgeBg: 'var(--rust-2)',
       codeErr: s.codeErr || '',
       codeErrDisplay: s.codeErr ? 'block' : 'none',
+      // The slots carved into the sign.
+      //
+      // The code stays MASKED. The mockup prints the digits across the plank,
+      // and it looks lovely — but this is a door code typed on a street with
+      // somebody stood behind you, so the slot fills and does not announce.
       dots: Array.from({ length: this.pinLength() }, (_, i) => ({
-        fill: i < s.code.length ? 'var(--rust-2)' : 'transparent',
-        // Only the newest dot animates. Keying the animation off the code
+        mark: i < s.code.length ? '\u25cf' : '',
+        // Only the newest slot animates. Keying the animation off the code
         // length means it replays on every press rather than once per mount.
-        scale: i === s.code.length - 1 ? 'mfDot .22s ease' : 'none',
-        ring: i === s.code.length - 1 ? 'var(--blush-2)' : 'var(--on-dark)'
+        scale: i === s.code.length - 1 ? 'mfDot .22s ease' : 'none'
       })),
+      // Printed on the sign: what you are signing in as.
+      plankTitle: s.pending === 'owner' ? t.tabOwner : t.tabClient,
       keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].map(k => ({
         label: k,
-        border: k === '' ? 'transparent' : 'var(--on-dark)',
-        bg: k === '' ? 'transparent' : 'var(--veil-08)',
+        bg: k === '' ? 'transparent' : k === '\u232b' ? 'var(--veil-08)' : 'var(--paper)',
+        fg: k === '' ? 'transparent' : k === '\u232b' ? 'var(--paper)' : 'var(--ink)',
         cursor: k === '' ? 'default' : 'pointer',
-        hoverBg: k === '' ? 'transparent' : 'var(--veil-2)',
-        pressBg: k === '' ? 'transparent' : 'var(--rust-2)',
         // A digit gets a short tick; backspace a slightly longer one, so
         // deleting feels different from entering without having to look.
         press: k === '' || s.checking ? () => {}
