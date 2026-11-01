@@ -1202,11 +1202,14 @@ input,textarea,select{font-size:16px}
                   </div>
                 </div>
                                 <sc-for list="{{ orders }}" as="o" hint-placeholder-count="3">
-                  <div style="background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:15px 16px;box-shadow:3px 3px 0 var(--shadow-2)">
+                  <div style="background:var(--card);border:2px solid {{ o.cardEdge }};border-radius:24px;padding:15px 16px;box-shadow:3px 3px 0 var(--shadow-2)">
                     <div style="display:flex;align-items:center;gap:11px">
                       <div style="width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:var(--green-ink);flex:none">{{ o.initials }}</div>
                       <div style="flex:1;min-width:0">
-                        <div style="font:800 15px/1.15 var(--font-body);color:var(--ink)">{{ o.client }}</div>
+                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+                          <span style="font:800 15px/1.15 var(--font-body);color:var(--ink)">{{ o.client }}</span>
+                          <span style="display:{{ o.tierDisplay }};align-items:center;font-family:var(--font-display);font-size:9.5px;letter-spacing:.04em;padding:3px 7px;border-radius:999px;background:{{ o.tierBg }};color:var(--ink)">{{ o.tier }}</span>
+                        </div>
                         <div style="font:500 12px/1.4 var(--font-body);color:var(--muted);margin-top:2px">{{ o.no }} &middot; {{ o.when }}</div>
                       </div>
                       <div style="padding:6px 11px;border-radius:999px;border:2px solid var(--ink);font:800 10.5px/1 var(--font-body);letter-spacing:.06em;text-transform:uppercase;background:{{ o.statusBg }};color:{{ o.statusFg }};flex:none;white-space:nowrap">{{ o.status }}</div>
@@ -1571,6 +1574,24 @@ input,textarea,select{font-size:16px}
                    The owner picks the kinds; each customer opts in separately.
                    Both have to say yes, so neither can be volunteered by the
                    other. He writes nothing — that is the whole point. -->
+              <!-- Promos. A decision he makes on a Friday and unmakes on a
+                   Monday, so it saves on the tap rather than waiting for the
+                   Save button at the bottom of a long screen. Off by default:
+                   nothing starts giving stock away on its own. -->
+              <div style="margin-top:16px;background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:16px">
+                <div style="font-family:var(--font-display);font-size:19px;color:var(--ink)">{{ t.stPromoTitle }}</div>
+                <div style="font:500 11.5px/1.45 var(--font-body);color:var(--muted);margin-top:7px">{{ t.stPromoSub }}</div>
+                <div style="display:flex;align-items:center;gap:12px;margin-top:13px;background:var(--paper);border:2px solid var(--ink);border-radius:18px;padding:12px 13px">
+                  <div style="flex:1;min-width:0">
+                    <div style="font:800 13px/1.2 var(--font-body);color:var(--ink)">{{ t.promoBakerTitle }}</div>
+                    <div style="font:500 11.5px/1.4 var(--font-body);color:var(--muted);margin-top:3px">{{ t.promoBakerSub }}</div>
+                  </div>
+                  <div onClick="{{ toggleBaker }}" style="flex:none;width:62px;height:32px;border-radius:999px;border:2px solid var(--ink);background:{{ bakerBg }};display:flex;align-items:center;justify-content:{{ bakerJustify }};padding:3px;cursor:pointer;box-sizing:border-box">
+                    <div style="width:24px;height:24px;border-radius:50%;background:var(--card);border:2px solid var(--ink);box-sizing:border-box"></div>
+                  </div>
+                </div>
+              </div>
+
               <div style="margin-top:16px;background:var(--card);border:2px solid var(--ink);border-radius:24px;padding:16px">
                 <div style="font-family:var(--font-display);font-size:19px;color:var(--ink)">{{ t.stNotifTitle }}</div>
                 <div style="font:500 11.5px/1.45 var(--font-body);color:var(--muted);margin-top:7px">{{ t.stNotifSub }}</div>
@@ -1883,6 +1904,8 @@ const COPY = {
     lostPhone: 'Tu teléfono', lostSend: 'Avísale',
     lostNeedPhone: 'Pon el número completo.',
     lostSent: 'Ya le avisamos. Él te escribe.',
+    stPromoTitle: 'Promociones', stPromoSub: 'Préndelas cuando quieras y apágalas igual. Empiezan apagadas.',
+    promoBakerTitle: 'Gramo de ñapa', promoBakerSub: 'Cada onza lleva un gramo de más. Solo pa’ los Patrón.',
     pingReady: 'Avisarle que está lista', pingSent: 'Le llegó el aviso.',
     pingNobody: 'No tiene avisos prendidos — mejor llámalo.',
     ptsTitle: 'Mafupuntos', ptsRule: 'Un octavo te da 1 Mafupunto. 25 puntos = un octavo gratis.',
@@ -2149,6 +2172,8 @@ const COPY = {
     lostPhone: 'Your phone', lostSend: 'Let him know',
     lostNeedPhone: 'Put the whole number.',
     lostSent: 'He has been told. He will message you.',
+    stPromoTitle: 'Promos', stPromoSub: 'Switch one on for a weekend and off again. They all start off.',
+    promoBakerTitle: "Baker's dozen", promoBakerSub: 'A gram on the house with every ounce. Patrón only.',
     pingReady: 'Tell them it is ready', pingSent: 'They got the nudge.',
     pingNobody: 'No alerts on their phone — better ring them.',
     ptsTitle: 'Mafupuntos', ptsRule: 'An eighth earns 1 Mafupunto. 25 points = an eighth free.',
@@ -2355,7 +2380,7 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = "2026-11-01.0710";
+const BUILD = "2026-11-01.0800";
 
 
 // The Mafupuntos ladder, and the ONE thing in here that has to agree with the
@@ -2839,6 +2864,26 @@ class Component extends DCLogic {
       this.setState({ busy: false });
       if (!res || !res.ok) { this.setState({ lostMsg: (res && res.error) || this.t().offline, lostOk: false }); return; }
       this.setState({ lostMsg: this.t().lostSent, lostOk: true, lostPhone: '' });
+    });
+  }
+
+  // Flip a promo. Saves on the tap, because the whole point of a promo is
+  // that he decides on a Friday — and reverts if the save fails, since a
+  // switch that says ON while the shop gives nothing away is the worst of it.
+  togglePromo(key) {
+    const cfg = this.state.cfg || {};
+    const was = !!(cfg.promos || {})[key];
+    const next = JSON.parse(JSON.stringify(cfg));
+    next.promos = { ...(next.promos || {}), [key]: !was };
+    this.setState({ cfg: next });
+    buzz(10);
+    this.api('shop', 'saveConfig', { config: next }).then(res => {
+      if (this.expired(res)) return;
+      if (!res || !res.ok) {
+        this.setState({ cfg, settingsMsg: (res && res.error) || this.t().offline });
+        return;
+      }
+      this.setState({ cfg: res.config });
     });
   }
 
@@ -3554,7 +3599,18 @@ class Component extends DCLogic {
     // The queue shows one side or the other, never both: active orders by
     // default, archived ones when he asks for them.
     const codeFor = (code) => (s.codes || []).find(c => c.code === code);
-    const queue = s.orders.filter(o => (s.showArchived ? o.archived : !o.archived));
+    // Patron's orders sit at the top of the pile. Only among orders that are
+    // still live — once something is handed over its place in the queue is
+    // history, and reordering the done pile would just make it hard to find
+    // the thing he finished five minutes ago.
+    const queue = s.orders.filter(o => (s.showArchived ? o.archived : !o.archived))
+      .slice()
+      .sort((a, b) => {
+        const live = (o) => !o.cancelled && (o.step || 0) < 3;
+        if (live(a) !== live(b)) return 0;
+        if (!live(a)) return 0;
+        return (b.tierId === 'patron' ? 1 : 0) - (a.tierId === 'patron' ? 1 : 0);
+      });
 
     // ── a month of trading, read back ────────────────────────────────────
     //
@@ -3836,6 +3892,10 @@ class Component extends DCLogic {
       // app never adds a point of its own, so there is no second opinion for
       // the two to disagree about.
       ptsValue: (s.pts || 0).toLocaleString('en-US'),
+      bakerOn: !!((s.cfg || {}).promos || {}).bakersDozen,
+      bakerBg: ((s.cfg || {}).promos || {}).bakersDozen ? 'var(--green)' : 'var(--faint)',
+      bakerJustify: ((s.cfg || {}).promos || {}).bakersDozen ? 'flex-end' : 'flex-start',
+      toggleBaker: () => this.togglePromo('bakersDozen'),
       queueMsg: s.queueMsg || '',
       queueMsgDisplay: s.queueMsg ? 'block' : 'none',
       ptsWorthLine: t.ptsWorth((s.ptsWorth || 0).toLocaleString('en-US')),
@@ -4570,6 +4630,14 @@ class Component extends DCLogic {
         const pend = app && !o.payOk && !o.cancelled;
         return {
           client: o.client, no: o.no, total: o.total, items: o.items,
+          // Who he is dealing with, before he reads anything else. The card
+          // edge carries it too, so a Patron is recognisable across the room
+          // without reading a word.
+          tier: o.tier || '',
+          tierDisplay: o.tierId && o.tierId !== 'mafutero' ? 'inline-flex' : 'none',
+          tierBg: o.tierId === 'patron' ? 'var(--green-glow)' : 'var(--green-pale)',
+          cardEdge: o.tierId === 'patron' ? 'var(--green-glow)'
+            : o.tierId === 'veterano' ? 'var(--green-3)' : 'var(--ink)',
           when: stamp(o.at),
           initials: this.initials(o.client),
           status: o.cancelled ? t.cancelled : st.label,

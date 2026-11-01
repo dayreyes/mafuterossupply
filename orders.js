@@ -13,7 +13,7 @@ import { route, ok, fail, unauthorized, str, num, newId } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { mileFee, migrateProduct, shopOpen, shopDay, loadConfig } from './lib/config.js';
-import { pointsFor, orderPoints, crossed } from './lib/points.js';
+import { pointsFor, orderPoints, crossed, tierAt, perksFor } from './lib/points.js';
 import {
   sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText,
   pushTo, orderStatusMsg, lowStockCustomerMsg, pointsMsg
@@ -163,14 +163,32 @@ export default async (req) => route(req, {
     // tier.grams x qty off the shelf — an ounce removes 28, not 1. Totals per
     // product are summed first, so 3.5g + 1g of the same strain is checked as
     // 4.5g against what is actually there.
+    // Where they stand, before anything is priced or counted off the shelf.
+    // A regular gets longer to turn up for a cash pickup, and a Patron gets a
+    // gram on the house with every ounce.
+    const buyerTier = tierAt(await read(KEYS.orders, []), session.code || '');
+    const perks = perksFor(buyerTier.id);
+    const promoOn = !!(cfg.promos && cfg.promos.bakersDozen);
+
     const needed = {};
+    const gifted = {};
     for (const raw of lines) {
       const p = products.find((x) => x.id === str(raw.pid, 40) && x.active);
       if (!p) return fail('Something in your bag is no longer available.');
       const tIdx = num(raw.weightIdx, 0, p.tiers.length - 1, 0);
       const qty = num(raw.qty, 1, 99, 1);
       const tier = p.tiers[tIdx];
-      needed[p.id] = (needed[p.id] || 0) + tier.grams * qty;
+      // The baker's dozen. An ounce leaves the shelf as twenty-nine grams,
+      // charged as twenty-eight. Counted into `needed` so the gram is really
+      // reserved — a gift that is not deducted is a gift that oversells the
+      // shelf and is discovered by the next customer.
+      // TWO gates: he is running the promo this week, and they have earned
+      // it. Either alone is not enough — the promo without the tier is a
+      // giveaway to everybody, and the tier without the promo is a standing
+      // cost he never agreed to.
+      const bonus = (promoOn && perks.bakersDozen && tier.grams >= 28) ? qty : 0;
+      if (bonus) gifted[p.id] = (gifted[p.id] || 0) + bonus;
+      needed[p.id] = (needed[p.id] || 0) + tier.grams * qty + bonus;
       if ((p.stock || 0) < needed[p.id]) {
         return fail(p.name + ' only has ' + fmtStock(p.stock || 0, p.unit) + ' left.');
       }
@@ -215,7 +233,7 @@ export default async (req) => route(req, {
     // must not rewrite where an earlier order was sent.
     const customer = (await read(KEYS.codes, [])).find((x) => x.code === session.code) || {};
 
-    const hold = cashPickup ? cfg.holdMinutes : null;
+    const hold = cashPickup ? Math.max(cfg.holdMinutes, perks.holdMinutes) : null;
     const counters = await read(KEYS.counters, { orderSeq: 1000 });
     const seq = (counters.orderSeq || 1000) + 1;
     await write(KEYS.counters, { ...counters, orderSeq: seq });
@@ -224,6 +242,12 @@ export default async (req) => route(req, {
       id: newId('o'),
       no: '#' + seq,
       client: session.name || customer.name || 'Customer',
+      tier: buyerTier.name,
+      tierId: buyerTier.id,
+      // What he has to actually remember to add.
+      gifted: Object.entries(gifted).map(([pid, g]) => ({
+        pid, name: (products.find((x) => x.id === pid) || {}).name || '', grams: g
+      })),
       clientCode: session.code || '',
       phone: customer.phone || '',
       addr: mode === 'delivery' ? (customer.addr || '') : '',
