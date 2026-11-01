@@ -34,7 +34,19 @@
 // means "how you have been buying lately" rather than "what you did once".
 export const DOLLARS_PER_POINT = 25;   // an eighth earns a point
 export const POINT_VALUE = 1;          // a point is a dollar off
-export const EXPIRE_DAYS = 30;
+// Sixty, not thirty.
+//
+// Thirty wiped the shop's whole customer base the day it shipped. The maths
+// is unforgiving: somebody who buys roughly monthly and slips to a thirty-six
+// day gap loses everything behind it, and most people buy roughly monthly.
+// A rule that punishes the normal rhythm of the shop is not loyalty, it is a
+// tax on having a life.
+//
+// Sixty forgives one missed cycle and still clears out people who genuinely
+// stopped coming. Nothing is stored, so changing this line recomputes every
+// balance in the shop the moment it deploys — the points that vanished come
+// straight back.
+export const EXPIRE_DAYS = 60;
 export const TIER_DAYS = 90;
 
 // Thresholds in grams: an ounce and a half, and three and a half ounces.
@@ -143,6 +155,27 @@ export const earnedRows = (orders, code, now = new Date()) =>
     const t = tierAt(orders, code, new Date(o.at));
     return { no: o.no, at: o.at, points: orderPoints(o, t.mult), tier: t.name, mult: t.mult };
   });
+
+// What they LOST, so the app can say so instead of showing a silent zero.
+//
+// A balance that quietly reads 0 looks like a bug, or like the shop took
+// something. Naming the number and the date turns it into a rule that was
+// explained — and gives him something to win back, which a zero does not.
+export function expiredInfo(orders, code, now = new Date()) {
+  const mine = (orders || []).filter((o) => counts(o, code))
+    .sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0));
+  const alive = new Set(livingOrders(orders, code, now));
+  const dead = mine.filter((o) => !alive.has(o));
+  if (!dead.length) return { points: 0, at: '', tier: '' };
+  return {
+    points: dead.reduce((a, o) =>
+      a + orderPoints(o, tierAt(orders, code, new Date(o.at || 0)).mult), 0),
+    // The day the gap closed over them, not the day of the last order.
+    at: new Date(new Date(dead[0].at || 0).getTime() + EXPIRE_MS).toISOString(),
+    // And what they were, before it went.
+    tier: tierAt(orders, code, new Date(dead[0].at || 0)).name
+  };
+}
 
 // When the balance goes, if nothing else is bought.
 export function expiresAt(orders, code, now = new Date()) {
