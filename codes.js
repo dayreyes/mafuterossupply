@@ -13,6 +13,7 @@ import { pointsFor, earnedRows, nextMilestone, PTS_PER_DOLLAR } from './lib/poin
 // What a customer may see of their own record, and nothing of anyone else's.
 const publicSelf = (c) => ({
   name: c.name || '', phone: c.phone || '', addr: c.addr || '', code: c.code,
+  favs: Array.isArray(c.favs) ? c.favs : [],
   // Whether they asked for automatic messages, and whether THIS device is
   // registered — two different things: saying yes on a phone does not sign up
   // a laptop, and the switch is meaningless if no device is subscribed.
@@ -21,6 +22,7 @@ const publicSelf = (c) => ({
 });
 
 const MAX_DEVICES = 5;
+const MAX_FAVS = 60;
 
 export default async (req) => route(req, {
 
@@ -95,6 +97,36 @@ export default async (req) => route(req, {
     );
     if (!found) return fail('That code is no longer active.');
     return ok({ profile: publicSelf(codes.find((c) => c.code === session.code)) });
+  },
+
+  // Favourites.
+  //
+  // Kept against the code on the server rather than in the phone's storage,
+  // which is what the prototype does: a customer who taps the heart on their
+  // phone and then opens the shop on a laptop should still see it. Scoped to
+  // the session's own code like everything else here, so the only list anyone
+  // can touch is their own.
+  //
+  // Capped, because this is a free-text-ish list a client supplies and an
+  // uncapped one is a way to make the codes blob grow without limit.
+  async fav(body, req) {
+    const session = await requireClient(req);
+    if (!session) return unauthorized('Your session expired — enter your code again.');
+    const pid = str(body.pid, 24);
+    if (!pid) return fail('No strain given.');
+    const on = body.on === true;
+
+    let found = false;
+    const codes = await mutate(KEYS.codes, [], (list) =>
+      list.map((c) => {
+        if (c.code !== session.code) return c;
+        found = true;
+        const had = Array.isArray(c.favs) ? c.favs.filter((x) => x !== pid) : [];
+        return { ...c, favs: on ? [pid].concat(had).slice(0, MAX_FAVS) : had };
+      })
+    );
+    if (!found) return fail('That code is no longer active.');
+    return ok({ favs: publicSelf(codes.find((c) => c.code === session.code)).favs });
   },
 
   // The browser needs the shop's public key to subscribe at all.

@@ -401,7 +401,7 @@ async function customerProfile() {
   ck('and nothing else is attached',
     Object.keys(r).sort().join(',') === 'earned,goal,ok,perDollar,points,profile,toGo', Object.keys(r));
   ck('the profile itself still carries only their own fields',
-    Object.keys(r.profile).sort().join(',') === 'addr,code,devices,name,notify,phone', Object.keys(r.profile));
+    Object.keys(r.profile).sort().join(',') === 'addr,code,devices,favs,name,notify,phone', Object.keys(r.profile));
 
   section('and cannot reach anybody else\u2019s');
   const dump = JSON.stringify(r);
