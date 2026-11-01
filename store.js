@@ -53,13 +53,27 @@ export class StorageDown extends Error {
   }
 }
 
-export async function available() {
+// Can we reach the store, and if not, WHY.
+//
+// `available()` answered yes or no and threw the reason away, so the shop
+// could only ever say "Blobs is not available" — which is a dead end for the
+// one person who has to fix it. The reason was always right there in the
+// exception; it just never left this function.
+//
+// This is the same lesson as the notifications opt-in: a generic message that
+// hides the real cause costs hours, and the cause is rarely a secret. An
+// infrastructure error from the blob store is an operational fact.
+export async function probe() {
   try {
     await store().get('__probe');
-    return true;
-  } catch {
-    return false;
+    return { ok: true, reason: '' };
+  } catch (err) {
+    return { ok: false, reason: String((err && err.message) || err).slice(0, 300) };
   }
+}
+
+export async function available() {
+  return (await probe()).ok;
 }
 
 // A readable answer to "why is the shop down?".

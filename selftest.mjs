@@ -699,6 +699,22 @@ async function diagnose() {
   ck('and says it is a JSON problem, not an outage', /not valid JSON/.test(cfg.error || ''), cfg.error);
   ck('healthy records are marked readable', d.keys.find(k => k.key === 'products').readable === true);
 
+  section('a dead store says WHY, on the screen');
+  // The shop went down tonight and told its owner "Netlify Blobs is not
+  // available for this site — see DEPLOY.md", which is a dead end: the real
+  // reason was one layer down, inside an exception nobody ever read. The
+  // cause of an outage is an operational fact, not a secret.
+  reset();
+  __setStoreFactory(() => ({
+    async get() { throw new Error('The environment has not been configured to use Netlify Blobs'); },
+    async set() {}, async setJSON() {}
+  }));
+  const down = await call(auth, { action: 'status' });
+  ck('the app is told storage is gone', down.ok === true && down.storage === false, down);
+  ck('and the reason travels with it', /not been configured/.test(down.why || ''), down.why);
+  ck('the message on screen carries it too', /not been configured/.test(down.error || ''), down.error);
+  ck('it does not just point at a file', !/DEPLOY\.md/.test(down.error || ''), down.error);
+
   section('it never leaks what is in the records');
   const dump = JSON.stringify(d);
   ck('no shop name', !dump.includes('Mafuteros'));
