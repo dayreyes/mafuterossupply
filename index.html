@@ -690,8 +690,16 @@ input,textarea,select{font-size:16px}
                 <div style="font-family:var(--font-display);font-size:19px;color:var(--on-dark)">{{ t.ptsTitle }}</div>
                 <div style="font:800 9.5px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--rust-2)">{{ t.ptsSoon }}</div>
               </div>
-              <div style="font-family:var(--font-display);font-size:52px;line-height:1.02;color:var(--green-glow);margin-top:8px">{{ ptsValue }}</div>
+              <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;flex-wrap:wrap">
+                <span style="font-family:var(--font-display);font-size:52px;line-height:1.02;color:var(--green-glow)">{{ ptsValue }}</span>
+                <!-- What it is actually worth, next to what it is.
+                     A points balance nobody can price is a number, not a
+                     reward: "540 points" means nothing until it says $540 or
+                     $27, and the gap between those two is the whole scheme. -->
+                <span style="font-family:var(--font-hand);font-size:19px;line-height:1;color:var(--on-dark)">{{ ptsWorthLine }}</span>
+              </div>
               <div style="font:500 11.5px/1.45 var(--font-body);color:var(--faint);margin-top:3px">{{ t.ptsRule }}</div>
+              <div style="display:{{ ptsGoneDisplay }};font:600 11px/1.45 var(--font-body);color:var(--rust-4);margin-top:6px">{{ ptsGoneLine }}</div>
 
               <div style="display:{{ ptsGoalDisplay }};margin-top:15px">
                 <div style="height:10px;border-radius:999px;background:var(--veil-14);overflow:hidden">
@@ -1823,9 +1831,11 @@ const COPY = {
     pfNeedName: 'Pon un nombre que él reconozca.',
     pfOrders: 'Tus órdenes', pfOrdersEmpty: 'Todavía no has hecho ninguna orden.',
     typeAll: 'Todas',
-    earnPts: n => 'Esta orden te da ' + n + ' Mafupuntos.',
+    earnPts: n => n === 1 ? 'Esta orden te da 1 Mafupunto.' : 'Esta orden te da ' + n + ' Mafupuntos.',
+    ptsWorth: v => 'Valen $' + v + ' en tu pr\u00f3xima orden.',
+    ptsGone: d => 'Se vencen si no pides antes del ' + d + '.',
     noCode: '¿No tienes código?', ask: 'Pídelo aquí',
-    ptsTitle: 'Mafupuntos', ptsRule: '1 Mafupunto por cada $1 que gastas.',
+    ptsTitle: 'Mafupuntos', ptsRule: 'Un octavo te da 1 Mafupunto. Cada punto vale $1.',
     ptsSoon: 'Premios pronto',
     ptsHistory: 'Cómo los ganaste',
     ptsEmpty: 'Todavía no tienes Mafupuntos. Haz una orden y empiezas.',
@@ -2076,9 +2086,11 @@ const COPY = {
     pfNeedName: 'Put a name he will recognise.',
     pfOrders: 'Your orders', pfOrdersEmpty: 'You have not ordered yet.',
     typeAll: 'All',
-    earnPts: n => 'This order earns you ' + n + ' Mafupuntos.',
+    earnPts: n => n === 1 ? 'This order earns you 1 Mafupunto.' : 'This order earns you ' + n + ' Mafupuntos.',
+    ptsWorth: v => 'Worth $' + v + ' off your next order.',
+    ptsGone: d => 'They expire if you do not order before ' + d + '.',
     noCode: 'No code?', ask: 'Ask for one',
-    ptsTitle: 'Mafupuntos', ptsRule: '1 Mafupunto for every $1 you spend.',
+    ptsTitle: 'Mafupuntos', ptsRule: 'An eighth earns you 1 Mafupunto. Each one is $1 off.',
     ptsSoon: 'Rewards coming soon',
     ptsHistory: 'How you earned them',
     ptsEmpty: 'No Mafupuntos yet. Place an order and you are away.',
@@ -2279,7 +2291,7 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = "2026-11-01.0320";
+const BUILD = "2026-11-01.0400";
 
 
 // The Mafupuntos ladder, and the ONE thing in here that has to agree with the
@@ -2287,7 +2299,12 @@ const BUILD = "2026-11-01.0320";
 // earned. This copy exists only to draw the progress bar between one rung and
 // the next, so if the two ever drift the bar is wrong and the number is right —
 // which is the correct way round for a mistake to land.
-const PTS_RUNGS = [100, 250, 500, 1000, 2500, 5000];
+const PTS_RUNGS = [25, 50, 100, 200, 400];
+// Mirrored from lib/points.js, which owns the real figures and decides what
+// anyone has actually earned. These exist only to draw the bar and promise a
+// number at checkout, so if the two ever drift the drawing is wrong and the
+// balance is right — which is the correct way round for a mistake to land.
+const PTS_PER = 25;
 
 // What each kind of thing comes in, and how much a full one holds.
 //
@@ -2380,6 +2397,8 @@ class Component extends DCLogic {
     favs: [],
     pts: 0,
     ptsGoal: 0,
+    ptsWorth: 0,
+    ptsExpires: '',
     ptsToGo: 0,
     ptsEarned: [],
     pfDraft: null,
@@ -2708,6 +2727,8 @@ class Component extends DCLogic {
           // number that is never out of step with this one.
           favs: (res.profile && res.profile.favs) || [],
           pts: res.points || 0,
+          ptsWorth: res.worth || 0,
+          ptsExpires: res.expiresAt || '',
           ptsGoal: res.goal || 0,
           ptsToGo: res.toGo || 0,
           ptsEarned: res.earned || []
@@ -3691,6 +3712,11 @@ class Component extends DCLogic {
       // app never adds a point of its own, so there is no second opinion for
       // the two to disagree about.
       ptsValue: (s.pts || 0).toLocaleString('en-US'),
+      ptsWorthLine: t.ptsWorth((s.ptsWorth || 0).toLocaleString('en-US')),
+      // Only once there is something to lose. Warning a customer with no
+      // points that they are about to lose none of them is just noise.
+      ptsGoneDisplay: (s.pts || 0) > 0 && s.ptsExpires ? 'block' : 'none',
+      ptsGoneLine: s.ptsExpires ? t.ptsGone(stamp(s.ptsExpires).split(' \u00b7 ')[0]) : '',
       ptsGoalDisplay: s.ptsGoal ? 'block' : 'none',
       ptsGoalLine: s.ptsGoal ? t.ptsGoal((s.ptsToGo || 0).toLocaleString('en-US'), s.ptsGoal.toLocaleString('en-US')) : t.ptsTop,
       // The bar fills across the gap between the rung just cleared and the one
@@ -4179,7 +4205,7 @@ class Component extends DCLogic {
       subtotal: cash(sub),
       // Floored the same way the server floors it, so the number promised here
       // is the number that lands. Hidden on an empty bag.
-      earnLine: t.earnPts(Math.floor(sub + (fee || 0))),
+      earnLine: t.earnPts(Math.floor((sub + (fee || 0)) / PTS_PER)),
       earnDisplay: sub > 0 ? 'block' : 'none',
       feeLabel: s.mode === 'delivery' && zone ? t.feeDelivery + ' · ' + zone.mi + ' mi' : t.feePickup,
       fee: fee ? cash(fee) : t.free,

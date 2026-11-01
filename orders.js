@@ -13,7 +13,7 @@ import { route, ok, fail, unauthorized, str, num, newId } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { mileFee, migrateProduct, shopOpen, shopDay, loadConfig } from './lib/config.js';
-import { pointsFor, orderPoints, crossed, addCarry } from './lib/points.js';
+import { pointsFor, orderPoints, crossed } from './lib/points.js';
 import {
   sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText,
   pushTo, orderStatusMsg, lowStockCustomerMsg, pointsMsg
@@ -246,19 +246,12 @@ export default async (req) => route(req, {
     };
 
     // Points before this order, taken off the very list it is being added to,
-    // so the two can never be read a moment apart. Anything pushed off the end
-    // of the cap has its points banked — see lib/points.js.
+    // so the two can never be read a moment apart.
     let ptsBefore = 0;
-    let aged = [];
     await mutate(KEYS.orders, [], (list) => {
       ptsBefore = pointsFor(list, order.clientCode);
-      const next = [order].concat(list);
-      aged = next.slice(2000);
-      return next.slice(0, 2000);
+      return [order].concat(list).slice(0, 2000);
     });
-    if (aged.length) {
-      await mutate(KEYS.ptsCarry, {}, (c) => addCarry(c, aged));
-    }
 
     // Commit the stock only once the order is safely stored.
     const low = [];

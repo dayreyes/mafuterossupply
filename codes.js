@@ -8,7 +8,8 @@ import { read, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { mintCode, withHistory } from './lib/invites.js';
 import { sendAll, codeText, pushConfigured, pushPublicKey } from './lib/notify.js';
-import { pointsFor, earnedRows, nextMilestone, PTS_PER_DOLLAR } from './lib/points.js';
+import { pointsFor, earnedRows, nextMilestone, expiresAt, pointsValue,
+  DOLLARS_PER_POINT, POINT_VALUE, EXPIRE_DAYS } from './lib/points.js';
 
 // What a customer may see of their own record, and nothing of anyone else's.
 const publicSelf = (c) => ({
@@ -40,15 +41,42 @@ export default async (req) => route(req, {
     // customer's own orders only — the filter is on the session's code, so
     // there is nothing here to scope wrong.
     const orders = await read(KEYS.orders, []);
-    const points = pointsFor(orders, session.code, await read(KEYS.ptsCarry, {}));
+    const points = pointsFor(orders, session.code);
     const goal = nextMilestone(points);
     return ok({
       profile: publicSelf(mine),
       points,
-      perDollar: PTS_PER_DOLLAR,
+      worth: pointsValue(points),
+      perPoint: DOLLARS_PER_POINT,
+      pointValue: POINT_VALUE,
+      expireDays: EXPIRE_DAYS,
+      expiresAt: expiresAt(orders, session.code),
       goal,
       toGo: goal ? goal - points : 0,
       earned: earnedRows(orders, session.code).slice(0, 20)
+    });
+  },
+
+  // The owner checking somebody's claim.
+  //
+  // He could already see the total on the Codes screen, which is enough to
+  // disagree with a customer and not enough to settle it. This is the working:
+  // the same rows the customer sees on their own phone, from the same
+  // function, so the two cannot tell different stories.
+  async history(body, req) {
+    if (!(await requireOwner(req))) return unauthorized();
+    const code = str(body.code, 16);
+    const row = (await read(KEYS.codes, [])).find((c) => c.code === code);
+    if (!row) return fail('No such code.');
+    const orders = await read(KEYS.orders, []);
+    const points = pointsFor(orders, code);
+    return ok({
+      name: row.name || '',
+      code,
+      points,
+      worth: pointsValue(points),
+      expiresAt: expiresAt(orders, code),
+      earned: earnedRows(orders, code).slice(0, 40)
     });
   },
 

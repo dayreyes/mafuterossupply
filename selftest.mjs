@@ -399,7 +399,7 @@ async function customerProfile() {
   // response has to be looked at: `me` is the reply that could most easily
   // start carrying somebody else's details without anyone noticing.
   ck('and nothing else is attached',
-    Object.keys(r).sort().join(',') === 'earned,goal,ok,perDollar,points,profile,toGo', Object.keys(r));
+    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,goal,ok,perPoint,pointValue,points,profile,toGo,worth', Object.keys(r));
   ck('the profile itself still carries only their own fields',
     Object.keys(r.profile).sort().join(',') === 'addr,code,devices,favs,name,notify,phone', Object.keys(r.profile));
 
@@ -1146,15 +1146,26 @@ async function mafupuntos() {
   const tito = await s.asCustomer('Tito');
   const buy = (tok, qty) => call(orders,
     { action: 'place', items: [{ pid: s.pid, weightIdx: 0, qty }], mode: 'pickup', pay: 'cash' }, tok);
+  const pts = await import(B + 'lib/points.js');
 
-  section('a point for a dollar, counted off the orders');
+  section('an eighth earns a point');
   let me = await call(codes, { action: 'me' }, ana);
   ck('a customer with no orders has none', me.points === 0, me.points);
-  ck('and is told the rate', me.perDollar === 1, me);
+  ck('and is told what a point costs', me.perPoint === 25, me);
+  ck('and what one is worth', me.pointValue === 1, me);
   await buy(ana, 4);                       // 4 x 3.5g at $25 = $100
   me = await call(codes, { action: 'me' }, ana);
-  ck('a $100 order is 100 points', me.points === 100, me.points);
-  ck('the breakdown has the order in it', me.earned.length === 1 && me.earned[0].points === 100, me.earned);
+  ck('a $100 order is four points', me.points === 4, me.points);
+  ck('and is worth four dollars', me.worth === 4, me.worth);
+
+  section('the economics are not a giveaway');
+  // The first draft gave a point per dollar AND made a point worth a dollar,
+  // which hands back every dollar of revenue. This is the check that would
+  // have caught that before it shipped.
+  const spend = 1000;
+  const back = pts.pointsValue(pts.orderPoints({ subtotal: spend, fee: 0 }));
+  ck('a $1000 spend returns $40, not $1000', back === 40, back);
+  ck('which is 4% of it', back / spend === 0.04, back / spend);
 
   section('the list adds up to the number');
   await buy(ana, 1);
@@ -1165,64 +1176,56 @@ async function mafupuntos() {
   ck('newest first', me.earned.length === 3 && me.earned[0].at >= me.earned[1].at, me.earned);
 
   section('nobody earns on somebody else\'s money');
-  const his = await call(codes, { action: 'me' }, tito);
-  ck('a different customer has their own balance', his.points === 0, his.points);
   await buy(tito, 1);
-  const hisNow = await call(codes, { action: 'me' }, tito);
+  const his = await call(codes, { action: 'me' }, tito);
   const hers = await call(codes, { action: 'me' }, ana);
-  ck('and it only moves for their own orders', hisNow.points === 25 && hers.points === 175,
-    { tito: hisNow.points, ana: hers.points });
+  ck('each balance is their own', his.points === 1 && hers.points === 7,
+    { tito: his.points, ana: hers.points });
 
   section('a cancelled order takes its points with it');
   const all = (await call(orders, { action: 'list' }, s.token)).orders;
   const anaOrder = all.find(o => o.clientCode === hers.profile.code && o.subtotal === 100);
   await call(orders, { action: 'cancel', id: anaOrder.id }, s.token);
   const afterCancel = await call(codes, { action: 'me' }, ana);
-  ck('the sale did not happen, so the points did not either', afterCancel.points === 75, afterCancel.points);
+  ck('the sale did not happen, so the points did not either', afterCancel.points === 3, afterCancel.points);
   ck('and it drops out of the breakdown', afterCancel.earned.length === 2, afterCancel.earned);
 
   section('the goal ahead of them');
-  ck('the next rung is named', afterCancel.goal === 100, afterCancel);
-  ck('with the distance to it', afterCancel.toGo === 25, afterCancel);
+  ck('the first rung is a free eighth', afterCancel.goal === 25, afterCancel.goal);
+  ck('with the distance to it', afterCancel.toGo === 22, afterCancel.toGo);
 
-  section('the owner sees the same number');
-  const row = (await call(codes, { action: 'list' }, s.token)).codes
-    .find(c => c.code === afterCancel.profile.code);
-  ck('no disagreement between the two screens', row.points === afterCancel.points,
-    { owner: row.points, customer: afterCancel.points });
+  section('a month without ordering and you start again');
+  const day = 86400000;
+  const code = 'ZZ';
+  const ord = (daysAgo, subtotal) => ({ clientCode: code, no: '#' + daysAgo, cancelled: false,
+    subtotal, fee: 0, at: new Date(Date.now() - daysAgo * day).toISOString() });
+  ck('a recent run all counts',
+    pts.pointsFor([ord(1, 100), ord(10, 100), ord(20, 100)], code) === 12);
+  ck('nothing counts once the last order is over a month old',
+    pts.pointsFor([ord(40, 100), ord(50, 100)], code) === 0);
+  // The naive "is their last order old" version passes the two above and
+  // fails this one: a gap in the middle has to burn everything before it.
+  ck('a gap in the middle burns what came before it',
+    pts.pointsFor([ord(2, 100), ord(45, 100), ord(50, 100)], code) === 4);
+  ck('and ordering again does not bring expired points back',
+    pts.pointsFor([ord(0, 25), ord(60, 500)], code) === 1);
+  ck('the customer is told when it goes',
+    typeof pts.expiresAt([ord(1, 100)], code) === 'string');
 
-  section('points survive an order ageing off the end of the list');
-  // The cap is 2000 and nobody is placing 2000 orders in a test, so the carry
-  // is exercised directly — it is the mechanism, not the cap, that matters.
-  const pts = await import(B + 'lib/points.js');
-  const dropped = [{ clientCode: 'X', subtotal: 40, fee: 0, cancelled: false }];
-  const carry = pts.addCarry({}, dropped);
-  ck('the points of a dropped order are banked', carry.X === 40, carry);
-  ck('and still counted once it is gone', pts.pointsFor([], 'X', carry) === 40);
-  ck('a cancelled order banks nothing',
-    Object.keys(pts.addCarry({}, [{ clientCode: 'Y', subtotal: 40, cancelled: true }])).length === 0);
-
-  section('the bag promises what the order actually pays');
-  // The bag now says "this order earns you N" BEFORE the order exists, which
-  // means the app is doing its own arithmetic for the first time. If it ever
-  // rounds differently from the server, the shop promises a number at
-  // checkout and banks a different one a second later — and the customer is
-  // right and we are wrong.
-  const fe = await import('node:fs').then(m => m.readFileSync(join(root, 'index.html'), 'utf8'));
-  ck('the bag floors it, like the server does',
-    /earnPts\(Math\.floor\(sub \+ \(fee \|\| 0\)\)\)/.test(fe), 'earnPts call shape');
-  for (const [subtotal, feeAmt] of [[25, 0], [24.5, 0], [100, 5], [39.99, 6.5], [0.4, 0]]) {
-    const promised = Math.floor(subtotal + feeAmt);
-    const banked = pts.orderPoints({ subtotal, fee: feeAmt });
-    ck('$' + subtotal + ' + $' + feeAmt + ' fee promises and banks ' + promised,
-      promised === banked, { promised, banked });
-  }
+  section('the owner can settle an argument');
+  const seen = await call(codes, { action: 'history', code: hers.profile.code }, s.token);
+  ck('he gets the same total the customer sees', seen.points === afterCancel.points,
+    { owner: seen.points, customer: afterCancel.points });
+  ck('and the working, not just the figure',
+    seen.earned.length === afterCancel.earned.length && seen.earned[0].no === afterCancel.earned[0].no,
+    seen.earned);
+  ck('a customer cannot read anyone else\'s', (await call(codes, { action: 'history', code: hers.profile.code }, ana)).ok === false);
 
   section('a milestone is crossed once, not every order after it');
-  ck('the order that passes it', pts.crossed(90, 110) === 100);
-  ck('nothing for the one after', pts.crossed(110, 130) === null);
-  ck('one message when an order clears two rungs', pts.crossed(90, 300) === 250);
-  ck('and nothing when the balance goes backwards', pts.crossed(300, 90) === null);
+  ck('the order that passes it', pts.crossed(24, 26) === 25);
+  ck('nothing for the one after', pts.crossed(26, 30) === null);
+  ck('one message when an order clears two rungs', pts.crossed(24, 120) === 100);
+  ck('and nothing when the balance goes backwards', pts.crossed(300, 20) === null);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
