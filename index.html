@@ -2279,7 +2279,7 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = "2026-11-01.0130";
+const BUILD = "2026-11-01.0320";
 
 
 // The Mafupuntos ladder, and the ONE thing in here that has to agree with the
@@ -3912,7 +3912,7 @@ class Component extends DCLogic {
         weights: (p.tiers || []).slice(0, 4).map(w => ({ label: w.label, price: cash(w.price) })),
         favFill: (s.favs || []).includes(p.id) ? 'currentColor' : 'none',
         toggleFav: e => { if (e && e.stopPropagation) e.stopPropagation(); this.toggleFav(p.id); },
-        open: () => this.openProduct(p.id)
+        open: () => this.setState({ selId: p.id, weightIdx: 0, screen: 'product' })
       })),
       menuEmptyDisplay: menuShown.length ? 'none' : 'block',
 

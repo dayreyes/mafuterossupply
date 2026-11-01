@@ -784,6 +784,20 @@ async function viewLayer() {
   // anything: the element quietly keeps the first skin's value, so a single
   // missing line leaves one control cream on a black screen. Nobody sees it
   // until they are looking at that one screen in that one skin.
+  section('every method a binding calls actually exists');
+  // How the menu broke tonight. The rebuild bound a strain card to
+  // `this.openProduct(p.id)`, which was never a method — so every card threw
+  // the moment it was tapped and the menu was dead on the customer side.
+  //
+  // Nothing caught it: the tests render the markup but do not press anything,
+  // and the screenshots I took after the rebuild never tapped a card. A
+  // dangling method is invisible until a finger lands on it.
+  const calls = new Set([...script.matchAll(/\bthis\.([a-zA-Z_]\w*)\s*\(/g)].map(m => m[1]));
+  const defs = new Set([...script.matchAll(/^\s{2}(?:async\s+)?([a-zA-Z_]\w*)\s*\([^)]*\)\s*\{/gm)].map(m => m[1]));
+  const fromRuntime = new Set(['setState', 'forceUpdate', 'render']);
+  const dangling = [...calls].filter(n => !defs.has(n) && !fromRuntime.has(n)).sort();
+  ck('no binding calls a method that is not there', dangling.length === 0, dangling);
+
   section('the two skins define the same colours');
   const blockOf = (sel) => {
     const at = html.indexOf(sel);
