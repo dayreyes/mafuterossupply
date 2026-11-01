@@ -691,6 +691,23 @@ input,textarea,select{font-size:16px}
                      profile screen, which is the one place somebody deciding
                      whether to add another eighth is not looking. -->
                 <div style="display:{{ earnDisplay }};margin-top:10px;padding:10px 13px;border-radius:14px;background:var(--green-pale);border:2px solid var(--green);font:700 12px/1.35 var(--font-body);color:var(--green-ink);text-align:center">{{ earnLine }}</div>
+
+                <!-- Spending them. Only appears when they hold enough AND the
+                     bag is worth enough to take it, so it is never a button
+                     that explains why it cannot be pressed. -->
+                <div style="display:{{ redeemDisplay }};margin-top:10px;padding:12px 13px;border-radius:14px;background:var(--slab);border:2px solid var(--green-glow)">
+                  <div style="display:flex;align-items:center;gap:11px">
+                    <div style="flex:1;min-width:0">
+                      <div style="font:800 12.5px/1.25 var(--font-body);color:var(--green-glow)">{{ redeemTitle }}</div>
+                      <div style="font:500 11px/1.4 var(--font-body);color:var(--green-pale);margin-top:3px">{{ redeemSub }}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;flex:none">
+                      <div onClick="{{ fewerBlocks }}" style="width:34px;height:34px;border-radius:50%;border:2px solid var(--green-glow);color:var(--green-glow);display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 17px/1 var(--font-body)">&minus;</div>
+                      <div style="min-width:24px;text-align:center;font-family:var(--font-display);font-size:19px;color:var(--on-dark)">{{ blocksUsed }}</div>
+                      <div onClick="{{ moreBlocks }}" style="width:34px;height:34px;border-radius:50%;border:2px solid var(--green-glow);color:var(--green-glow);display:flex;align-items:center;justify-content:center;cursor:pointer;font:800 17px/1 var(--font-body)">+</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1460,7 +1477,7 @@ input,textarea,select{font-size:16px}
                       <div style="font:800 14.5px/1.2 var(--font-body);color:var(--ink)">{{ c.name }}</div>
                       <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:3px">
                         <span style="font:500 11.5px/1.35 var(--font-body);color:var(--muted)">{{ c.meta }}</span>
-                        <span style="display:{{ c.tierDisplay }};align-items:center;font-family:var(--font-display);font-size:9.5px;letter-spacing:.04em;padding:3px 7px;border-radius:999px;background:var(--green-glow);color:var(--ink)">{{ c.tier }}</span>
+                        <span style="display:{{ c.tierDisplay }};align-items:center;font-family:var(--font-display);font-size:9.5px;letter-spacing:.04em;padding:3px 7px;border-radius:999px;background:{{ c.tierBg }};color:{{ c.tierFg }}">{{ c.tier }}</span>
                       </div>
                       <div style="display:{{ c.contactDisplay }};font:500 11px/1.4 var(--font-body);color:var(--muted-2);margin-top:3px">{{ c.contact }}</div>
                       <div style="font:500 11px/1.35 var(--font-body);color:var(--muted-2);margin-top:2px">{{ c.last }}</div>
@@ -1907,6 +1924,8 @@ const COPY = {
     ptsGone: d => 'Se vencen si no pides antes del ' + d + '.',
     noCode: '¿No tienes código?', ask: 'Pídelo aquí',
     lostCode: '¿Se te perdió tu código?',
+    redeemTitle: n => 'Usa ' + n + ' Mafupuntos',
+    redeemSub: (n, v) => n === 0 ? 'Cada ' + 25 + ' puntos te quitan $25.' : n + ' puntos \u00b7 ' + v + ' menos.',
     ptsLost: (n, d) => 'Se te vencieron ' + n + ' Mafupuntos el ' + d + '.',
     ptsLostTier: ty => 'Eras ' + ty + '. Vuelve a pedir y lo recuperas.',
     lostTitle: 'Te lo mandamos',
@@ -2177,6 +2196,8 @@ const COPY = {
     ptsGone: d => 'They expire if you do not order before ' + d + '.',
     noCode: 'No code?', ask: 'Ask for one',
     lostCode: 'Lost your code?',
+    redeemTitle: n => 'Spend ' + n + ' Mafupuntos',
+    redeemSub: (n, v) => n === 0 ? 'Every ' + 25 + ' points takes $25 off.' : n + ' points \u00b7 ' + v + ' off.',
     ptsLost: (n, d) => n + ' Mafupuntos expired on ' + d + '.',
     ptsLostTier: ty => 'You were ' + ty + '. Order again and you climb back.',
     lostTitle: 'We will send it over',
@@ -2392,7 +2413,7 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 // running on a phone can be read off the screen — a stale service worker once
 // served a days-old build while the repo and the deploy were both current, and
 // there was no way to tell from the outside.
-const BUILD = "2026-11-01.0845";
+const BUILD = "2026-11-01.0930";
 
 
 // The Mafupuntos ladder, and the ONE thing in here that has to agree with the
@@ -2500,6 +2521,7 @@ class Component extends DCLogic {
     ptsGoal: 0,
     ptsWorth: 0,
     lostPts: 0, lostAt: '', lostTier: '',
+    useBlocks: 0,
     queueMsg: '',
     lostPhone: '',
     lostMsg: '',
@@ -2735,7 +2757,16 @@ class Component extends DCLogic {
     // Their hearts come down with the menu, not when they happen to open
     // their profile — the menu is where the hearts are drawn.
     this.api('codes', 'me').then(res => {
-      if (res && res.ok && res.profile) this.setState({ favs: res.profile.favs || [] });
+      if (!res || !res.ok || !res.profile) return;
+      // Points come down with the hearts, because the BAG needs the balance
+      // to offer a discount — waiting until they open their profile means
+      // the one screen where spending matters is the one that does not know.
+      this.setState({
+        favs: res.profile.favs || [],
+        pts: res.points || 0,
+        ptsWorth: res.worth || 0,
+        tier: res.tier || '', tierMult: res.tierMult || 1
+      });
     });
     return this.loadMenu().then(() => this.setState({ role: 'client', clientName: name, screen: 'home' }));
   }
@@ -3244,7 +3275,10 @@ class Component extends DCLogic {
       mode: s.mode,
       pay: s.pay,
       zone: s.zone,
-      slot: slot
+      slot: slot,
+      // How many blocks they asked for. The server decides what actually
+      // comes off, from the balance it works out itself.
+      useBlocks: s.useBlocks || 0
     }).then(res => {
       this.setState({ busy: false });
       if (this.expired(res)) return;
@@ -3515,6 +3549,11 @@ class Component extends DCLogic {
     };
     const sub = s.cart.reduce((a, l) => a + l.price * l.qty, 0);
     const fee = this.feeAmount();
+    // What they could spend on THIS bag. Clamped here and again on the
+    // server, which is the one that actually decides.
+    const maxBlocks = Math.max(0, Math.min(
+      Math.floor((s.pts || 0) / PTS_PER), Math.floor(sub / PTS_PER)));
+    const blocksNow = Math.min(s.useBlocks || 0, maxBlocks);
     const zone = this.zone();
     const allowed = this.zones();
     const zonesLabel = allowed.map(z => z.name).join(' · ');
@@ -4419,10 +4458,18 @@ class Component extends DCLogic {
       // is the number that lands. Hidden on an empty bag.
       earnLine: t.earnPts(Math.floor((sub + (fee || 0)) / PTS_PER)),
       earnDisplay: sub > 0 ? 'block' : 'none',
+      // Blocks they could spend here: never more than they hold, never more
+      // than the goods are worth. The server checks both again.
+      redeemDisplay: maxBlocks > 0 ? 'block' : 'none',
+      redeemTitle: t.redeemTitle(PTS_PER),
+      redeemSub: t.redeemSub(blocksNow * PTS_PER, cash(blocksNow * PTS_PER)),
+      blocksUsed: String(blocksNow),
+      moreBlocks: () => this.setState({ useBlocks: Math.min(maxBlocks, blocksNow + 1) }),
+      fewerBlocks: () => this.setState({ useBlocks: Math.max(0, blocksNow - 1) }),
       feeLabel: s.mode === 'delivery' && zone ? t.feeDelivery + ' · ' + zone.mi + ' mi' : t.feePickup,
       fee: fee ? cash(fee) : t.free,
       dueLabel: pay && !pay.fast ? t.dueCash : t.duePaid(this.payLabel()),
-      total: cash(sub + fee),
+      total: cash(Math.max(0, sub + fee - blocksNow * PTS_PER)),
       place: () => { if (s.shopOpen !== false) this.place(); },
       placeLabel: s.shopOpen === false ? t.shutTitle : t.sendOrder,
       placeBg: s.shopOpen === false ? 'var(--faint)' : 'var(--green)',
@@ -4835,8 +4882,15 @@ class Component extends DCLogic {
         // own screen only meant he kept a worse copy of it somewhere else.
         contact: [c.phone || '', c.addr || ''].filter(Boolean).join(' · '),
         contactDisplay: (c.phone || c.addr) ? 'block' : 'none',
+        // Every customer, including the base tier. Hiding it there was a
+        // judgement about visual noise on a CUSTOMER's screen, and this is
+        // his: a blank where a tier should be reads as missing data, and he
+        // cannot tell "Mafutero" from "not loaded" at a glance.
         tier: c.tier || '',
-        tierDisplay: c.tier && c.tier !== 'Mafutero' ? 'inline-flex' : 'none',
+        tierDisplay: c.tier ? 'inline-flex' : 'none',
+        tierBg: c.tier === 'Patr\u00f3n' ? 'var(--green-glow)'
+          : c.tier === 'Veterano' ? 'var(--green-pale)' : 'var(--chip)',
+        tierFg: c.tier === 'Mafutero' ? 'var(--muted)' : 'var(--ink)',
         last: c.lastOrder ? t.lastOrder(stamp(c.lastOrder)) : t.neverOrdered,
         state: c.active ? t.active : t.revoked,
         bg: c.active ? 'var(--green-pale)' : 'var(--chip)', fg: c.active ? 'var(--green-ink)' : 'var(--muted-2)',
