@@ -49,6 +49,15 @@ export const POINT_VALUE = 1;          // a point is a dollar off
 export const EXPIRE_DAYS = 60;
 export const TIER_DAYS = 90;
 
+// Redemption, in blocks.
+//
+// Twenty-five points for twenty-five dollars off, which at this shop is an
+// eighth — so the card can say "25 points = an eighth free" and mean it.
+// Blocks rather than loose pounds because "spend some points" invites a
+// slider nobody wants to use, and because a round number is what gets said
+// out loud at a door.
+export const REDEEM_BLOCK = 25;
+
 // Thresholds in grams: an ounce and a half, and three and a half ounces.
 export const TIERS = [
   { id: 'mafutero', name: 'Mafutero', grams: 0,   mult: 1 },
@@ -141,9 +150,31 @@ export function livingOrders(orders, code, now = new Date()) {
   return out;
 }
 
-export const pointsFor = (orders, code, now = new Date()) =>
-  livingOrders(orders, code, now)
-    .reduce((a, o) => a + orderPoints(o, tierAt(orders, code, new Date(o.at)).mult), 0);
+// What an order gave back, in points.
+export const orderSpend = (o) => Math.max(0, Number(o.pointsSpent) || 0);
+
+// Earned minus spent, both read off the same order list.
+//
+// Spending had to be recorded SOMEWHERE — it is the one fact about a balance
+// that cannot be inferred from what things cost. Putting it on the order
+// keeps the whole thing derived anyway: cancel that order and the points go
+// back, exactly as cancelling an earning order takes them away.
+//
+// Clamped at zero because the two halves expire independently: an old
+// earning order can age out while the order that spent it is still inside
+// the window, and a negative balance is not a thing a customer can be shown.
+export const pointsFor = (orders, code, now = new Date()) => {
+  const live = livingOrders(orders, code, now);
+  const earned = live.reduce((a, o) => a + orderPoints(o, tierAt(orders, code, new Date(o.at)).mult), 0);
+  const spent = live.reduce((a, o) => a + orderSpend(o), 0);
+  return Math.max(0, earned - spent);
+};
+
+// How many blocks this order could pay for: never more than they hold, and
+// never more than the goods are worth — the delivery fee is his mileage and
+// is not something points buy.
+export const blocksFor = (points, subtotal) =>
+  Math.max(0, Math.min(Math.floor(points / REDEEM_BLOCK), Math.floor(subtotal / REDEEM_BLOCK)));
 
 // What the balance is worth in money.
 export const pointsValue = (points) => points * POINT_VALUE;
@@ -189,7 +220,7 @@ export function expiresAt(orders, code, now = new Date()) {
 // A free eighth at twenty-five, then again. At the base tier that is
 // twenty-five eighths; at Patr\u00f3n it is eight and a bit, which is the tier
 // doing its job.
-export const MILESTONES = [25, 50, 100, 200];
+export const MILESTONES = [REDEEM_BLOCK, REDEEM_BLOCK * 2, REDEEM_BLOCK * 4, REDEEM_BLOCK * 8];
 
 export const nextMilestone = (points) => MILESTONES.find((m) => m > points) || null;
 

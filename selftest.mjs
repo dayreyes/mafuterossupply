@@ -1313,6 +1313,44 @@ async function mafupuntos() {
     seen.earned);
   ck('a customer cannot read anyone else\'s', (await call(codes, { action: 'history', code: hers.profile.code }, ana)).ok === false);
 
+  section('points can actually be spent');
+  // Until now the card promised "25 points = an eighth free" with nothing
+  // behind it. A promise a shop cannot keep is worse than no scheme at all.
+  const rd = await openShop({ hours: { on: false } }, {
+    stock: 600,
+    tiers: [{ label: '3.5g', grams: 3.5, price: 25 }, { label: '7g', grams: 7, price: 40 },
+      { label: '1 oz', grams: 28, price: 140 }]
+  });
+  const rich = await rd.asCustomer('Rich');
+  const ozBuy = (useBlocks) => call(orders, { action: 'place',
+    items: [{ pid: rd.pid, weightIdx: 2, qty: 1 }], mode: 'pickup', pay: 'cash', useBlocks }, rich);
+  for (let i = 0; i < 5; i++) await ozBuy(0);
+  const before = (await call(codes, { action: 'me' }, rich)).points;
+  ck('they have something to spend', before >= 25, before);
+
+  const spent = await ozBuy(1);
+  ck('the discount came off the total', spent.order.discount === 25, spent.order);
+  ck('and is recorded on the order', spent.order.pointsSpent === 25, spent.order.pointsSpent);
+  ck('the total reflects it', spent.order.total === '$115', spent.order.total);
+  const after = (await call(codes, { action: 'me' }, rich)).points;
+  // Earned on this order too, so the drop is 25 less whatever it just earned.
+  // That order earned as well as spent: five ounces in, they are Patron, so
+  // $140 earns 5 x 3 = 15 while 25 goes out. Net ten down.
+  ck('the balance went down by what was spent, net of what it earned',
+    after === before + 15 - 25, { before, after, expected: before - 10 });
+
+  section('the server prices it, not the browser');
+  const broke = await rd.asCustomer('Broke');
+  const cheeky = await call(orders, { action: 'place',
+    items: [{ pid: rd.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash', useBlocks: 99 }, broke);
+  ck('somebody with no points gets no discount', cheeky.order.discount === 0, cheeky.order);
+  ck('and is charged the full price', cheeky.order.total === '$25', cheeky.order.total);
+  // Asking for more than the goods are worth must not make the shop pay them.
+  const over = await call(orders, { action: 'place',
+    items: [{ pid: rd.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash', useBlocks: 99 }, rich);
+  ck('a discount never exceeds the goods', over.order.discount <= over.order.subtotal, over.order);
+  ck('and a total is never negative', !/-/.test(over.order.total), over.order.total);
+
   section('a milestone is crossed once, not every order after it');
   ck('the order that passes it', pts.crossed(24, 26) === 25);
   ck('nothing for the one after', pts.crossed(26, 30) === null);

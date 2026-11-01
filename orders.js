@@ -13,7 +13,8 @@ import { route, ok, fail, unauthorized, str, num, newId } from './lib/http.js';
 import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { mileFee, migrateProduct, shopOpen, shopDay, loadConfig } from './lib/config.js';
-import { pointsFor, orderPoints, crossed, tierAt, perksFor } from './lib/points.js';
+import { pointsFor, orderPoints, crossed, tierAt, perksFor,
+  blocksFor, REDEEM_BLOCK, POINT_VALUE } from './lib/points.js';
 import {
   sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText,
   pushTo, orderStatusMsg, lowStockCustomerMsg, pointsMsg
@@ -233,6 +234,19 @@ export default async (req) => route(req, {
     // must not rewrite where an earlier order was sent.
     const customer = (await read(KEYS.codes, [])).find((x) => x.code === session.code) || {};
 
+    // ── spending points ─────────────────────────────────────────────────
+    //
+    // The SERVER decides how much came off, from the balance it computes
+    // itself. The browser only says how many blocks they asked for; if it
+    // asked for more than they hold, they get what they hold and no error —
+    // a bag that refuses to check out because a stale balance was a block
+    // out of date is worse than quietly giving them the right discount.
+    const held = pointsFor(await read(KEYS.orders, []), session.code || '');
+    const wanted = num(body.useBlocks, 0, 99, 0);
+    const blocks = Math.min(wanted, blocksFor(held, subtotal));
+    const pointsSpent = blocks * REDEEM_BLOCK;
+    const discount = pointsSpent * POINT_VALUE;
+
     const hold = cashPickup ? Math.max(cfg.holdMinutes, perks.holdMinutes) : null;
     const counters = await read(KEYS.counters, { orderSeq: 1000 });
     const seq = (counters.orderSeq || 1000) + 1;
@@ -264,7 +278,9 @@ export default async (req) => route(req, {
       items: priced,
       subtotal,
       fee,
-      total: money(subtotal + fee),
+      pointsSpent,
+      discount,
+      total: money(Math.max(0, subtotal + fee - discount)),
       step: 0,
       cancelled: false
     };
