@@ -28,8 +28,36 @@ const STORE = 'mafuteros';
 // correct.
 const CONSISTENCY = 'strong';
 
+// Normally Netlify wires Blobs up by itself: the runtime hands the function a
+// siteID and a token, and getStore() finds them. When that does not happen the
+// package throws "the environment has not been configured to use Netlify
+// Blobs" and the whole shop is down, with nothing you can do from the repo —
+// which is exactly where this site ended up.
+//
+// So the credentials can also be given explicitly. Set BLOBS_SITE_ID and
+// BLOBS_TOKEN in the Netlify dashboard and the store uses those instead of
+// waiting to be told. Automatic stays the default and nothing changes for a
+// site where it works; this is the hatch for when it does not.
+//
+// The token is a secret and lives only in the dashboard, exactly like the
+// Telegram and VAPID keys — never in this repo.
+const envCreds = () => ({
+  siteID: process.env.BLOBS_SITE_ID || process.env.NETLIFY_SITE_ID || '',
+  token: process.env.BLOBS_TOKEN || process.env.NETLIFY_API_TOKEN || ''
+});
+
+export const credsMode = () => {
+  const { siteID, token } = envCreds();
+  return siteID && token ? 'explicit' : 'automatic';
+};
+
 let _store = null;
-let _factory = () => getStore({ name: STORE, consistency: CONSISTENCY });
+let _factory = () => {
+  const opts = { name: STORE, consistency: CONSISTENCY };
+  const { siteID, token } = envCreds();
+  if (siteID && token) { opts.siteID = siteID; opts.token = token; }
+  return getStore(opts);
+};
 
 function store() {
   if (!_store) _store = _factory();
@@ -87,7 +115,13 @@ export async function available() {
 // Names and error text only. No stored values ever leave here: what is in these
 // records is customers' names, phones and addresses.
 export async function diagnose() {
-  const out = { store: STORE, consistency: CONSISTENCY, opened: false, probe: null, keys: [] };
+  const out = {
+    store: STORE, consistency: CONSISTENCY,
+    // Which way the credentials arrived — never the credentials themselves.
+    creds: credsMode(),
+    siteIdSet: !!envCreds().siteID, tokenSet: !!envCreds().token,
+    opened: false, probe: null, keys: []
+  };
   try {
     store();
     out.opened = true;

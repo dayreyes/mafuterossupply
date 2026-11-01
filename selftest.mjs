@@ -699,6 +699,22 @@ async function diagnose() {
   ck('and says it is a JSON problem, not an outage', /not valid JSON/.test(cfg.error || ''), cfg.error);
   ck('healthy records are marked readable', d.keys.find(k => k.key === 'products').readable === true);
 
+  section('the way the store is wired is visible, the token is not');
+  reset();
+  const st = await import(B + 'lib/store.js');
+  delete process.env.BLOBS_SITE_ID; delete process.env.BLOBS_TOKEN;
+  ck('automatic by default', st.credsMode() === 'automatic', st.credsMode());
+  process.env.BLOBS_SITE_ID = 'site_abc';
+  process.env.BLOBS_TOKEN = 'nfp_secret_value_here';
+  ck('explicit once both are set', st.credsMode() === 'explicit', st.credsMode());
+  const dd = await diag();
+  ck('the diagnostic says which way', dd.creds === 'explicit' && dd.siteIdSet && dd.tokenSet, dd.creds);
+  // The whole point of a diagnostic anyone can open on a phone is that it is
+  // safe to open on a phone.
+  ck('and never prints the token', !JSON.stringify(dd).includes('nfp_secret_value_here'));
+  ck('nor the site id', !JSON.stringify(dd).includes('site_abc'));
+  delete process.env.BLOBS_SITE_ID; delete process.env.BLOBS_TOKEN;
+
   section('a dead store says WHY, on the screen');
   // The shop went down tonight and told its owner "Netlify Blobs is not
   // available for this site — see DEPLOY.md", which is a dead end: the real
