@@ -985,6 +985,28 @@ async function shopDayBoundary() {
   ck('an unknown timezone falls back rather than throwing',
     /^\d{4}-\d{2}-\d{2}$/.test(shopDay({ hours: { tz: 'Nope/Nope' } }, at('2026-09-15T01:00:00Z'))));
 
+  section('the UTC date and the shop day are NOT interchangeable');
+  // This is the regression that matters, and the reason it hid for six weeks:
+  // the suite only noticed when it happened to run between midnight UTC and
+  // midnight in Florida. Pinned here against fixed instants instead, so it
+  // fails at any hour of any day.
+  for (const [instant, utcDay, flDay] of [
+    ['2026-11-01T00:05:00Z', '2026-11-01', '2026-10-31'],   // 8:05pm EDT
+    ['2026-11-01T03:30:00Z', '2026-11-01', '2026-10-31'],   // 11:30pm EDT
+    ['2026-07-04T02:00:00Z', '2026-07-04', '2026-07-03'],   // 10pm EDT, summer
+    ['2026-01-15T04:00:00Z', '2026-01-15', '2026-01-14']    // 11pm EST, winter
+  ]) {
+    const d = at(instant);
+    ck(instant + ' is ' + flDay + ' in the shop, not ' + utcDay,
+      shopDay(fl, d) === flDay && d.toISOString().slice(0, 10) === utcDay,
+      { shop: shopDay(fl, d), utc: d.toISOString().slice(0, 10) });
+  }
+  // And the thing that actually broke: nothing in orders.js may bucket an
+  // order by slicing its ISO string, because that slice is UTC.
+  const ordersSrc = (await import('node:fs')).readFileSync(join(root, 'orders.js'), 'utf8');
+  const sliced = ordersSrc.match(/String\(o\.at[^)]*\)\.slice\(0, ?10\)\s*===/g) || [];
+  ck('no order is bucketed by its UTC slice', sliced.length === 0, sliced);
+
   section('an evening order counts towards tonight');
   // Shop open around the clock so the hours gate cannot interfere.
   const s = await openShop({

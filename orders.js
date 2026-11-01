@@ -37,9 +37,24 @@ const fmtStock = (n, unit) => (unit === 'ea' ? String(n) : (Math.round(n * 10) /
 
 // Delivery capacity is derived from the orders actually taken today rather than
 // a counter someone has to remember to reset.
+// Which shop-day an order belongs to.
+//
+// NOT `o.at.slice(0, 10)`. That is the UTC date, and shopDay() is the date in
+// the shop's own town — so the two disagree for the four or five hours every
+// night between midnight UTC and midnight in Florida. Which is to say: from
+// 8pm, through the busiest hours this shop has.
+//
+// The September fix moved the shop's "today" off UTC but left the comparison
+// against the raw ISO string, so half the bug stayed. An order taken at 9pm
+// fell out of today's takings, out of tonight's run, and out of the delivery
+// cap, then reappeared on tomorrow's figures. The owner would have seen the
+// evening quietly under-report and the next morning overstate, with nothing
+// on screen to say why.
+const dayOf = (o, cfg) => shopDay(cfg, new Date(o.at || 0));
+
 const stopsToday = (orders, cfg) =>
   orders.filter((o) => o.mode === 'delivery' && !o.cancelled &&
-    String(o.at || '').slice(0, 10) === shopDay(cfg)).length;
+    dayOf(o, cfg) === shopDay(cfg)).length;
 
 // Today's delivery run, grouped so he drives one area at a time.
 //
@@ -56,7 +71,7 @@ function buildRun(orders, cfg) {
   const day = shopDay(cfg);
   const live = orders.filter((o) =>
     o.mode === 'delivery' && !o.cancelled && !o.archived && (o.step || 0) < 3 &&
-    String(o.at || '').slice(0, 10) === day);
+    dayOf(o, cfg) === day);
 
   const zones = cfg.zones || [];
   const byZone = new Map();
@@ -89,7 +104,7 @@ function buildRun(orders, cfg) {
 async function snapshot(orders) {
   const cfg = await loadConfig();
   const day = shopDay(cfg);
-  const todays = orders.filter((o) => String(o.at || '').slice(0, 10) === day);
+  const todays = orders.filter((o) => dayOf(o, cfg) === day);
   return {
     orders: orders.slice(0, 300),
     stops: stopsToday(orders, cfg),
