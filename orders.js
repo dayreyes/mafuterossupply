@@ -313,6 +313,32 @@ export default async (req) => route(req, {
     return ok(await snapshot(orders));
   },
 
+  // "Your order is ready" — sent on purpose, not as a side effect.
+  //
+  // `advance` already messages the customer when a step moves, but that only
+  // fires the once and only if the step actually changed. The owner standing
+  // at the door with a bag in his hand needs to be able to nudge somebody who
+  // has not turned up, without pretending the order moved again.
+  //
+  // Goes only to the one customer on the order, and only if they asked for
+  // messages at all — the same two gates as every other automatic message.
+  // Nothing about the order changes, so it can be pressed twice without
+  // corrupting anything; the push service collapses repeats by tag.
+  async ping(body, req) {
+    if (!(await requireOwner(req))) return unauthorized();
+    const id = str(body.id, 40);
+    const order = (await read(KEYS.orders, [])).find((o) => o.id === id);
+    if (!order) return fail('No such order.');
+    if (order.cancelled) return fail('That order was cancelled.');
+    if (!order.clientCode) return fail('That order has no customer attached.');
+
+    const line = str(body.line, 120) || 'It is ready.';
+    const res = await pushTo([order.clientCode], orderStatusMsg(order, line));
+    // Say plainly when it reached nobody, rather than claiming it was sent.
+    // He is about to decide whether to phone them instead.
+    return ok({ sent: res.sent, reached: res.sent > 0 });
+  },
+
   async advance(body, req) {
     if (!(await requireOwner(req))) return unauthorized();
     const id = str(body.id, 40);

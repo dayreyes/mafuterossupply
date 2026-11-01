@@ -71,6 +71,17 @@ export async function withHistory(codes) {
   // cannot settle an argument with it.
   return codes.map((c) => {
     const row = byCode.get(c.code) || { orders: 0, spent: 0, lastOrder: '' };
-    return { ...c, ...row, points: pointsFor(orders, c.code) };
+    return {
+      ...c, ...row,
+      points: pointsFor(orders, c.code),
+      // The owner's own list, so it carries what he needs to reach somebody:
+      // where to drive and what number to ring. This is already his data —
+      // he took it at signup — and withholding it from his own screen only
+      // meant he kept a separate note of it somewhere worse.
+      phone: c.phone || '',
+      addr: c.addr || '',
+      notify: c.notify === true,
+      devices: Array.isArray(c.push) ? c.push.length : 0
+    };
   })
 }

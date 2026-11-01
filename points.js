@@ -21,20 +21,26 @@
 // Everything about the economics is here, because the economics are the part
 // most likely to change and the part most expensive to get wrong.
 //
-// An eighth earns a point and a point is a dollar off: roughly 4% back, and
-// one sentence to explain at the door. The first draft gave a point per dollar
-// AND made a point worth a dollar, which handed back every dollar of revenue —
-// papant's first month alone would have been $545 of credit against $545 of
-// sales.
+// A punch card, in points. An eighth earns a point, five points is a free
+// eighth: buy five, the sixth is on the shop. Twenty percent back.
 //
-// A WORD ON THESE TWO TOGETHER: at 4% back a free eighth is twenty-five
-// eighths bought, and a thirty-day lapse clears the lot. Somebody buying two
-// eighths a month will not get there. If the scheme looks decorative after a
-// few months, EXPIRE_DAYS is the number to loosen first — the balances
-// recompute themselves the moment it changes, because nothing is stored.
-export const DOLLARS_PER_POINT = 25;
-export const POINT_VALUE = 1;
+// That ratio is the point of the whole scheme rather than a side effect of it.
+// The first draft gave a point per dollar AND made a point worth a dollar,
+// which handed back every dollar of revenue. The second was so tight — four
+// percent, twenty-five eighths for a free one — that somebody buying two a
+// month would never arrive, which is a loyalty scheme that rewards nobody and
+// therefore motivates nobody.
+//
+// Five is the number because five eighths of margin covers the sixth several
+// times over, and because "buy five, get one" needs no explaining at a door.
+//
+// It also rescues the thirty-day lapse. At four percent the expiry was a wall;
+// at twenty percent a regular buying monthly is never near it, and it only
+// bites the people who actually stopped coming.
+export const DOLLARS_PER_POINT = 25;   // an eighth earns a point
+export const POINT_VALUE = 5;          // five points is a $25 eighth
 export const EXPIRE_DAYS = 30;
+export const FREE_AT = 5;
 
 const EXPIRE_MS = EXPIRE_DAYS * 24 * 60 * 60 * 1000;
 
@@ -104,9 +110,10 @@ export function expiresAt(orders, code, now = new Date()) {
 
 // ── the ladder ──────────────────────────────────────────────────────────────
 //
-// Rungs in points, which at a dollar a point are also dollars. The first is a
-// free eighth at this shop's prices.
-export const MILESTONES = [25, 50, 100, 200, 400];
+// The first rung is the free eighth; the rest are the same card, punched
+// again. Kept short deliberately — a ladder somebody cannot see the top of is
+// not a ladder.
+export const MILESTONES = [FREE_AT, FREE_AT * 2, FREE_AT * 4, FREE_AT * 8];
 
 export const nextMilestone = (points) => MILESTONES.find((m) => m > points) || null;
 

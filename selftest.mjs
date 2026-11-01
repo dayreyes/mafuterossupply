@@ -627,6 +627,28 @@ async function automaticMessages() {
   msgs = await during(() => call(orders, { action: 'advance', id: placed.order.id }, s.token));
   ck('a step that cannot move says nothing', msgs.length === 0, msgs);
 
+  section('he can say "it is ready" without faking a step');
+  const ready = await call(orders, { action: 'place',
+    items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, ana.token);
+  const stepBefore = (await call(orders, { action: 'list' }, s.token))
+    .orders.find(o => o.id === ready.order.id).step;
+  msgs = await during(() => call(orders, { action: 'ping', id: ready.order.id }, s.token));
+  ck('the customer gets it', msgs.length === 1 && /ana/.test(msgs[0].endpoint), msgs.map(m => m.endpoint));
+  ck('and it says what he typed', /ready/i.test(msgs[0].msg.body), msgs[0].msg);
+  const stepAfter = (await call(orders, { action: 'list' }, s.token))
+    .orders.find(o => o.id === ready.order.id).step;
+  // The whole point: a nudge is not progress. Pressing it must not advance
+  // the order, or the queue starts lying about where things are.
+  ck('the order has not moved', stepBefore === stepAfter, { stepBefore, stepAfter });
+  ck('pressing it twice is harmless',
+    (await call(orders, { action: 'ping', id: ready.order.id }, s.token)).ok === true);
+  ck('a customer cannot ping anybody',
+    (await call(orders, { action: 'ping', id: ready.order.id }, ana.token)).ok === false);
+  const quietPing = await call(orders, { action: 'place',
+    items: [{ pid: s.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash' }, quiet.token);
+  const none = await call(orders, { action: 'ping', id: quietPing.order.id }, s.token);
+  ck('and he is told when it reached nobody', none.reached === false, none);
+
   section('switching off means off');
   msgs = await during(() => call(codes, { action: 'notify', on: false }, tito.token));
   const after = await call(codes, { action: 'me' }, tito.token);
@@ -1133,6 +1155,39 @@ async function uniqueIds() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// LOST CODE
+//
+// An unauthenticated endpoint on the front door of a cannabis shop. The thing
+// that matters is not that it works — it is that it gives nothing away.
+// ════════════════════════════════════════════════════════════════════════════
+async function lostCode() {
+  const sent = [];
+  const s = await openShop({ hours: { on: false } }, { stock: 100 });
+  const c = await call(codes, { action: 'issue', name: 'Ana' }, s.token);
+  await call(codes, { action: 'saveMe', name: 'Ana', phone: '(813) 555-0101', addr: '1 St' },
+    (await call(auth, { action: 'unlock', code: c.code })).token);
+
+  section('the answer is the same whether the number is known or not');
+  const hit = await call(signups, { action: 'lost', phone: '(813) 555-0101' });
+  const miss = await call(signups, { action: 'lost', phone: '(813) 555-9999' });
+  ck('a number he has gets a plain yes', hit.ok === true, hit);
+  ck('a number he does not also gets a plain yes', miss.ok === true, miss);
+  // If these two ever differ, the endpoint becomes a way to test phone numbers
+  // against a cannabis shop's customer list from anywhere, one request a time.
+  ck('and the two replies are identical',
+    JSON.stringify(hit) === JSON.stringify(miss), { hit, miss });
+
+  section('it never hands back the code itself');
+  ck('not on a match', !JSON.stringify(hit).includes(c.code), hit);
+  ck('nor anything but an acknowledgement',
+    Object.keys(hit).sort().join(',') === 'asked,ok', Object.keys(hit));
+
+  section('rubbish is refused before it reaches the owner');
+  const bad = await call(signups, { action: 'lost', phone: '123' });
+  ck('too short to be a phone number', bad.ok === false, bad);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // MAFUPUNTOS
 //
 // A balance is the customer's money in all but name, so the things that matter
@@ -1152,11 +1207,11 @@ async function mafupuntos() {
   let me = await call(codes, { action: 'me' }, ana);
   ck('a customer with no orders has none', me.points === 0, me.points);
   ck('and is told what a point costs', me.perPoint === 25, me);
-  ck('and what one is worth', me.pointValue === 1, me);
+  ck('and what one is worth', me.pointValue === 5, me);
   await buy(ana, 4);                       // 4 x 3.5g at $25 = $100
   me = await call(codes, { action: 'me' }, ana);
   ck('a $100 order is four points', me.points === 4, me.points);
-  ck('and is worth four dollars', me.worth === 4, me.worth);
+  ck('and is worth twenty dollars', me.worth === 20, me.worth);
 
   section('the economics are not a giveaway');
   // The first draft gave a point per dollar AND made a point worth a dollar,
@@ -1164,8 +1219,12 @@ async function mafupuntos() {
   // have caught that before it shipped.
   const spend = 1000;
   const back = pts.pointsValue(pts.orderPoints({ subtotal: spend, fee: 0 }));
-  ck('a $1000 spend returns $40, not $1000', back === 40, back);
-  ck('which is 4% of it', back / spend === 0.04, back / spend);
+  ck('a $1000 spend returns $200, not $1000', back === 200, back);
+  ck('which is 20% of it', back / spend === 0.2, back / spend);
+  // Five eighths bought, the sixth free. The ratio IS the scheme, so it is
+  // pinned rather than left to drift with whatever the constants become.
+  ck('five eighths earns a free one',
+    pts.pointsValue(5 * pts.orderPoints({ subtotal: 25, fee: 0 })) === 25);
 
   section('the list adds up to the number');
   await buy(ana, 1);
@@ -1191,8 +1250,8 @@ async function mafupuntos() {
   ck('and it drops out of the breakdown', afterCancel.earned.length === 2, afterCancel.earned);
 
   section('the goal ahead of them');
-  ck('the first rung is a free eighth', afterCancel.goal === 25, afterCancel.goal);
-  ck('with the distance to it', afterCancel.toGo === 22, afterCancel.toGo);
+  ck('the first rung is a free eighth', afterCancel.goal === 5, afterCancel.goal);
+  ck('with the distance to it', afterCancel.toGo === 2, afterCancel.toGo);
 
   section('a month without ordering and you start again');
   const day = 86400000;
@@ -1222,14 +1281,14 @@ async function mafupuntos() {
   ck('a customer cannot read anyone else\'s', (await call(codes, { action: 'history', code: hers.profile.code }, ana)).ok === false);
 
   section('a milestone is crossed once, not every order after it');
-  ck('the order that passes it', pts.crossed(24, 26) === 25);
-  ck('nothing for the one after', pts.crossed(26, 30) === null);
-  ck('one message when an order clears two rungs', pts.crossed(24, 120) === 100);
-  ck('and nothing when the balance goes backwards', pts.crossed(300, 20) === null);
+  ck('the order that passes it', pts.crossed(4, 6) === 5);
+  ck('nothing for the one after', pts.crossed(6, 8) === null);
+  ck('one message when an order clears two rungs', pts.crossed(4, 22) === 20);
+  ck('and nothing when the balance goes backwards', pts.crossed(30, 4) === null);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, configMigration, automaticMessages, mafupuntos, diagnose, viewLayer]) {
+for (const suite of [storeHours, shopDayBoundary, costAndProfit, pickupTerms, archiveDelete, alerts, customerHistory, uniqueIds, customerProfile, configMigration, automaticMessages, mafupuntos, lostCode, diagnose, viewLayer]) {
   await suite();
 }
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
