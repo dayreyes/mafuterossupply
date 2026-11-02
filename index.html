@@ -773,7 +773,7 @@ input,textarea,select{font-size:16px}
                      $27, and the gap between those two is the whole scheme. -->
                 <span style="font-family:var(--font-hand);font-size:19px;line-height:1;color:var(--on-dark)">{{ ptsWorthLine }}</span>
               </div>
-              <div style="font:500 11.5px/1.45 var(--font-body);color:var(--faint);margin-top:3px">{{ t.ptsRule }}</div>
+              <div style="font:500 11.5px/1.45 var(--font-body);color:var(--faint);margin-top:3px">{{ ptsRuleLine }}</div>
               <div style="display:{{ ptsGoneDisplay }};font:600 11px/1.45 var(--font-body);color:var(--rust-4);margin-top:6px">{{ ptsGoneLine }}</div>
               <!-- What went, and when. A balance that quietly reads zero
                    looks like a bug, or like the shop took something; naming
@@ -1954,7 +1954,7 @@ const COPY = {
     noCode: '¿No tienes código?', ask: 'Pídelo aquí',
     lostCode: '¿Se te perdió tu código?',
     redeemTitle: n => 'Usa ' + n + ' Mafupuntos',
-    redeemSub: (n, v) => n === 0 ? 'Cada ' + 25 + ' puntos te quitan $25.' : n + ' puntos \u00b7 ' + v + ' menos.',
+    redeemSub: (n, v, b, off) => n === 0 ? 'Cada ' + b + ' puntos te quitan ' + off + '.' : n + ' puntos \u00b7 ' + v + ' menos.',
     ptsLost: (n, d) => 'Se te vencieron ' + n + ' Mafupuntos el ' + d + '.',
     ptsLostTier: ty => 'Eras ' + ty + '. Vuelve a pedir y lo recuperas.',
     lostTitle: 'Te lo mandamos',
@@ -1966,17 +1966,37 @@ const COPY = {
     promoBakerTitle: 'Gramo de ñapa', promoBakerSub: 'Cada onza lleva un gramo de más. Solo pa’ los Patrón.',
     pingReady: 'Avisarle que está lista', pingSent: 'Le llegó el aviso.',
     pingNobody: 'No tiene avisos prendidos — mejor llámalo.',
-    ptsTitle: 'Mafupuntos', ptsRule: 'Un octavo te da 1 Mafupunto. 25 puntos = un octavo gratis.',
+    ptsTitle: 'Mafupuntos',
+    // The rule in money, which is the rule the server actually applies.
+    //
+    // It used to read "un octavo te da 1 Mafupunto", which was wrong twice
+    // over: a Patrón earns three per $25 and the badge above it says 3×, and
+    // an ounce at $140 earns 5 — not the 8 you get by counting eighths. A
+    // customer who adds it up at the door and comes out short is the whole
+    // problem with printing a rule the till does not follow.
+    ptsRule: (d, m, b, off) =>
+      'Cada $' + d + ' que gastas = ' + m + (m === 1 ? ' Mafupunto' : ' Mafupuntos') +
+      '. ' + b + ' puntos = $' + off + ' menos.',
     ptsSoon: 'Premios pronto',
     ptsHistory: 'Cómo los ganaste',
     ptsEmpty: 'Todavía no tienes Mafupuntos. Haz una orden y empiezas.',
-    ptsGoal: (n, g) => n === 1 ? 'Te falta 1 pa’ un octavo gratis.' : 'Te faltan ' + n + ' pa’ un octavo gratis.',
+    // "$25 menos", not "un octavo gratis": twenty-five points come off the
+    // bill, whatever is on it. They only buy an eighth outright while an
+    // eighth is priced at exactly $25, and El Mafu sets the prices.
+    //
+    // And when they are already holding enough, say so FIRST. The old line
+    // told somebody with 39 points "te faltan 11" and never mentioned the $25
+    // they could have taken off that afternoon.
+    ptsGoal: (n, readyOff, nextOff) => readyOff
+      ? 'Tienes $' + readyOff + ' menos listos pa’ la bolsa. Otros ' +
+        (n === 1 ? '1 punto' : n + ' puntos') + ' y son $' + nextOff + '.'
+      : (n === 1 ? 'Te falta 1 punto' : 'Te faltan ' + n + ' puntos') +
+        ' pa’ $' + nextOff + ' menos.',
     tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7',
     // Not "te faltan": that is how the POINTS goal under the bar reads, and
     // two "te faltan" lines on one card is how it got confusing.
     tierNext: (g, t) => 'Otros ' + g + 'g y eres ' + t + '.',
     tierTop: 'Est\u00e1s en lo m\u00e1s alto.',
-    ptsTop: 'Pasaste todas las metas. Bestia.',
     saving: 'Guardando…',
     confirmTitle: 'Confirma que te llegó el pago',
     confirmSub: 'Hasta que lo confirmes, esto no está separado.',
@@ -2228,7 +2248,7 @@ const COPY = {
     noCode: 'No code?', ask: 'Ask for one',
     lostCode: 'Lost your code?',
     redeemTitle: n => 'Spend ' + n + ' Mafupuntos',
-    redeemSub: (n, v) => n === 0 ? 'Every ' + 25 + ' points takes $25 off.' : n + ' points \u00b7 ' + v + ' off.',
+    redeemSub: (n, v, b, off) => n === 0 ? 'Every ' + b + ' points takes ' + off + ' off.' : n + ' points \u00b7 ' + v + ' off.',
     ptsLost: (n, d) => n + ' Mafupuntos expired on ' + d + '.',
     ptsLostTier: ty => 'You were ' + ty + '. Order again and you climb back.',
     lostTitle: 'We will send it over',
@@ -2240,15 +2260,20 @@ const COPY = {
     promoBakerTitle: "Baker's dozen", promoBakerSub: 'A gram on the house with every ounce. Patrón only.',
     pingReady: 'Tell them it is ready', pingSent: 'They got the nudge.',
     pingNobody: 'No alerts on their phone — better ring them.',
-    ptsTitle: 'Mafupuntos', ptsRule: 'An eighth earns 1 Mafupunto. 25 points = an eighth free.',
+    ptsTitle: 'Mafupuntos',
+    ptsRule: (d, m, b, off) =>
+      'Every $' + d + ' you spend earns ' + m + (m === 1 ? ' Mafupunto' : ' Mafupuntos') +
+      '. ' + b + ' points = $' + off + ' off.',
     ptsSoon: 'Rewards coming soon',
     ptsHistory: 'How you earned them',
     ptsEmpty: 'No Mafupuntos yet. Place an order and you are away.',
-    ptsGoal: (n, g) => n === 1 ? '1 more and the next eighth is free.' : n + ' more and an eighth is free.',
+    ptsGoal: (n, readyOff, nextOff) => readyOff
+      ? '$' + readyOff + ' off waiting in your bag. ' + (n === 1 ? '1 point' : n + ' points') +
+        ' more makes it $' + nextOff + '.'
+      : (n === 1 ? '1 point' : n + ' points') + ' to go for $' + nextOff + ' off.',
     tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7',
     tierNext: (g, t) => g + 'g more and you are ' + t + '.',
     tierTop: 'Top tier. Nothing above this.',
-    ptsTop: 'You have passed every goal. Animal.',
     saving: 'Saving\u2026',
     confirmTitle: 'Confirm the payment landed',
     confirmSub: 'Until you confirm, nothing is held.',
@@ -2447,16 +2472,15 @@ const STICKERS = ['var(--green-pale)', 'var(--blush)', 'var(--blush-2)', 'var(--
 const BUILD = "2026-11-01.0930";
 
 
-// The Mafupuntos ladder, and the ONE thing in here that has to agree with the
-// server: lib/points.js owns the real list and decides what has actually been
-// earned. This copy exists only to draw the progress bar between one rung and
-// the next, so if the two ever drift the bar is wrong and the number is right —
-// which is the correct way round for a mistake to land.
-const PTS_RUNGS = [25, 50, 100, 200];
-// Mirrored from lib/points.js, which owns the real figures and decides what
-// anyone has actually earned. These exist only to draw the bar and promise a
-// number at checkout, so if the two ever drift the drawing is wrong and the
-// balance is right — which is the correct way round for a mistake to land.
+// The last mirror of lib/points.js left in the page, and only a fallback: the
+// server sends perPoint, pointValue and redeemBlock with the profile and those
+// replace it the moment it lands. It exists so a bag opened in the first second
+// of a session does not promise "$0 off".
+//
+// The MILESTONES ladder used to be mirrored here as well, to draw the bar
+// between one rung and the next. The bar measures blocks of redeemable points
+// now, which the page works out from the balance, so there is nothing left to
+// drift.
 const PTS_PER = 25;
 
 // What each kind of thing comes in, and how much a full one holds.
@@ -2549,7 +2573,6 @@ class Component extends DCLogic {
     profile: null,
     favs: [],
     pts: 0,
-    ptsGoal: 0,
     ptsWorth: 0,
     lostPts: 0, lostAt: '', lostTier: '',
     useBlocks: 0,
@@ -2558,8 +2581,11 @@ class Component extends DCLogic {
     lostMsg: '',
     lostOk: false,
     tier: '', tierMult: 1, nextTier: '', nextTierGrams: 0,
+    // Seeded from the mirror below and replaced by the server's own figures the
+    // moment the profile lands. Starting at the mirror rather than at zero so a
+    // bag opened in the first second does not promise "$0 off".
+    ptsPer: PTS_PER, ptsOne: 1, ptsBlock: PTS_PER,
     ptsExpires: '',
-    ptsToGo: 0,
     ptsEarned: [],
     pfDraft: null,
     pushMsg: '',
@@ -2903,8 +2929,12 @@ class Component extends DCLogic {
           tier: res.tier || '', tierMult: res.tierMult || 1,
           nextTier: res.nextTier || '', nextTierGrams: res.nextTierGrams || 0,
           ptsExpires: res.expiresAt || '',
-          ptsGoal: res.goal || 0,
-          ptsToGo: res.toGo || 0,
+          // The economics, from the one place that owns them. The page used to
+          // mirror "25" in three spots and state the rule as prose about
+          // eighths; now the rule it prints is the rule the server charges.
+          ptsPer: res.perPoint || PTS_PER,
+          ptsOne: res.pointValue || 1,
+          ptsBlock: res.redeemBlock || PTS_PER,
           ptsEarned: res.earned || []
         });
       }
@@ -3582,8 +3612,14 @@ class Component extends DCLogic {
     const fee = this.feeAmount();
     // What they could spend on THIS bag. Clamped here and again on the
     // server, which is the one that actually decides.
+    //
+    // Two different numbers, which happen to be equal today: the block costs
+    // ptsBlock POINTS and takes blockOff DOLLARS off. Dividing the subtotal by
+    // the point count works only while a point is a dollar.
+    const ptsBlock = s.ptsBlock || PTS_PER;
+    const blockOff = ptsBlock * (s.ptsOne || 1);
     const maxBlocks = Math.max(0, Math.min(
-      Math.floor((s.pts || 0) / PTS_PER), Math.floor(sub / PTS_PER)));
+      Math.floor((s.pts || 0) / ptsBlock), Math.floor(sub / blockOff)));
     const blocksNow = Math.min(s.useBlocks || 0, maxBlocks);
     const zone = this.zone();
     const allowed = this.zones();
@@ -3992,6 +4028,11 @@ class Component extends DCLogic {
       lostTierDisplay: s.lostTier && s.lostTier !== 'Mafutero' ? 'block' : 'none',
       lostTierLine: t.ptsLostTier(s.lostTier || ''),
       tierLabel: t.tierLine(s.tier || 'Mafutero', s.tierMult || 1),
+      // The rule, stated at THIS customer's multiplier and in the server's own
+      // figures. A card that shows a 3× badge and then says "an eighth earns 1
+      // Mafupunto" is arguing with itself, and the customer counting at the
+      // door is the one who loses the argument.
+      ptsRuleLine: t.ptsRule(s.ptsPer || PTS_PER, s.tierMult || 1, ptsBlock, blockOff),
       // Grams still needed, not the threshold. "42g" means nothing to
       // somebody holding a phone; "another half ounce" means everything.
       tierNextLine: s.nextTier ? t.tierNext(s.nextTierGrams, s.nextTier) : t.tierTop,
@@ -3999,17 +4040,29 @@ class Component extends DCLogic {
       // points that they are about to lose none of them is just noise.
       ptsGoneDisplay: (s.pts || 0) > 0 && s.ptsExpires ? 'block' : 'none',
       ptsGoneLine: s.ptsExpires ? t.ptsGone(stamp(s.ptsExpires).split(' \u00b7 ')[0]) : '',
-      ptsGoalDisplay: s.ptsGoal ? 'block' : 'none',
-      ptsGoalLine: s.ptsGoal ? t.ptsGoal((s.ptsToGo || 0).toLocaleString('en-US'), s.ptsGoal.toLocaleString('en-US')) : t.ptsTop,
-      // The bar fills across the gap between the rung just cleared and the one
-      // ahead, not from zero — from zero every bar past the first rung sits
-      // nearly full and stops meaning anything.
-      ptsPct: (() => {
-        if (!s.ptsGoal) return '100%';
-        const span = s.ptsGoal - (PTS_RUNGS.filter(m => m <= (s.pts || 0)).pop() || 0);
-        const done = span > 0 ? ((s.pts || 0) - (s.ptsGoal - span)) / span : 0;
-        return Math.max(2, Math.min(100, Math.round(done * 100))) + '%';
+      // Blocks, not rungs.
+      //
+      // This used to read off the MILESTONES ladder — 25, 50, 100, 200 — and
+      // say "11 more for a free eighth" to somebody holding 39 points, who
+      // could already have taken $25 off that afternoon and was never told.
+      // Now that points really can be spent, there is no ladder to climb:
+      // every 25 points is $25 off, again and again. So the bar measures the
+      // distance to the next block and the line says what is already waiting.
+      ptsGoalDisplay: 'block',
+      ptsGoalLine: (() => {
+        const ready = Math.floor((s.pts || 0) / ptsBlock) * blockOff;
+        // Zero stays a NUMBER through to the copy. Formatting it first makes it
+        // the string "0", which is truthy, and the card then reads "Tienes $0
+        // menos listos" to somebody holding two points.
+        return t.ptsGoal(
+          (ptsBlock - ((s.pts || 0) % ptsBlock)).toLocaleString('en-US'),
+          ready > 0 ? ready.toLocaleString('en-US') : 0,
+          (ready + blockOff).toLocaleString('en-US'));
       })(),
+      // Across the current block only. Full-width at 24 points and empty again
+      // at 25 is correct: the 25 went from "coming" to "ready", and the line
+      // underneath says so.
+      ptsPct: Math.max(2, Math.round(((s.pts || 0) % ptsBlock) / ptsBlock * 100)) + '%',
       ptsHistDisplay: (s.ptsEarned || []).length ? 'block' : 'none',
       ptsEmptyDisplay: (s.ptsEarned || []).length ? 'none' : 'block',
       // Four, not the lot. Their whole order list is already further down this
@@ -4485,22 +4538,27 @@ class Component extends DCLogic {
       payNoteTitle, payNoteBody, payNoteBg, payNoteBorder,
 
       subtotal: cash(sub),
-      // Floored the same way the server floors it, so the number promised here
-      // is the number that lands. Hidden on an empty bag.
-      earnLine: t.earnPts(Math.floor((sub + (fee || 0)) / PTS_PER)),
+      // Floored the same way the server floors it, AND multiplied by the tier
+      // the same way — which it was not. The server pays
+      // floor((subtotal + fee) / $25) x the tier multiplier; this line left the
+      // multiplier off, so a Patrón was told one point at the bag and paid
+      // three. Under-promising is the kinder direction to be wrong in and it is
+      // still wrong: the card next door says 3x, so the bag was calling it a
+      // liar. Hidden on an empty bag.
+      earnLine: t.earnPts(Math.floor((sub + (fee || 0)) / (s.ptsPer || PTS_PER)) * (s.tierMult || 1)),
       earnDisplay: sub > 0 ? 'block' : 'none',
       // Blocks they could spend here: never more than they hold, never more
       // than the goods are worth. The server checks both again.
       redeemDisplay: maxBlocks > 0 ? 'block' : 'none',
-      redeemTitle: t.redeemTitle(PTS_PER),
-      redeemSub: t.redeemSub(blocksNow * PTS_PER, cash(blocksNow * PTS_PER)),
+      redeemTitle: t.redeemTitle(ptsBlock),
+      redeemSub: t.redeemSub(blocksNow * ptsBlock, cash(blocksNow * blockOff), ptsBlock, cash(blockOff)),
       blocksUsed: String(blocksNow),
       moreBlocks: () => this.setState({ useBlocks: Math.min(maxBlocks, blocksNow + 1) }),
       fewerBlocks: () => this.setState({ useBlocks: Math.max(0, blocksNow - 1) }),
       feeLabel: s.mode === 'delivery' && zone ? t.feeDelivery + ' · ' + zone.mi + ' mi' : t.feePickup,
       fee: fee ? cash(fee) : t.free,
       dueLabel: pay && !pay.fast ? t.dueCash : t.duePaid(this.payLabel()),
-      total: cash(Math.max(0, sub + fee - blocksNow * PTS_PER)),
+      total: cash(Math.max(0, sub + fee - blocksNow * blockOff)),
       place: () => { if (s.shopOpen !== false) this.place(); },
       placeLabel: s.shopOpen === false ? t.shutTitle : t.sendOrder,
       placeBg: s.shopOpen === false ? 'var(--faint)' : 'var(--green)',

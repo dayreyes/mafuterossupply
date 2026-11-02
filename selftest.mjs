@@ -399,7 +399,7 @@ async function customerProfile() {
   // response has to be looked at: `me` is the reply that could most easily
   // start carrying somebody else's details without anyone noticing.
   ck('and nothing else is attached',
-    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,goal,lost,nextTier,nextTierGrams,ok,perPoint,pointValue,points,profile,tier,tierDays,tierGrams,tierId,tierMult,toGo,worth', Object.keys(r));
+    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,lost,nextTier,nextTierGrams,ok,perPoint,pointValue,points,profile,redeemBlock,tier,tierDays,tierGrams,tierId,tierMult,worth', Object.keys(r));
   ck('the profile itself still carries only their own fields',
     Object.keys(r.profile).sort().join(',') === 'addr,code,devices,favs,name,notify,phone', Object.keys(r.profile));
 
@@ -918,7 +918,7 @@ async function viewLayer() {
     const block = lang === 'es'
       ? html.slice(html.indexOf('ptsWorth: v =>'), html.indexOf('ptsWorth: v =>', html.indexOf('ptsWorth: v =>') + 1))
       : html.slice(html.indexOf('ptsWorth: v =>', html.indexOf('ptsWorth: v =>') + 1));
-    const goal = /ptsGoal: \(n, g\) =>([^\n]*)/.exec(block);
+    const goal = /ptsGoal: \(n, readyOff, nextOff\) =>([\s\S]{0,300}?)(?:\n\s*tierLine)/.exec(block);
     const next = /tierNext: \(g, t\) =>([^\n]*)/.exec(block);
     const head = (s) => (/'([^']{4,14})/.exec(s || '') || ['', ''])[1].trim();
     ck(lang + ': the tier line and the points goal do not open alike',
@@ -1331,9 +1331,19 @@ async function mafupuntos() {
   ck('the sale did not happen, so the points did not either', afterCancel.points === 3, afterCancel.points);
   ck('and it drops out of the breakdown', afterCancel.earned.length === 2, afterCancel.earned);
 
-  section('the goal ahead of them');
-  ck('the first rung is a free eighth', afterCancel.goal === 25, afterCancel.goal);
-  ck('with the distance to it', afterCancel.toGo === 22, afterCancel.toGo);
+  section('the goal ahead of them is a block, not a rung');
+  // `goal` and `toGo` are gone from this reply. They were the next rung of the
+  // MILESTONES ladder, and the card turned them into "11 more for a free
+  // eighth" for somebody holding 39 points who could already take $25 off.
+  // What the card needs is the block size, which it divides the balance by.
+  ck('no ladder rung is sent any more', afterCancel.goal === undefined, afterCancel.goal);
+  ck('nor a distance to one', afterCancel.toGo === undefined, afterCancel.toGo);
+  ck('the block size is, so the card can work it out',
+    afterCancel.redeemBlock === 25 && afterCancel.pointValue === 1,
+    { block: afterCancel.redeemBlock, value: afterCancel.pointValue });
+  // 3 points: nothing ready, 22 to the first block.
+  ck('and it comes out right', 3 % afterCancel.redeemBlock === afterCancel.points &&
+    afterCancel.redeemBlock - afterCancel.points === 22, afterCancel.points);
 
   section('two months without ordering and you start again');
   const day = 86400000;
@@ -1430,6 +1440,85 @@ async function mafupuntos() {
     items: [{ pid: rd.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash', useBlocks: 99 }, rich);
   ck('a discount never exceeds the goods', over.order.discount <= over.order.subtotal, over.order);
   ck('and a total is never negative', !/-/.test(over.order.total), over.order.total);
+
+  section('the card states the rule the till actually follows');
+  // It read "Un octavo te da 1 Mafupunto. 25 puntos = un octavo gratis."
+  //
+  // Wrong twice. A Patron earns three per $25 and the badge directly above it
+  // says 3x, so the card argued with itself. And counting eighths does not
+  // survive a bigger basket: an ounce at $140 earns five points, not the eight
+  // you get by counting eighths into it. A customer who adds it up at the door
+  // and comes out short is the whole cost of printing a rule the till does not
+  // follow.
+  const ozPts = pts.orderPoints({ subtotal: 140, fee: 0 }, 1);
+  ck('an ounce does not earn eight points, it earns five', ozPts === 5, ozPts);
+  ck('so "an eighth earns a point" was never the rule',
+    ozPts !== Math.round(28 / 3.5), { paid: ozPts, byEighths: 8 });
+  ck('and a Patron earns three times it', pts.orderPoints({ subtotal: 140, fee: 0 }, 3) === 15);
+
+  // So the copy has to be stated in money, with the multiplier, and may not
+  // promise an eighth — a price El Mafu sets and can change this afternoon.
+  const { readFileSync: rfs } = await import('node:fs');
+  const html = rfs(join(root, 'index.html'), 'utf8');
+  const script = /<script type="text\/x-dc" data-dc-script>([\s\S]*?)<\/script>/.exec(html)[1];
+  for (const lang of ['es', 'en']) {
+    const block = lang === 'es'
+      ? html.slice(html.indexOf('ptsWorth: v =>'), html.indexOf('ptsWorth: v =>', html.indexOf('ptsWorth: v =>') + 1))
+      : html.slice(html.indexOf('ptsWorth: v =>', html.indexOf('ptsWorth: v =>') + 1));
+    const rule = (/ptsRule: \(d, m, b, off\) =>([\s\S]{0,220}?)\n\s*ptsSoon/.exec(block) || ['', ''])[1];
+    const goal = (/ptsGoal: \(n, readyOff, nextOff\) =>([\s\S]{0,300}?)(?:\n\s*tierLine)/.exec(block) || ['', ''])[1];
+    ck(lang + ': the rule is a function of the real figures', /\+ d \+/.test(rule) && /\+ b \+/.test(rule), rule.slice(0, 90));
+    ck(lang + ': and of the customer’s own multiplier', /\+ m \+/.test(rule), rule.slice(0, 90));
+    ck(lang + ': neither line promises an eighth',
+      !/octavo|eighth/i.test(rule + goal), (rule + goal).slice(0, 120));
+    ck(lang + ': the goal is money off, not a named product', /\$' \+ nextOff/.test(goal), goal.slice(0, 90));
+    ck(lang + ': and says what is already redeemable first', /readyOff\s*$|readyOff$/m.test(goal.split('\n')[0]) || /\? *'/.test(goal), goal.slice(0, 60));
+  }
+  // And the page must pass the tier through to it, or the badge and the rule
+  // disagree again with nothing to catch it.
+  ck('the rule is drawn at the tier the customer holds',
+    /ptsRuleLine: t\.ptsRule\(s\.ptsPer \|\| PTS_PER, s\.tierMult \|\| 1,/.test(script));
+
+  // Nothing redeemable has to reach the copy as a number. Formatted first it
+  // becomes the string "0", which is truthy, and the card reads "Tienes $0
+  // menos listos" to somebody holding two points.
+  const esGoal = (/ptsGoal: \(n, readyOff, nextOff\) =>([\s\S]{0,300}?)(?:\n\s*tierLine)/
+    .exec(html.slice(html.indexOf('ptsWorth: v =>'))) || ['', ''])[1];
+  const goalFn = new Function('n', 'readyOff', 'nextOff', 'return (' + esGoal.trim().replace(/,$/, '') + ')');
+  ck('nothing ready says nothing, not "$0"', !/\$0/.test(goalFn('23', 0, '25')), goalFn('23', 0, '25'));
+  ck('and something ready is named before the next block',
+    /\$25/.test(goalFn('11', '25', '50')) && /\$50/.test(goalFn('11', '25', '50')), goalFn('11', '25', '50'));
+  ck('the page keeps zero a number', /ready > 0 \? ready\.toLocaleString\('en-US'\) : 0/.test(script));
+
+  section('the bag promises what the order pays');
+  // The bag said floor((subtotal + fee) / $25) and left the multiplier off, so
+  // a Patron was told one point and credited three. The comment above it even
+  // claimed it was floored "the same way the server floors it".
+  const earnSrc = (/earnLine: t\.earnPts\(([^\n]*)\),/.exec(script) || ['', ''])[1];
+  ck('the bag multiplies by the tier', /s\.tierMult/.test(earnSrc), earnSrc);
+  ck('and divides by the figure the server sent', /s\.ptsPer/.test(earnSrc), earnSrc);
+  // End to end: what the bag would have shown for THIS order, against what
+  // landed on it. Matched by order number rather than taking the newest row,
+  // so another order placed above it cannot make the check pass by accident.
+  const fresh = await ozBuy(0);
+  const bagSaid = Math.floor((fresh.order.subtotal + (fresh.order.fee || 0)) / 25) * 3; // Patron
+  const row = (await call(codes, { action: 'me' }, rich)).earned.find(e => e.no === fresh.order.no);
+  ck('the bag’s figure is the one that lands', !!row && bagSaid === row.points,
+    { no: fresh.order.no, bagSaid, paid: row && row.points, tier: row && row.tier });
+  ck('and it is three times the base, not one', bagSaid === 15, bagSaid);
+
+  section('a block is a count of points and an amount of money');
+  // The same number today only because a point is a dollar. Capping the
+  // subtotal by the POINT count would, at any other point value, let a $50 bag
+  // take two blocks worth $50 each.
+  ck('the two are spelt out separately', pts.BLOCK_OFF === pts.REDEEM_BLOCK * pts.POINT_VALUE,
+    { block: pts.REDEEM_BLOCK, off: pts.BLOCK_OFF, value: pts.POINT_VALUE });
+  ck('and the cap counts the money', /Math\.floor\(subtotal \/ BLOCK_OFF\)/.test(
+    rfs(join(root, 'points.js'), 'utf8')));
+  ck('nothing to redeem against a bag worth less than a block', pts.blocksFor(1000, 24) === 0);
+  ck('one block at exactly a block’s worth', pts.blocksFor(1000, 25) === 1);
+  ck('and not two until the bag is worth two', pts.blocksFor(1000, 49) === 1);
+  ck('held points cap it as well', pts.blocksFor(25, 1000) === 1);
 
   section('a milestone is crossed once, not every order after it');
   ck('the order that passes it', pts.crossed(24, 26) === 25);

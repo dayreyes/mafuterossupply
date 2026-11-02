@@ -332,7 +332,13 @@ export default async (req) => route(req, {
     // them past it, so this is rare by construction — four or five times in a
     // customer's whole history — which is what keeps it worth reading.
     if (cfg.notifs && cfg.notifs.points && order.clientCode) {
-      const rung = crossed(ptsBefore, ptsBefore + orderPoints(order));
+      // At the tier they held, and net of what this order spent — the same two
+      // corrections the balance itself gets. Without the multiplier a Patron
+      // could clear a rung on the strength of their 3x and never be told;
+      // without the spend, an order that redeemed would announce a rung the
+      // balance is no longer at.
+      const after = Math.max(0, ptsBefore + orderPoints(order, buyerTier.mult) - pointsSpent);
+      const rung = crossed(ptsBefore, after);
       if (rung) await pushTo([order.clientCode], pointsMsg(cfg, rung));
     }
 

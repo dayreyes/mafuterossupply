@@ -170,11 +170,17 @@ export const pointsFor = (orders, code, now = new Date()) => {
   return Math.max(0, earned - spent);
 };
 
+// What one block takes off the bill. Spelt out rather than assumed equal to
+// REDEEM_BLOCK: they are the same number today only because a point is worth a
+// dollar, and the two are separate dials. Raise POINT_VALUE with the cap below
+// still counting in points and a $50 bag could take two blocks worth $50 each.
+export const BLOCK_OFF = REDEEM_BLOCK * POINT_VALUE;
+
 // How many blocks this order could pay for: never more than they hold, and
 // never more than the goods are worth — the delivery fee is his mileage and
 // is not something points buy.
 export const blocksFor = (points, subtotal) =>
-  Math.max(0, Math.min(Math.floor(points / REDEEM_BLOCK), Math.floor(subtotal / REDEEM_BLOCK)));
+  Math.max(0, Math.min(Math.floor(points / REDEEM_BLOCK), Math.floor(subtotal / BLOCK_OFF)));
 
 // What the balance is worth in money.
 export const pointsValue = (points) => points * POINT_VALUE;
@@ -215,14 +221,19 @@ export function expiresAt(orders, code, now = new Date()) {
   return new Date(new Date(live[0].at).getTime() + EXPIRE_MS).toISOString();
 }
 
-// ── the ladder ──────────────────────────────────────────────────────────────
+// ── the ladder, which is only for the congratulations push ──────────────────────────────────────────────────────────────
 //
-// A free eighth at twenty-five, then again. At the base tier that is
-// twenty-five eighths; at Patr\u00f3n it is eight and a bit, which is the tier
-// doing its job.
+// $25 off at twenty-five points, then fifty, a hundred, two hundred.
+//
+// This is NOT what the card shows, and must not be. Every 25 points is $25 off,
+// over and over, so there is no rung a customer is climbing towards — the card
+// divides the balance by REDEEM_BLOCK and says what is ready now. It did read
+// off this ladder, and told somebody holding 39 points "11 more for a free
+// eighth" while $25 of their own money sat there unmentioned.
+//
+// What the ladder is still good for is knowing when to say well done without
+// saying it every 25 points for ever: four times in a customer's history.
 export const MILESTONES = [REDEEM_BLOCK, REDEEM_BLOCK * 2, REDEEM_BLOCK * 4, REDEEM_BLOCK * 8];
-
-export const nextMilestone = (points) => MILESTONES.find((m) => m > points) || null;
 
 // The rung an order just carried somebody past, if any.
 //
