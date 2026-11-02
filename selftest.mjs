@@ -399,7 +399,7 @@ async function customerProfile() {
   // response has to be looked at: `me` is the reply that could most easily
   // start carrying somebody else's details without anyone noticing.
   ck('and nothing else is attached',
-    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,ladder,lost,nextTier,nextTierGrams,nextTierId,ok,perPoint,pointValue,points,profile,redeemOn,tier,tierDays,tierFrom,tierGrams,tierId,tierMult,tierTo', Object.keys(r));
+    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,gramsPerPoint,ladder,lost,nextTier,nextTierGrams,nextTierId,ok,pointValue,points,profile,redeemOn,tier,tierDays,tierFrom,tierGrams,tierId,tierMult,tierTo', Object.keys(r));
   ck('the profile itself still carries only their own fields',
     Object.keys(r.profile).sort().join(',') === 'addr,code,devices,favs,name,notify,phone', Object.keys(r.profile));
 
@@ -1290,7 +1290,9 @@ async function mafupuntos() {
   section('an eighth earns a point');
   let me = await call(codes, { action: 'me' }, ana);
   ck('a customer with no orders has none', me.points === 0, me.points);
-  ck('and is told what a point costs', me.perPoint === 25, me);
+  ck('and is told what a point costs, in grams', me.gramsPerPoint === 3.5, me.gramsPerPoint);
+  ck('and no longer in dollars, which is what it used to say',
+    me.perPoint === undefined, me.perPoint);
   ck('and what one is worth', me.pointValue === 1, me);
   ck('and starts at the bottom tier',
     me.tierId === pts.BASE_TIER.id && me.tierMult === 1, { id: me.tierId, mult: me.tierMult });
@@ -1299,27 +1301,56 @@ async function mafupuntos() {
   // against the name would have passed on the wrong rung.
   ck('and the bottom tier is Pana', pts.BASE_TIER.id === 'pana', pts.BASE_TIER);
   ck('and the top one is the shop itself', pts.TOP_TIER.id === 'mafutero', pts.TOP_TIER);
-  await buy(ana, 4);                       // 4 x 3.5g at $25 = $100
+  await buy(ana, 4);                       // 4 x 3.5g = 14g = four eighths
   me = await call(codes, { action: 'me' }, ana);
-  ck('a $100 order is four points', me.points === 4, me.points);
+  ck('four eighths is four points', me.points === 4, me.points);
   // Not priced. Nothing can be redeemed, so the reply carries no dollar figure
   // at all — a number in the payload is a number that reaches a screen.
   ck('but is not priced, because nothing can be spent',
     me.redeemOn === false && me.worth === undefined && me.redeemBlock === undefined, me);
 
+  section('a point is an eighth, not a dollar');
+  // It was money: a point per $25 spent. The two looked equivalent because an
+  // eighth was $25 that week, and they are not — and the gap falls on exactly
+  // the orders the shop most wants, because it widens with the size of the
+  // basket.
+  const anOz = { subtotal: 140, fee: 0, items: [{ grams: 28, qty: 1 }] };
+  ck('an ounce is eight points, not five', pts.orderPoints(anOz) === 8, pts.orderPoints(anOz));
+  ck('three eighths is three points',
+    pts.orderPoints({ items: [{ grams: 3.5, qty: 3 }] }) === 3);
+  ck('and at the top tier, nine',
+    pts.orderPoints({ items: [{ grams: 3.5, qty: 3 }] }, 3) === 9);
+  // The price is now irrelevant, which is the whole point of moving to weight:
+  // El Mafu can reprice an eighth this afternoon and nobody's rate changes.
+  ck('the price does not enter into it',
+    pts.orderPoints({ subtotal: 999, items: [{ grams: 28, qty: 1 }] }) ===
+    pts.orderPoints({ subtotal: 1, items: [{ grams: 28, qty: 1 }] }));
+  // Floored on the whole order's weight, not line by line, so two halves of an
+  // eighth still earn the eighth.
+  ck('two halves of an eighth still earn it',
+    pts.orderPoints({ items: [{ grams: 1.75, qty: 1 }, { grams: 1.75, qty: 1 }] }) === 1);
+  ck('and 3g alone earns nothing', pts.orderPoints({ items: [{ grams: 3, qty: 1 }] }) === 0);
+  // The delivery fee is his mileage, not goods, and no longer earns anything.
+  ck('the fee earns nothing',
+    pts.orderPoints({ fee: 50, items: [{ grams: 3.5, qty: 1 }] }) === 1);
+
   section('the economics are not a giveaway');
   // The first draft gave a point per dollar AND made a point worth a dollar,
-  // which hands back every dollar of revenue. This is the check that would
-  // have caught that before it shipped.
-  const spend = 1000;
-  const back = pts.pointsValue(pts.orderPoints({ subtotal: spend, fee: 0 }));
-  ck('a $1000 spend returns $40 at base tier', back === 40, back);
-  ck('which is 4% of it', back / spend === 0.04, back / spend);
-  // The tier is the whole motivation, so the ladder is pinned: the same
-  // spend has to pay three times as much at the top as at the bottom.
-  const atTier = (m) => pts.pointsValue(pts.orderPoints({ subtotal: spend, fee: 0 }, m));
-  ck('Veterano doubles it', atTier(2) === 80, atTier(2));
-  ck('Patr\u00f3n triples it', atTier(3) === 120, atTier(3));
+  // which hands back every dollar of revenue. On weight the exposure is a
+  // function of the shelf price of an eighth, so it is pinned here against the
+  // shop's real one.
+  const EIGHTH = 25;                       // what this shop charges for 3.5g
+  const ozBack = pts.pointsValue(pts.orderPoints(anOz));
+  ck('an ounce at the base tier owes $8 back', ozBack === 8, ozBack);
+  ck('which is under 6% of a $140 ounce', ozBack / 140 < 0.06, ozBack / 140);
+  ck('and one eighth owes a dollar on $25, which is 4%',
+    pts.pointsValue(pts.orderPoints({ items: [{ grams: 3.5, qty: 1 }] })) / EIGHTH === 0.04);
+  // The tier is the whole motivation, so the ladder is pinned: the same weight
+  // has to pay three times as much at the top as at the bottom.
+  const atTier = (m) => pts.pointsValue(pts.orderPoints(anOz, m));
+  ck('the middle tier doubles it', atTier(2) === 16, atTier(2));
+  ck('the top tier triples it', atTier(3) === 24, atTier(3));
+  ck('and the top is still under 18% of the ounce', atTier(3) / 140 < 0.18, atTier(3) / 140);
 
   section('the list adds up to the number');
   await buy(ana, 1);
@@ -1366,25 +1397,36 @@ async function mafupuntos() {
   section('two months without ordering and you start again');
   const day = 86400000;
   const code = 'ZZ';
-  const ord = (daysAgo, subtotal) => ({ clientCode: code, no: '#' + daysAgo, cancelled: false,
-    subtotal, fee: 0, at: new Date(Date.now() - daysAgo * day).toISOString() });
+  // In GRAMS, because that is what earns now. 14g is four eighths, so four
+  // points at the base tier.
+  const ord = (daysAgo, grams) => ({ clientCode: code, no: '#' + daysAgo, cancelled: false,
+    subtotal: 0, fee: 0, items: [{ grams, qty: 1 }],
+    at: new Date(Date.now() - daysAgo * day).toISOString() });
+  // Deliberately light enough to stay inside the base tier: these are about
+  // expiry, and a fixture that also crosses a tier threshold starts testing
+  // two things at once and asserting the wrong total.
   ck('a recent run all counts',
-    pts.pointsFor([ord(1, 100), ord(10, 100), ord(20, 100)], code) === 12);
+    pts.pointsFor([ord(1, 10.5), ord(10, 10.5), ord(20, 10.5)], code) === 9);
   ck('nothing counts once the last order is past the window',
-    pts.pointsFor([ord(70, 100), ord(80, 100)], code) === 0);
+    pts.pointsFor([ord(70, 14), ord(80, 14)], code) === 0);
   // The reason the window moved: thirty days punished the shop's normal
   // rhythm. Somebody buying roughly monthly must not be wiped by one slow
   // cycle, which is exactly what was happening.
   ck('a monthly buyer who slips a little keeps everything',
-    pts.pointsFor([ord(2, 100), ord(38, 100), ord(74, 100)], code) > 0);
+    pts.pointsFor([ord(2, 14), ord(38, 14), ord(74, 14)], code) > 0);
   // The naive "is their last order old" version passes the two above and
   // fails this one: a gap in the middle has to burn everything before it.
   ck('a gap in the middle burns what came before it',
-    pts.pointsFor([ord(2, 100), ord(75, 100), ord(80, 100)], code) === 4);
+    pts.pointsFor([ord(2, 7), ord(75, 7), ord(80, 7)], code) === 2);
+  // And the tier is NOT burned with them: it is the grams of the last ninety
+  // days whatever happened to the points, so somebody who lapsed and came back
+  // still earns at the rate their buying says they should.
+  ck('but the tier still counts the grams that expired',
+    pts.tierAt([ord(2, 14), ord(75, 14), ord(80, 14)], code).id === 'socio');
   ck('and ordering again does not bring expired points back',
-    pts.pointsFor([ord(0, 25), ord(100, 500)], code) === 1);
+    pts.pointsFor([ord(0, 3.5), ord(100, 70)], code) === 1);
   ck('the customer is told when it goes',
-    typeof pts.expiresAt([ord(1, 100)], code) === 'string');
+    typeof pts.expiresAt([ord(1, 14)], code) === 'string');
 
   section('a zero balance says what was lost, not nothing');
   // A balance that quietly reads 0 looks like a bug, or like the shop took
@@ -1401,12 +1443,15 @@ async function mafupuntos() {
   ck('and what they were before', typeof info.tier === 'string' && info.tier.length > 0, info.tier);
 
   const partly = [lapsed(2, 140, 28), lapsed(70, 140, 28)];
-  // 10, not 5: the surviving order was placed while they held Veterano, so
-  // it earned at double — which is the "earned at the tier you held" rule
-  // doing exactly what it should.
-  ck('a gap loses only what is behind it', pts.pointsFor(partly, 'L') === 10,
+  // Two ounces inside the ninety-day tier window is 56g, which is Socio, so the
+  // surviving ounce earned at double: 8 eighths x 2 = 16. The expired one was
+  // placed when only it had happened, 28g, still the base tier, so 8.
+  //
+  // Which is the "earned at the tier you held" rule doing exactly what it
+  // should — and the reason the two numbers differ at all.
+  ck('a gap loses only what is behind it', pts.pointsFor(partly, 'L') === 16,
     pts.pointsFor(partly, 'L'));
-  ck('and the lost half is still named', pts.expiredInfo(partly, 'L').points === 5,
+  ck('and the lost half is still named', pts.expiredInfo(partly, 'L').points === 8,
     pts.expiredInfo(partly, 'L'));
   ck('somebody still active has lost nothing',
     pts.expiredInfo([lapsed(1, 140, 28), lapsed(10, 140, 28)], 'L').points === 0);
@@ -1449,8 +1494,8 @@ async function mafupuntos() {
   ck('the full price is charged', spent.order.total === '$140', spent.order.total);
   const after = (await call(codes, { action: 'me' }, rich)).points;
   // Still earned on it, at the tier they hold: five ounces in they are the top
-  // tier, so $140 earns 5 x 3 = 15 and nothing goes out.
-  ck('the balance only went up', after === before + 15, { before, after });
+  // tier, so an ounce earns 8 x 3 = 24 and nothing goes out.
+  ck('the balance only went up', after === before + 24, { before, after });
   // The one choke point, exercised directly — the maths underneath is correct
   // and stays tested, it is simply not reachable.
   ck('nothing is allowed through while it is off', pts.blocksAllowed(1000, 1000) === 0);
@@ -1471,19 +1516,18 @@ async function mafupuntos() {
   ck('and a total is never negative', !/-/.test(over.order.total), over.order.total);
 
   section('the card states the rule the till actually follows');
-  // It read "Un octavo te da 1 Mafupunto. 25 puntos = un octavo gratis."
+  // It read "Un octavo te da 1 MafuPunto. 25 puntos = un octavo gratis." The
+  // first half of that is now TRUE — but it was not when it was written: the
+  // till was counting dollars, and the two only agreed while an eighth cost
+  // $25. An ounce paid five where the card implied eight.
   //
-  // Wrong twice over. A top-tier customer earns three per $25 and the badge
-  // directly above it says 3x, so the card argued with itself. And counting
-  // eighths does not survive a bigger basket: an ounce at $140 earns five
-  // points, not the eight you get by counting eighths into it. Somebody who
-  // adds it up at the door and comes out short is the whole cost of printing a
-  // rule the till does not follow.
-  const ozPts = pts.orderPoints({ subtotal: 140, fee: 0 }, 1);
-  ck('an ounce does not earn eight points, it earns five', ozPts === 5, ozPts);
-  ck('so "an eighth earns a point" was never the rule',
-    ozPts !== Math.round(28 / 3.5), { paid: ozPts, byEighths: 8 });
-  ck('and the top tier earns three times it', pts.orderPoints({ subtotal: 140, fee: 0 }, 3) === 15);
+  // So the guard is not "never say eighth" any more. It is "the unit on the
+  // card is the unit in the code", which is the thing that was actually wrong.
+  const ozPts = pts.orderPoints({ items: [{ grams: 28, qty: 1 }] });
+  ck('the card may say eighth, because an ounce really is eight points',
+    ozPts === 8 && pts.GRAMS_PER_POINT === 3.5, ozPts);
+  ck('and the top tier earns three times it',
+    pts.orderPoints({ items: [{ grams: 28, qty: 1 }] }, 3) === 24);
 
   const { readFileSync: rfs } = await import('node:fs');
   const html = rfs(join(root, 'index.html'), 'utf8');
@@ -1504,17 +1548,26 @@ async function mafupuntos() {
 
   for (const lang of ['es', 'en']) {
     const block = langBlock(lang);
-    const rule = (/ptsRule: \(d, m\) =>([\s\S]{0,220}?)\n\s*ptsRedeemRule/.exec(block) || ['', ''])[1];
-    ck(lang + ': the rule is a function of the real figures',
-      /\+ d \+/.test(rule), rule.slice(0, 90));
-    ck(lang + ': and of the customer’s own multiplier', /\+ m \+/.test(rule), rule.slice(0, 90));
-    // Nothing anywhere in the customer copy may promise a free eighth. The
-    // price of an eighth is his to change and was never what a point bought.
-    // Word boundaries: "perWeightHint" contains the letters of "eighth" and
-    // was failing this on a key about weight labels.
-    ck(lang + ': nothing in the copy promises an eighth',
-      !/\b(octavos?|eighths?)\b/i.test(block),
-      (/.{0,40}\b(octavos?|eighths?)\b.{0,40}/i.exec(block) || [''])[0]);
+    const rule = (/ptsRule: \(g, m\) =>([\s\S]{0,260}?)\n\s*ptsRedeemRule/.exec(block) || ['', ''])[1];
+    ck(lang + ': the rule is stated at the customer’s own multiplier',
+      /\+ m \+/.test(rule), rule.slice(0, 110));
+    // The unit on the card has to be the unit in the code. It says eighths now
+    // because the till counts eighths; what it must never do again is name a
+    // unit the till is not using.
+    ck(lang + ': and in eighths, which is what the till counts',
+      /octavo|eighth/i.test(rule), rule.slice(0, 110));
+    // One sentence. It briefly also spelt out what an ounce comes to, which
+    // was arithmetic for my benefit, not information for a customer's.
+    ck(lang + ': in one sentence and no more',
+      (rule.match(/\./g) || []).length <= 2, rule.slice(0, 110));
+    // And still nothing promised free: a reward nobody has priced. Scoped to
+    // the points and tier keys — free DELIVERY inside five miles is real, and
+    // a guard over the whole language block was catching it.
+    const ptsCopy = block.split('\n')
+      .filter((ln) => /^\s*(pts|tiers|tier|earnPts|redeem)[A-Za-z]*:/.test(ln)).join('\n');
+    ck(lang + ': the points copy has real keys in it', ptsCopy.length > 200, ptsCopy.length);
+    ck(lang + ': but nothing in it is promised free',
+      !/gratis|free/i.test(ptsCopy), (/.{0,40}(gratis|free).{0,40}/i.exec(ptsCopy) || [''])[0]);
   }
   // And the page must pass the tier through to it, or the badge and the rule
   // disagree again with nothing to catch it.
@@ -1575,18 +1628,26 @@ async function mafupuntos() {
   }
   const esNames = (/tierNames: \{([^}]*)\}/.exec(langBlock('es')) || ['', ''])[1];
   const enNames = (/tierNames: \{([^}]*)\}/.exec(langBlock('en')) || ['', ''])[1];
-  ck('and English translates the two that translate',
-    /pana: 'Buddy'/.test(enNames) && /socio: 'Partner'/.test(enNames), enNames);
-  ck('while the shop’s own word stays the shop’s own',
-    /mafutero: 'Mafutero'/.test(esNames) && /mafutero: 'Mafutero'/.test(enNames));
+  ck('and English has its own word for each rung',
+    /pana: 'Buddy'/.test(enNames) && /socio: 'Partner'/.test(enNames) &&
+    /mafutero: 'OG'/.test(enNames), enNames);
+  // OG, because the ladder had to end on something that reads as "stoner, but
+  // senior" to somebody reading English. Spanish keeps the shop's own word.
+  ck('while Spanish keeps the shop’s own word at the top',
+    /mafutero: 'Mafutero'/.test(esNames), esNames);
 
-  section('the points are Mafupuntos, or MafuPoints');
+  section('the points are MafuPuntos, or MafuPoints');
   const es = langBlock('es'), en = langBlock('en');
-  ck('Spanish says Mafupuntos', /Mafupuntos/.test(es));
+  // Both P's capital in both languages: one name wearing two endings, not two
+  // names. It was Mafupuntos with a small p for the whole life of the app.
+  ck('Spanish says MafuPuntos', /MafuPuntos/.test(es));
   ck('English says MafuPoints', /MafuPoints/.test(en));
-  ck('and neither leaks into the other',
-    !/MafuPoints/.test(es) && !/Mafupuntos/.test(en),
-    { esLeak: /MafuPoints/.test(es), enLeak: (/.{0,30}Mafupuntos.{0,30}/.exec(en) || [''])[0] });
+  ck('and the small-p spelling is gone from both',
+    !/Mafupunto|Mafupoint/.test(es + en),
+    (/.{0,30}Mafu[pP]o?unto?s?.{0,30}/.exec(es + en) || [''])[0]);
+  ck('neither ending leaks into the other',
+    !/MafuPoints/.test(es) && !/MafuPuntos/.test(en),
+    { esLeak: /MafuPoints/.test(es), enLeak: (/.{0,30}MafuPuntos.{0,30}/.exec(en) || [''])[0] });
 
   section('the sheet that explains the tiers');
   // Asked for because nobody could work out what the badge meant. It has to
@@ -1620,15 +1681,22 @@ async function mafupuntos() {
   const earnSrc = (/earnLine: t\.earnPts\(([^\n]*)\),/.exec(script) || ['', ''])[1];
   ck('the bag multiplies by the tier', /s\.tierMult/.test(earnSrc), earnSrc);
   ck('and divides by the figure the server sent', /s\.ptsPer/.test(earnSrc), earnSrc);
+  // And divides the bag's WEIGHT by it, not its price. The money version is
+  // what made the bag and the card disagree in the first place.
+  ck('what it divides is the weight', /bagGrams/.test(earnSrc), earnSrc);
+  ck('which is summed off the cart the same way the server sums the order',
+    /const bagGrams = s\.cart\.reduce\(\(a, l\) => a \+ \(Number\(l\.grams\) \|\| 0\) \* l\.qty, 0\)/
+      .test(script));
   // End to end: what the bag would have shown for THIS order, against what
   // landed on it. Matched by order number rather than taking the newest row,
   // so another order placed above it cannot make the check pass by accident.
   const fresh = await ozBuy(0);
-  const bagSaid = Math.floor((fresh.order.subtotal + (fresh.order.fee || 0)) / 25) * 3; // Patron
+  const freshGrams = fresh.order.items.reduce((a, i) => a + i.grams * i.qty, 0);
+  const bagSaid = Math.floor(freshGrams / pts.GRAMS_PER_POINT) * 3;   // top tier
   const row = (await call(codes, { action: 'me' }, rich)).earned.find(e => e.no === fresh.order.no);
   ck('the bag’s figure is the one that lands', !!row && bagSaid === row.points,
     { no: fresh.order.no, bagSaid, paid: row && row.points, tier: row && row.tier });
-  ck('and it is three times the base, not one', bagSaid === 15, bagSaid);
+  ck('and it is three times the base, not one', bagSaid === 24, bagSaid);
 
   section('a block is a count of points and an amount of money');
   // The same number today only because a point is a dollar. Capping the

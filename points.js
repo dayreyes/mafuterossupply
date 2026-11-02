@@ -1,4 +1,4 @@
-// Mafupuntos.
+// MafuPuntos.
 //
 // POINTS ARE DERIVED, NEVER STORED.
 //
@@ -16,24 +16,34 @@
 // The cost is a read of the order list to answer "how many points do I have",
 // which is one blob fetch on a shop doing a few dozen orders a day.
 
-// ── the three numbers that decide what this costs ───────────────────────────
+// -- the numbers that decide what this costs --------------------------------
 //
 // Everything about the economics is here, because the economics are the part
 // most likely to change and the part most expensive to get wrong.
 //
-// An eighth earns a point and a point is a dollar off. Four percent at the
-// base, and one sentence at a door.
+// A POINT IS AN EIGHTH, NOT A DOLLAR.
 //
-// THE TIER IS WHAT ACTUALLY MOVES THE NEEDLE, and it is measured in GRAMS,
-// not in purchases. Counting purchases rewards frequency: eight separate
-// eighths would outrank one ounce, which is backwards for a shop that would
-// rather sell the ounce. Grams count what left the shelf, so buying bigger
-// climbs faster — one ounce moves you as far as eight eighths, in one go.
+// This started out as money: a point per $25 spent. It looked equivalent,
+// because an eighth was $25 that week, and it was not -- an ounce at $140 earns
+// five points on the money and eight on the weight, and the ounce is the sale
+// the shop wants. Worse, the rule moved every time El Mafu moved a price, so a
+// card reading "an eighth earns a point" was true only until the next menu.
+//
+// Weight is the honest unit here. Three eighths is three points. An ounce is
+// eight. It is the same thing the shop already counts off the shelf, it cannot
+// drift with a price change, and it is the same unit as the tier below -- so
+// "what did I earn" and "how do I climb" have one answer, in grams.
+export const GRAMS_PER_POINT = 3.5;  // an eighth earns a point
+export const POINT_VALUE = 1;        // a point is a dollar off, when they can be spent
+
+// THE TIER IS WHAT ACTUALLY MOVES THE NEEDLE, and it is measured in GRAMS too.
+// Counting purchases would reward frequency: eight separate eighths would
+// outrank one ounce, which is backwards for a shop that would rather sell the
+// ounce. Grams count what left the shelf, so buying bigger climbs faster -- one
+// ounce moves you as far as eight eighths, in one go.
 //
 // Ninety days, so a quiet fortnight does not demote anybody, and so the tier
 // means "how you have been buying lately" rather than "what you did once".
-export const DOLLARS_PER_POINT = 25;   // an eighth earns a point
-export const POINT_VALUE = 1;          // a point is a dollar off
 // Sixty, not thirty.
 //
 // Thirty wiped the shop's whole customer base the day it shipped. The maths
@@ -81,8 +91,9 @@ export const REDEEM_BLOCK = 25;
 // Thresholds in grams: an ounce and a half, and three and a half ounces.
 //
 // The top rung is the shop's own word. Somebody who has moved three and a half
-// ounces in ninety days is not a customer of Mafutero's any more, they are a
-// Mafutero — which is a better thing for a badge to say than any rank.
+// ounces in ninety days is a Mafutero, same as El Mafu — which is a better
+// thing for a badge to say than any rank. On English it reads OG, which is the
+// same sentence in the vernacular.
 //
 // `name` here is the SPANISH name and is what goes out over Telegram, because
 // Telegram is Goldo's and Goldo reads Spanish. The app names them from its own
@@ -135,12 +146,12 @@ export const tierAt = (orders, code, at = new Date()) =>
 // it. Not the tier they hold today: an order's value must never change after
 // the fact, or the breakdown stops matching the receipts and a customer who
 // drops a tier watches old points evaporate.
+//
+// Floored on the order's WHOLE weight rather than line by line, so two 1.75g
+// halves of an eighth still earn the eighth. The delivery fee earns nothing
+// now, which is right: the fee is his mileage, not goods.
 export const orderPoints = (o, mult = 1) =>
-  Math.floor(((o.subtotal || 0) + (o.fee || 0)) / DOLLARS_PER_POINT) * mult;
-
-// The fee earns points too, because it is money the customer actually handed
-// over. Splitting it out would mean the balance never matches the totals on
-// their own receipts.
+  Math.floor(orderGrams(o) / GRAMS_PER_POINT) * mult;
 
 // Cancelled orders are worth nothing — the sale did not happen. Archived ones
 // count, since archiving only tidies the queue.
