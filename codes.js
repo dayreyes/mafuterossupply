@@ -8,8 +8,8 @@ import { read, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { mintCode, withHistory } from './lib/invites.js';
 import { sendAll, codeText, pushConfigured, pushPublicKey } from './lib/notify.js';
-import { pointsFor, earnedRows, nextMilestone, expiresAt, pointsValue,
-  tierAt, gramsInWindow, expiredInfo, TIERS, TIER_DAYS,
+import { pointsFor, earnedRows, expiresAt, pointsValue,
+  tierAt, gramsInWindow, expiredInfo, TIERS, TIER_DAYS, REDEEM_BLOCK,
   DOLLARS_PER_POINT, POINT_VALUE, EXPIRE_DAYS } from './lib/points.js';
 
 // What a customer may see of their own record, and nothing of anyone else's.
@@ -63,17 +63,28 @@ export default async (req) => route(req, {
     // there is nothing here to scope wrong.
     const orders = await read(KEYS.orders, []);
     const points = pointsFor(orders, session.code);
-    const goal = nextMilestone(points);
     return ok({
       profile: publicSelf(mine),
       points,
       worth: pointsValue(points),
+      // The three numbers the card states as a rule. Sent rather than mirrored
+      // in the page, because a rule the shop prints and a rule the shop
+      // applies have to be the same rule — and the page used to say "an eighth
+      // earns 1 Mafupunto" while the server was charging $25 a point and
+      // multiplying by the tier.
       perPoint: DOLLARS_PER_POINT,
       pointValue: POINT_VALUE,
+      redeemBlock: REDEEM_BLOCK,
       expireDays: EXPIRE_DAYS,
       expiresAt: expiresAt(orders, session.code),
-      goal,
-      toGo: goal ? goal - points : 0,
+      // No `goal` here any more. It used to be the next rung of the MILESTONES
+      // ladder (25, 50, 100, 200), which the card turned into "11 more for an
+      // eighth free" — said to somebody holding 39 points, who could already
+      // take $25 off that afternoon. Once points can really be spent the ladder
+      // is not what a customer is climbing: every 25 points is $25 off, over
+      // and over. The card works that out from `points` and `redeemBlock`.
+      // MILESTONES stays on the server for the congratulations push, which is
+      // the one thing that should stay rare.
       earned: earnedRows(orders, session.code).slice(0, 20),
       lost: expiredInfo(orders, session.code),
       ...tierBlock(orders, session.code)
