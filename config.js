@@ -39,7 +39,7 @@ export const defaultConfig = () => ({
     run: true,            // tonight's delivery run is rolling
     orderStatus: true,    // their own order moved along
     lowStock: false,      // something they buy is nearly gone
-    points: true          // they crossed a Mafupuntos milestone
+    points: true          // they crossed a MafuPuntos milestone
   },
   // Opening hours, so the shop closes itself.
   //

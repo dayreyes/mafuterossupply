@@ -273,7 +273,7 @@ export const lowStockCustomerMsg = (name, left) => ({
 // message at all.
 export const pointsMsg = (cfg, rung) => ({
   kind: 'points',
-  title: rung + ' Mafupuntos',
+  title: rung + ' MafuPuntos',
   body: 'You just passed ' + rung + ' at ' + shopName(cfg) + '.',
   tag: 'pts-' + rung
 });

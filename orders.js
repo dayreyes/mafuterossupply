@@ -332,7 +332,7 @@ export default async (req) => route(req, {
       }
     }
 
-    // Crossing a Mafupuntos milestone. Only on the order that actually carries
+    // Crossing a MafuPuntos milestone. Only on the order that actually carries
     // them past it, so this is rare by construction — four or five times in a
     // customer's whole history — which is what keeps it worth reading.
     if (cfg.notifs && cfg.notifs.points && order.clientCode) {

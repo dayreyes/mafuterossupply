@@ -10,7 +10,7 @@ import { mintCode, withHistory } from './lib/invites.js';
 import { sendAll, codeText, pushConfigured, pushPublicKey } from './lib/notify.js';
 import { pointsFor, earnedRows, expiresAt, pointsValue,
   tierAt, gramsInWindow, expiredInfo, TIERS, PERKS, TIER_DAYS, REDEEM_BLOCK, REDEEM_ON,
-  DOLLARS_PER_POINT, POINT_VALUE, EXPIRE_DAYS } from './lib/points.js';
+  GRAMS_PER_POINT, POINT_VALUE, EXPIRE_DAYS } from './lib/points.js';
 
 // What a customer may see of their own record, and nothing of anyone else's.
 const publicSelf = (c) => ({
@@ -81,11 +81,12 @@ export default async (req) => route(req, {
       // a figure that ends up on a screen eventually.
       redeemOn: REDEEM_ON,
       ...(REDEEM_ON ? { worth: pointsValue(points), redeemBlock: REDEEM_BLOCK } : {}),
-      // What the card states as the earn rate. Sent rather than mirrored in the
-      // page, because a rule the shop prints and a rule the shop applies have to
-      // be the same rule — the page used to say "an eighth earns 1 Mafupunto"
-      // while the server was charging $25 a point and multiplying by the tier.
-      perPoint: DOLLARS_PER_POINT,
+      // What the card states as the earn rate, in GRAMS. Sent rather than
+      // mirrored in the page, because a rule the shop prints and a rule the
+      // shop applies have to be the same rule — the page said "an eighth earns
+      // 1 MafuPunto" for weeks while the server was counting dollars, and the
+      // two only agreed while an eighth happened to cost $25.
+      gramsPerPoint: GRAMS_PER_POINT,
       pointValue: POINT_VALUE,
       expireDays: EXPIRE_DAYS,
       expiresAt: expiresAt(orders, session.code),
