@@ -74,7 +74,12 @@ export async function withHistory(codes) {
     return {
       ...c, ...row,
       points: pointsFor(orders, c.code),
+      // Both: the name for anything that goes out over Telegram, the id for
+      // anything the app has to make a decision about. His screen used to pick
+      // the badge colour by comparing the NAME, which broke the moment the
+      // tiers were renamed and would break again on the language toggle.
       tier: tierAt(orders, c.code).name,
+      tierId: tierAt(orders, c.code).id,
       // The owner's own list, so it carries what he needs to reach somebody:
       // where to drive and what number to ring. This is already his data —
       // he took it at signup — and withholding it from his own screen only
