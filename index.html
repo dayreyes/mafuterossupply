@@ -741,9 +741,12 @@ input,textarea,select{font-size:16px}
             <div style="font-family:var(--font-display);font-size:30px;line-height:1.08;color:var(--ink);margin-top:6px">{{ t.pfTitle }}</div>
 
             <!-- Mafupuntos. Dark card on a light screen because it is the one
-                 thing on here they came to look at, and nothing is redeemable
-                 yet — so it says "rewards coming soon" rather than dressing a
-                 number up as something it can already buy. -->
+                 thing on here they came to look at.
+                 Two halves with a rule between them, and the halves say
+                 different kinds of thing: ABOVE is the tier, which is real and
+                 is what the bar measures; BELOW is the points, which are
+                 counted and not yet spendable. They used to be interleaved,
+                 and the card contradicted itself twice over. -->
             <div style="margin-top:18px;background:var(--slab);border:2px solid var(--ink);border-radius:24px;padding:18px;box-shadow:3px 3px 0 var(--rust)">
               <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
                 <div style="min-width:0;font-family:var(--font-display);font-size:19px;color:var(--on-dark)">{{ t.ptsTitle }}</div>
@@ -757,23 +760,27 @@ input,textarea,select{font-size:16px}
                      on it is not ambiguous about what it multiplies. -->
                 <div style="flex:none;white-space:nowrap;font-family:var(--font-display);font-size:12px;line-height:1;letter-spacing:.04em;padding:6px 10px;border-radius:999px;background:var(--green-glow);color:var(--ink)">{{ tierLabel }}</div>
               </div>
-              <!-- How far off the next tier is, directly under the badge that
-                   names this one.
-                   It used to sit just above the progress bar, with the points
-                   goal just below it, so two lines of "you need N more"
-                   straddled one bar and neither owned it — and the bar
-                   measures the POINTS goal, not the tier. The tier belongs to
-                   the badge; the rule under the bar belongs to the bar. -->
-              <div style="font-family:var(--font-hand);font-size:16px;line-height:1.2;color:var(--green-3);margin-top:6px;padding-bottom:12px;border-bottom:2px solid var(--veil-1)">{{ tierNextLine }}</div>
-              <div style="display:flex;align-items:baseline;gap:10px;margin-top:12px;flex-wrap:wrap">
-                <span style="font-family:var(--font-display);font-size:52px;line-height:1.02;color:var(--green-glow)">{{ ptsValue }}</span>
-                <!-- What it is actually worth, next to what it is.
-                     A points balance nobody can price is a number, not a
-                     reward: "540 points" means nothing until it says $540 or
-                     $27, and the gap between those two is the whole scheme. -->
-                <span style="font-family:var(--font-hand);font-size:19px;line-height:1;color:var(--on-dark)">{{ ptsWorthLine }}</span>
+              <!-- ── the tier, which is the thing being earned ──
+                   How far off the next one is, and a bar measuring the same
+                   gap, directly under the badge that names this one. The tier
+                   gets the bar because the tier is what a customer is actually
+                   climbing: the points cannot be spent on anything yet.
+                   What the badge says, what the line says and what the bar
+                   draws are all one fact, so nothing on this card can argue
+                   with anything else on it. -->
+              <div style="font-family:var(--font-hand);font-size:16px;line-height:1.2;color:var(--green-3);margin-top:6px">{{ tierNextLine }}</div>
+              <div style="display:{{ tierBarDisplay }};height:10px;border-radius:999px;background:var(--veil-14);overflow:hidden;margin-top:9px">
+                <div style="height:100%;width:{{ tierPct }};background:var(--rust-2);border-radius:999px"></div>
               </div>
-              <div style="font:500 11.5px/1.45 var(--font-body);color:var(--faint);margin-top:3px">{{ ptsRuleLine }}</div>
+              <div onClick="{{ openTiers }}" style="display:inline-block;margin-top:11px;padding:6px 12px;border-radius:999px;border:1.5px solid var(--veil-25);font:700 11px/1 var(--font-body);color:var(--green-glow);cursor:pointer" style-active="transform:translate(1px,1px)">{{ t.tiersWhat }}</div>
+              <div style="margin-top:14px;padding-top:14px;border-top:2px solid var(--veil-1)">
+                <!-- ── the points, which are only counted ──
+                     No cash figure beside the number. "Worth $39" is a price,
+                     and nothing can be bought with them: the shop has not
+                     decided what they buy. It comes back with redeemOn. -->
+                <div style="font-family:var(--font-display);font-size:52px;line-height:1.02;color:var(--green-glow)">{{ ptsValue }}</div>
+                <div style="font:500 11.5px/1.45 var(--font-body);color:var(--faint);margin-top:3px">{{ ptsRuleLine }}</div>
+                <div style="font-family:var(--font-hand);font-size:15px;line-height:1.25;color:var(--green-pale);margin-top:7px">{{ ptsPendingLine }}</div>
               <div style="display:{{ ptsGoneDisplay }};font:600 11px/1.45 var(--font-body);color:var(--rust-4);margin-top:6px">{{ ptsGoneLine }}</div>
               <!-- What went, and when. A balance that quietly reads zero
                    looks like a bug, or like the shop took something; naming
@@ -783,11 +790,6 @@ input,textarea,select{font-size:16px}
                 <div style="font:700 12px/1.35 var(--font-body);color:var(--rust-4)">{{ lostLine }}</div>
                 <div style="display:{{ lostTierDisplay }};font-family:var(--font-hand);font-size:15px;line-height:1.3;color:var(--green-pale);margin-top:3px">{{ lostTierLine }}</div>
               </div>
-              <div style="display:{{ ptsGoalDisplay }};margin-top:15px">
-                <div style="height:10px;border-radius:999px;background:var(--veil-14);overflow:hidden">
-                  <div style="height:100%;width:{{ ptsPct }};background:var(--rust-2);border-radius:999px"></div>
-                </div>
-                <div style="font:600 11px/1.4 var(--font-body);color:var(--faint);margin-top:8px">{{ ptsGoalLine }}</div>
               </div>
 
               <div style="display:{{ ptsHistDisplay }};margin-top:16px">
@@ -857,6 +859,45 @@ input,textarea,select{font-size:16px}
               </sc-for>
             </div>
             <div style="margin-top:26px;text-align:center;font:600 10.5px/1.4 var(--font-body);color:var(--faint)">{{ buildStamp }}</div>
+          </div>
+        </sc-if>
+
+        <!-- What the tiers are, for a customer who taps and asks.
+             Over the profile rather than a screen of its own: it answers a
+             question about the card underneath it, and sending somebody
+             somewhere else to read the rules loses them the thing they were
+             looking at. Tapping the scrim closes it, which is what everybody
+             tries first. -->
+        <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeTiers }}" style="display:{{ tiersOpenDisplay }};position:fixed;inset:0;z-index:60;background:var(--scrim-5);align-items:flex-end;justify-content:center">
+            <div style="width:100%;max-width:560px;max-height:88dvh;overflow-y:auto;background:var(--slab);border-top:3px solid var(--green-glow);border-radius:26px 26px 0 0;padding:22px 20px calc(26px + var(--safe-bot));box-sizing:border-box">
+              <div style="width:46px;height:5px;border-radius:999px;background:var(--veil-25);margin:0 auto 16px"></div>
+              <div style="font-family:var(--font-display);font-size:27px;line-height:1.05;color:var(--on-dark)">{{ t.tiersTitle }}</div>
+              <div style="font:500 12.5px/1.5 var(--font-body);color:var(--green-pale);margin-top:8px">{{ tiersIntroLine }}</div>
+
+              <div style="display:flex;flex-direction:column;gap:11px;margin-top:17px">
+                <sc-for list="{{ tiersRows }}" as="r" hint-placeholder-count="3">
+                  <div style="border-radius:18px;padding:14px 15px;background:{{ r.bg }}">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                      <div style="font-family:var(--font-display);font-size:20px;line-height:1;color:{{ r.fg }}">{{ r.name }}</div>
+                      <div style="display:{{ r.mineDisplay }};flex:none;white-space:nowrap;font:800 9px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:{{ r.sub }};border:1.5px solid {{ r.sub }};border-radius:999px;padding:5px 8px">{{ r.mine }}</div>
+                    </div>
+                    <div style="font:700 11px/1.3 var(--font-body);color:{{ r.sub }};margin-top:6px">{{ r.from }}</div>
+                    <div style="font-family:var(--font-hand);font-size:16px;line-height:1.2;color:{{ r.fg }};margin-top:7px">{{ r.mult }}</div>
+                    <sc-for list="{{ r.perks }}" as="pk" hint-placeholder-count="2">
+                      <div style="display:flex;gap:7px;margin-top:5px">
+                        <div style="flex:none;font:800 12px/1.4 var(--font-body);color:{{ r.sub }}">&middot;</div>
+                        <div style="font:500 11.5px/1.4 var(--font-body);color:{{ r.fg }}">{{ pk }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="font-family:var(--font-hand);font-size:16px;line-height:1.25;color:var(--green-glow);margin-top:16px">{{ tiersWhyLine }}</div>
+              <div style="font:500 11.5px/1.5 var(--font-body);color:var(--faint);margin-top:9px">{{ t.tiersNote }}</div>
+              <div onClick="{{ closeTiers }}" style="margin-top:18px;height:52px;border-radius:999px;background:var(--green-glow);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:var(--font-display);font-size:17px;color:var(--ink)" style-active="transform:translate(2px,2px)">{{ t.tiersClose }}</div>
+            </div>
           </div>
         </sc-if>
 
@@ -1963,7 +2004,7 @@ const COPY = {
     lostNeedPhone: 'Pon el número completo.',
     lostSent: 'Ya le avisamos. Él te escribe.',
     stPromoTitle: 'Promociones', stPromoSub: 'Préndelas cuando quieras y apágalas igual. Empiezan apagadas.',
-    promoBakerTitle: 'Gramo de ñapa', promoBakerSub: 'Cada onza lleva un gramo de más. Solo pa’ los Patrón.',
+    promoBakerTitle: 'Gramo de ñapa', promoBakerSub: 'Cada onza lleva un gramo de más. Solo pa’ los Mafuteros.',
     pingReady: 'Avisarle que está lista', pingSent: 'Le llegó el aviso.',
     pingNobody: 'No tiene avisos prendidos — mejor llámalo.',
     ptsTitle: 'Mafupuntos',
@@ -1974,29 +2015,35 @@ const COPY = {
     // an ounce at $140 earns 5 — not the 8 you get by counting eighths. A
     // customer who adds it up at the door and comes out short is the whole
     // problem with printing a rule the till does not follow.
-    ptsRule: (d, m, b, off) =>
-      'Cada $' + d + ' que gastas = ' + m + (m === 1 ? ' Mafupunto' : ' Mafupuntos') +
-      '. ' + b + ' puntos = $' + off + ' menos.',
-    ptsSoon: 'Premios pronto',
-    ptsHistory: 'Cómo los ganaste',
-    ptsEmpty: 'Todavía no tienes Mafupuntos. Haz una orden y empiezas.',
-    // "$25 menos", not "un octavo gratis": twenty-five points come off the
-    // bill, whatever is on it. They only buy an eighth outright while an
-    // eighth is priced at exactly $25, and El Mafu sets the prices.
-    //
-    // And when they are already holding enough, say so FIRST. The old line
-    // told somebody with 39 points "te faltan 11" and never mentioned the $25
-    // they could have taken off that afternoon.
-    ptsGoal: (n, readyOff, nextOff) => readyOff
-      ? 'Tienes $' + readyOff + ' menos listos pa’ la bolsa. Otros ' +
-        (n === 1 ? '1 punto' : n + ' puntos') + ' y son $' + nextOff + '.'
-      : (n === 1 ? 'Te falta 1 punto' : 'Te faltan ' + n + ' puntos') +
-        ' pa’ $' + nextOff + ' menos.',
+    // The earn rate only. What they are WORTH is a separate line and a separate
+    // switch, because today they are worth nothing yet.
+    ptsRule: (d, m) =>
+      'Cada $' + d + ' que gastas = ' + m + (m === 1 ? ' Mafupunto' : ' Mafupuntos') + '.',
+    ptsRedeemRule: (b, off) => b + ' puntos = $' + off + ' menos.',
+    ptsHistory: 'C\u00f3mo los ganaste',
+    ptsEmpty: 'Todav\u00eda no tienes Mafupuntos. Haz una orden y empiezas.',
+    // Nothing can be spent yet, so the card says that in plain words instead of
+    // pricing them. It does NOT say "pronto" -- a date nobody has set.
+    ptsPending: 'Se van guardando. El Mafu todav\u00eda est\u00e1 viendo qu\u00e9 te dan \u2014 por ahora lo que sube es tu nivel.',
     tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7',
-    // Not "te faltan": that is how the POINTS goal under the bar reads, and
-    // two "te faltan" lines on one card is how it got confusing.
     tierNext: (g, t) => 'Otros ' + g + 'g y eres ' + t + '.',
     tierTop: 'Est\u00e1s en lo m\u00e1s alto.',
+    // The names, by id. The ids come from the server; the words are ours, and
+    // they are different words in each language.
+    tierNames: { pana: 'Pana', socio: 'Socio', mafutero: 'Mafutero' },
+    // ---- the tier sheet ----
+    tiersWhat: '\u00bfQu\u00e9 son los niveles?',
+    tiersTitle: 'Los niveles',
+    tiersIntro: (d) => 'Tu nivel sale de los gramos que compras en ' + d + ' d\u00edas. No de cu\u00e1ntas veces pides \u2014 de cu\u00e1nto te llevas. Sube solo, sin pedirlo.',
+    tiersYouAre: 'Aqu\u00ed est\u00e1s t\u00fa',
+    tiersFrom: (g) => g === 0 ? 'Desde el primer pedido' : 'Desde ' + g + 'g en 90 d\u00edas',
+    tiersMult: (m) => m + '\u00d7 Mafupuntos en todo lo que compres',
+    tiersPerkHold: (m) => 'Te guardamos el pedido ' + m + ' minutos',
+    tiersPerkQueue: 'Tu pedido se le pone de primero',
+    tiersPerkBaker: 'Gramo de \u00f1apa en cada onza, cuando El Mafu lo prende',
+    tiersNote: 'Si dejas de pedir, el nivel baja igual que subi\u00f3. Son los gramos de los \u00faltimos 90 d\u00edas, nada m\u00e1s.',
+    tiersWhy: (n) => n + ' es la casa. Quien mueve esa cantidad ya no es cliente de Mafutero\u2019s \u2014 es un Mafutero.',
+    tiersClose: 'Dale',
     saving: 'Guardando…',
     confirmTitle: 'Confirma que te llegó el pago',
     confirmSub: 'Hasta que lo confirmes, esto no está separado.',
@@ -2224,7 +2271,7 @@ const COPY = {
     stNotifSub: 'These send themselves. You write nothing.',
     stNotifSubs: n => n === 1 ? '1 customer has them on' : n + ' customers have them on',
     stNotifKeys: 'The VAPID keys are missing in Netlify. Nothing can send without them — see DEPLOY.md.',
-    notifNames: { newStrain: 'Something new landed', opened: 'We opened', run: 'Delivery is rolling', orderStatus: 'Their order moved', lowStock: 'Something they buy is nearly gone', points: 'They hit a Mafupuntos goal' },
+    notifNames: { newStrain: 'Something new landed', opened: 'We opened', run: 'Delivery is rolling', orderStatus: 'Their order moved', lowStock: 'Something they buy is nearly gone', points: 'They hit a MafuPoints goal' },
     notifWhen: { newStrain: 'When you add a strain to the menu.', opened: 'When the shop opens.', run: 'When you switch tonight\u2019s run on.', orderStatus: 'Only to the customer on that order.', lowStock: 'Only to people who have bought it.', points: 'Only on the order that passes it. Four or five times in their whole history.' },
     offerTitle: 'Want a nudge when it\u2019s ready?',
     offerBody: 'We\u2019ll message you when El Mafu has your order ready — and when something new lands on the menu. Nothing else.',
@@ -2242,14 +2289,14 @@ const COPY = {
     pfNeedName: 'Put a name he will recognise.',
     pfOrders: 'Your orders', pfOrdersEmpty: 'You have not ordered yet.',
     typeAll: 'All',
-    earnPts: n => n === 1 ? 'This order earns you 1 Mafupunto.' : 'This order earns you ' + n + ' Mafupuntos.',
+    earnPts: n => n === 1 ? 'This order earns you 1 MafuPoint.' : 'This order earns you ' + n + ' MafuPoints.',
     ptsWorth: v => 'Worth $' + v + '.',
     ptsGone: d => 'They expire if you do not order before ' + d + '.',
     noCode: 'No code?', ask: 'Ask for one',
     lostCode: 'Lost your code?',
-    redeemTitle: n => 'Spend ' + n + ' Mafupuntos',
+    redeemTitle: n => 'Spend ' + n + ' MafuPoints',
     redeemSub: (n, v, b, off) => n === 0 ? 'Every ' + b + ' points takes ' + off + ' off.' : n + ' points \u00b7 ' + v + ' off.',
-    ptsLost: (n, d) => n + ' Mafupuntos expired on ' + d + '.',
+    ptsLost: (n, d) => n + ' MafuPoints expired on ' + d + '.',
     ptsLostTier: ty => 'You were ' + ty + '. Order again and you climb back.',
     lostTitle: 'We will send it over',
     lostBody: 'Put the number El Mafu has for you. He sends it himself — it is never shown here.',
@@ -2257,23 +2304,34 @@ const COPY = {
     lostNeedPhone: 'Put the whole number.',
     lostSent: 'He has been told. He will message you.',
     stPromoTitle: 'Promos', stPromoSub: 'Switch one on for a weekend and off again. They all start off.',
-    promoBakerTitle: "Baker's dozen", promoBakerSub: 'A gram on the house with every ounce. Patrón only.',
+    promoBakerTitle: "Baker's dozen", promoBakerSub: 'A gram on the house with every ounce. Mafutero tier only.',
     pingReady: 'Tell them it is ready', pingSent: 'They got the nudge.',
     pingNobody: 'No alerts on their phone — better ring them.',
-    ptsTitle: 'Mafupuntos',
-    ptsRule: (d, m, b, off) =>
-      'Every $' + d + ' you spend earns ' + m + (m === 1 ? ' Mafupunto' : ' Mafupuntos') +
-      '. ' + b + ' points = $' + off + ' off.',
-    ptsSoon: 'Rewards coming soon',
+    ptsTitle: 'MafuPoints',
+    ptsRule: (d, m) =>
+      'Every $' + d + ' you spend earns ' + m + (m === 1 ? ' MafuPoint' : ' MafuPoints') + '.',
+    ptsRedeemRule: (b, off) => b + ' points = $' + off + ' off.',
     ptsHistory: 'How you earned them',
-    ptsEmpty: 'No Mafupuntos yet. Place an order and you are away.',
-    ptsGoal: (n, readyOff, nextOff) => readyOff
-      ? '$' + readyOff + ' off waiting in your bag. ' + (n === 1 ? '1 point' : n + ' points') +
-        ' more makes it $' + nextOff + '.'
-      : (n === 1 ? '1 point' : n + ' points') + ' to go for $' + nextOff + ' off.',
+    ptsEmpty: 'No MafuPoints yet. Place an order and you are away.',
+    ptsPending: 'They are stacking up. El Mafu is still working out what they get you \u2014 for now it is your tier that climbs.',
     tierLine: (t, m) => t + ' \u00b7 ' + m + '\u00d7',
     tierNext: (g, t) => g + 'g more and you are ' + t + '.',
     tierTop: 'Top tier. Nothing above this.',
+    // Buddy and Partner, but Mafutero stays Mafutero: it is the shop's own
+    // word, like MafuPoints, and there is nothing to translate it into.
+    tierNames: { pana: 'Buddy', socio: 'Partner', mafutero: 'Mafutero' },
+    tiersWhat: 'What are the tiers?',
+    tiersTitle: 'The tiers',
+    tiersIntro: (d) => 'Your tier comes from the grams you buy in ' + d + ' days. Not how often you order \u2014 how much you take. It moves on its own.',
+    tiersYouAre: 'You are here',
+    tiersFrom: (g) => g === 0 ? 'From your first order' : 'From ' + g + 'g in 90 days',
+    tiersMult: (m) => m + '\u00d7 MafuPoints on everything you buy',
+    tiersPerkHold: (m) => 'We hold your order ' + m + ' minutes',
+    tiersPerkQueue: 'Your order goes to the top of his pile',
+    tiersPerkBaker: 'A gram on the house with every ounce, when El Mafu switches it on',
+    tiersNote: 'Stop ordering and the tier comes back down the same way it went up. It is the grams of the last 90 days, nothing else.',
+    tiersWhy: (n) => n + ' is the house. Move that much and you are not a customer of Mafutero\u2019s any more \u2014 you are a Mafutero.',
+    tiersClose: 'Got it',
     saving: 'Saving\u2026',
     confirmTitle: 'Confirm the payment landed',
     confirmSub: 'Until you confirm, nothing is held.',
@@ -2483,6 +2541,19 @@ const BUILD = "2026-11-01.0930";
 // drift.
 const PTS_PER = 25;
 
+// The tier ids, base first, mirroring lib/points.js. Ids, never names: the
+// names are per-language now (an English customer reads Buddy and Partner),
+// and the ids are what PERKS is keyed by on the server.
+//
+// Here as a list because "is this the top tier" was a string literal in nine
+// places, and the rename that moved `mafutero` from the BASE tier to the TOP
+// one would have had to find every single one of them. A selftest holds this
+// list against the server's.
+const TIER_IDS = ['pana', 'socio', 'mafutero'];
+const TIER_BASE = TIER_IDS[0];
+const TIER_TOP = TIER_IDS[TIER_IDS.length - 1];
+const tierRank = (id) => Math.max(0, TIER_IDS.indexOf(id));
+
 // What each kind of thing comes in, and how much a full one holds.
 //
 // Only the things sold by weight have a capacity — those get a fill level.
@@ -2573,14 +2644,20 @@ class Component extends DCLogic {
     profile: null,
     favs: [],
     pts: 0,
-    ptsWorth: 0,
-    lostPts: 0, lostAt: '', lostTier: '',
+    // Whether points can be spent on anything. False until the shop decides
+    // what they buy, and the card reads off this rather than assuming.
+    redeemOn: false,
+    ladder: [],
+    tiersOpen: false,
+    lostPts: 0, lostAt: '', lostTier: '', lostTierId: '', lostAboveBase: false,
     useBlocks: 0,
     queueMsg: '',
     lostPhone: '',
     lostMsg: '',
     lostOk: false,
-    tier: '', tierMult: 1, nextTier: '', nextTierGrams: 0,
+    tier: '', tierId: '', tierMult: 1, tierGrams: 0, tierDays: 90,
+    nextTier: '', nextTierId: '', nextTierGrams: 0,
+    tierFrom: 0, tierTo: 0,
     // Seeded from the mirror below and replaced by the server's own figures the
     // moment the profile lands. Starting at the mirror rather than at zero so a
     // bag opened in the first second does not promise "$0 off".
@@ -2815,14 +2892,16 @@ class Component extends DCLogic {
     // their profile — the menu is where the hearts are drawn.
     this.api('codes', 'me').then(res => {
       if (!res || !res.ok || !res.profile) return;
-      // Points come down with the hearts, because the BAG needs the balance
-      // to offer a discount — waiting until they open their profile means
-      // the one screen where spending matters is the one that does not know.
+      // Points and the TIER come down with the hearts, because the bag needs
+      // the multiplier to promise the right number — waiting until they open
+      // their profile means the bag under-promises on the first order of
+      // every session, to exactly the customers who earn the most.
       this.setState({
         favs: res.profile.favs || [],
         pts: res.points || 0,
-        ptsWorth: res.worth || 0,
-        tier: res.tier || '', tierMult: res.tierMult || 1
+        redeemOn: res.redeemOn === true,
+        ladder: res.ladder || [],
+        tier: res.tier || '', tierId: res.tierId || '', tierMult: res.tierMult || 1
       });
     });
     return this.loadMenu().then(() => this.setState({ role: 'client', clientName: name, screen: 'home' }));
@@ -2922,12 +3001,18 @@ class Component extends DCLogic {
           // number that is never out of step with this one.
           favs: (res.profile && res.profile.favs) || [],
           pts: res.points || 0,
-          ptsWorth: res.worth || 0,
+          redeemOn: res.redeemOn === true,
+          ladder: res.ladder || [],
           lostPts: (res.lost || {}).points || 0,
           lostAt: (res.lost || {}).at || '',
           lostTier: (res.lost || {}).tier || '',
-          tier: res.tier || '', tierMult: res.tierMult || 1,
-          nextTier: res.nextTier || '', nextTierGrams: res.nextTierGrams || 0,
+          lostTierId: (res.lost || {}).tierId || '',
+          lostAboveBase: (res.lost || {}).aboveBase === true,
+          tier: res.tier || '', tierId: res.tierId || '', tierMult: res.tierMult || 1,
+          tierGrams: res.tierGrams || 0, tierDays: res.tierDays || 90,
+          nextTier: res.nextTier || '', nextTierId: res.nextTierId || '',
+          nextTierGrams: res.nextTierGrams || 0,
+          tierFrom: res.tierFrom || 0, tierTo: res.tierTo || 0,
           ptsExpires: res.expiresAt || '',
           // The economics, from the one place that owns them. The page used to
           // mirror "25" in three spots and state the rule as prose about
@@ -2935,6 +3020,7 @@ class Component extends DCLogic {
           ptsPer: res.perPoint || PTS_PER,
           ptsOne: res.pointValue || 1,
           ptsBlock: res.redeemBlock || PTS_PER,
+          ptsWorth: res.worth || 0,
           ptsEarned: res.earned || []
         });
       }
@@ -3592,6 +3678,13 @@ class Component extends DCLogic {
     // Today and yesterday are named rather than dated, because that is how
     // anyone reads a list they are working through.
     const loc = L === 'es' ? 'es-PR' : 'en-US';
+
+    // A tier's name, in the language being read. The SERVER sends ids and the
+    // copy holds the words, because the words differ \u2014 Pana and Socio are Buddy
+    // and Partner on English, while Mafutero stays Mafutero, being the shop's
+    // own. Falling back to the base tier's name rather than to an empty badge,
+    // so the card reads properly in the moment before the profile lands.
+    const tierName = (id) => (t.tierNames || {})[id] || (t.tierNames || {})[TIER_BASE] || '';
     const stamp = (iso) => {
       const d = new Date(iso);
       if (isNaN(d)) return '';
@@ -3618,7 +3711,7 @@ class Component extends DCLogic {
     // the point count works only while a point is a dollar.
     const ptsBlock = s.ptsBlock || PTS_PER;
     const blockOff = ptsBlock * (s.ptsOne || 1);
-    const maxBlocks = Math.max(0, Math.min(
+    const maxBlocks = !s.redeemOn ? 0 : Math.max(0, Math.min(
       Math.floor((s.pts || 0) / ptsBlock), Math.floor(sub / blockOff)));
     const blocksNow = Math.min(s.useBlocks || 0, maxBlocks);
     const zone = this.zone();
@@ -3731,7 +3824,7 @@ class Component extends DCLogic {
         const live = (o) => !o.cancelled && (o.step || 0) < 3;
         if (live(a) !== live(b)) return 0;
         if (!live(a)) return 0;
-        return (b.tierId === 'patron' ? 1 : 0) - (a.tierId === 'patron' ? 1 : 0);
+        return (b.tierId === TIER_TOP ? 1 : 0) - (a.tierId === TIER_TOP ? 1 : 0);
       });
 
     // ── a month of trading, read back ────────────────────────────────────
@@ -4020,49 +4113,79 @@ class Component extends DCLogic {
       toggleBaker: () => this.togglePromo('bakersDozen'),
       queueMsg: s.queueMsg || '',
       queueMsgDisplay: s.queueMsg ? 'block' : 'none',
-      ptsWorthLine: t.ptsWorth((s.ptsWorth || 0).toLocaleString('en-US')),
       lostDisplay: (s.lostPts || 0) > 0 ? 'block' : 'none',
       lostLine: t.ptsLost((s.lostPts || 0).toLocaleString('en-US'),
         s.lostAt ? stamp(s.lostAt).split(' \u00b7 ')[0] : ''),
-      // Only worth saying if it was a tier they would actually miss.
-      lostTierDisplay: s.lostTier && s.lostTier !== 'Mafutero' ? 'block' : 'none',
-      lostTierLine: t.ptsLostTier(s.lostTier || ''),
-      tierLabel: t.tierLine(s.tier || 'Mafutero', s.tierMult || 1),
-      // The rule, stated at THIS customer's multiplier and in the server's own
-      // figures. A card that shows a 3× badge and then says "an eighth earns 1
-      // Mafupunto" is arguing with itself, and the customer counting at the
-      // door is the one who loses the argument.
-      ptsRuleLine: t.ptsRule(s.ptsPer || PTS_PER, s.tierMult || 1, ptsBlock, blockOff),
+      // Only worth saying if it was a tier they would actually miss \u2014 which
+      // the SERVER decides, as `aboveBase`. The page used to compare the name
+      // against the literal 'Mafutero', meaning the base tier. Mafutero is the
+      // TOP tier now, so that line would have gone quiet for exactly the
+      // customers it matters to and spoken up for the ones it does not.
+      lostTierDisplay: (s.lostPts || 0) > 0 && s.lostAboveBase ? 'block' : 'none',
+      lostTierLine: t.ptsLostTier(tierName(s.lostTierId) || s.lostTier || ''),
+
+      // ---- the tier, which is the thing actually being earned ----
+      tierLabel: t.tierLine(tierName(s.tierId), s.tierMult || 1),
       // Grams still needed, not the threshold. "42g" means nothing to
       // somebody holding a phone; "another half ounce" means everything.
-      tierNextLine: s.nextTier ? t.tierNext(s.nextTierGrams, s.nextTier) : t.tierTop,
+      tierNextLine: s.nextTierId
+        ? t.tierNext(s.nextTierGrams, tierName(s.nextTierId))
+        : t.tierTop,
+      // The bar measures the gap between the tier they hold and the next one,
+      // in grams \u2014 from zero, every bar past the first tier would sit nearly
+      // full and stop meaning anything. Hidden at the top, where there is no
+      // gap left to draw.
+      tierBarDisplay: s.nextTierId ? 'block' : 'none',
+      tierPct: (() => {
+        const span = (s.tierTo || 0) - (s.tierFrom || 0);
+        const done = span > 0 ? ((s.tierGrams || 0) - (s.tierFrom || 0)) / span : 0;
+        return Math.max(2, Math.min(100, Math.round(done * 100))) + '%';
+      })(),
+      openTiers: () => this.setState({ tiersOpen: true }),
+      closeTiers: () => this.setState({ tiersOpen: false }),
+
+      // ---- the points, which are only counted ----
+      // The earn rate, at THIS customer's multiplier and in the server's own
+      // figures. A card that shows a 3x badge and then says "an eighth earns 1
+      // Mafupunto" is arguing with itself, and the customer counting at the
+      // door is the one who loses the argument.
+      ptsRuleLine: t.ptsRule(s.ptsPer || PTS_PER, s.tierMult || 1),
+      // What they are worth, or that nothing has been decided. One or the
+      // other, never neither and never both: while REDEEM_ON is false the shop
+      // has not priced them, and a card that prices them anyway is the promise
+      // this whole screen keeps getting wrong.
+      ptsPendingLine: s.redeemOn ? t.ptsRedeemRule(ptsBlock, blockOff) : t.ptsPending,
       // Only once there is something to lose. Warning a customer with no
       // points that they are about to lose none of them is just noise.
       ptsGoneDisplay: (s.pts || 0) > 0 && s.ptsExpires ? 'block' : 'none',
       ptsGoneLine: s.ptsExpires ? t.ptsGone(stamp(s.ptsExpires).split(' \u00b7 ')[0]) : '',
-      // Blocks, not rungs.
-      //
-      // This used to read off the MILESTONES ladder — 25, 50, 100, 200 — and
-      // say "11 more for a free eighth" to somebody holding 39 points, who
-      // could already have taken $25 off that afternoon and was never told.
-      // Now that points really can be spent, there is no ladder to climb:
-      // every 25 points is $25 off, again and again. So the bar measures the
-      // distance to the next block and the line says what is already waiting.
-      ptsGoalDisplay: 'block',
-      ptsGoalLine: (() => {
-        const ready = Math.floor((s.pts || 0) / ptsBlock) * blockOff;
-        // Zero stays a NUMBER through to the copy. Formatting it first makes it
-        // the string "0", which is truthy, and the card then reads "Tienes $0
-        // menos listos" to somebody holding two points.
-        return t.ptsGoal(
-          (ptsBlock - ((s.pts || 0) % ptsBlock)).toLocaleString('en-US'),
-          ready > 0 ? ready.toLocaleString('en-US') : 0,
-          (ready + blockOff).toLocaleString('en-US'));
-      })(),
-      // Across the current block only. Full-width at 24 points and empty again
-      // at 25 is correct: the 25 went from "coming" to "ready", and the line
-      // underneath says so.
-      ptsPct: Math.max(2, Math.round(((s.pts || 0) % ptsBlock) / ptsBlock * 100)) + '%',
+
+      // ---- the sheet that explains all of it ----
+      tiersOpenDisplay: s.tiersOpen ? 'flex' : 'none',
+      tiersIntroLine: t.tiersIntro(s.tierDays || 90),
+      tiersWhyLine: t.tiersWhy(tierName(TIER_TOP)),
+      tiersRows: (s.ladder || []).map((rung, n) => {
+        const id = rung.id;
+        const mine = tierRank(s.tierId) === n;
+        const perk = rung.perks || {};
+        return {
+          id,
+          name: tierName(id),
+          from: t.tiersFrom(rung.grams),
+          mult: t.tiersMult(rung.mult),
+          mine: mine ? t.tiersYouAre : '',
+          mineDisplay: mine ? 'inline-block' : 'none',
+          bg: mine ? 'var(--green-glow)' : 'var(--veil-08)',
+          fg: mine ? 'var(--ink)' : 'var(--on-dark)',
+          sub: mine ? 'var(--green-ink-2)' : 'var(--green-3)',
+          // Only the perks that tier actually has, so the list is not three
+          // identical paragraphs with one word different.
+          perks: [t.tiersPerkHold(perk.holdMinutes)]
+            .concat(perk.queueFirst ? [t.tiersPerkQueue] : [])
+            .concat(perk.bakersDozen ? [t.tiersPerkBaker] : [])
+        };
+      }),
+
       ptsHistDisplay: (s.ptsEarned || []).length ? 'block' : 'none',
       ptsEmptyDisplay: (s.ptsEarned || []).length ? 'none' : 'block',
       // Four, not the lot. Their whole order list is already further down this
@@ -4549,7 +4672,10 @@ class Component extends DCLogic {
       earnDisplay: sub > 0 ? 'block' : 'none',
       // Blocks they could spend here: never more than they hold, never more
       // than the goods are worth. The server checks both again.
-      redeemDisplay: maxBlocks > 0 ? 'block' : 'none',
+      // Nothing to spend them on, so nothing to offer. maxBlocks is already
+      // zero while the scheme is off \u2014 blocksAllowed sees to that on the server
+      // and the clamp below mirrors it \u2014 but this says why in one place.
+      redeemDisplay: s.redeemOn && maxBlocks > 0 ? 'block' : 'none',
       redeemTitle: t.redeemTitle(ptsBlock),
       redeemSub: t.redeemSub(blocksNow * ptsBlock, cash(blocksNow * blockOff), ptsBlock, cash(blockOff)),
       blocksUsed: String(blocksNow),
@@ -4792,10 +4918,10 @@ class Component extends DCLogic {
           // edge carries it too, so a Patron is recognisable across the room
           // without reading a word.
           tier: o.tier || '',
-          tierDisplay: o.tierId && o.tierId !== 'mafutero' ? 'inline-flex' : 'none',
-          tierBg: o.tierId === 'patron' ? 'var(--green-glow)' : 'var(--green-pale)',
-          cardEdge: o.tierId === 'patron' ? 'var(--green-glow)'
-            : o.tierId === 'veterano' ? 'var(--green-3)' : 'var(--ink)',
+          tierDisplay: o.tierId && o.tierId !== TIER_BASE ? 'inline-flex' : 'none',
+          tierBg: o.tierId === TIER_TOP ? 'var(--green-glow)' : 'var(--green-pale)',
+          cardEdge: tierRank(o.tierId) >= 2 ? 'var(--green-glow)'
+            : tierRank(o.tierId) === 1 ? 'var(--green-3)' : 'var(--ink)',
           when: stamp(o.at),
           initials: this.initials(o.client),
           status: o.cancelled ? t.cancelled : st.label,
@@ -4974,12 +5100,16 @@ class Component extends DCLogic {
         // Every customer, including the base tier. Hiding it there was a
         // judgement about visual noise on a CUSTOMER's screen, and this is
         // his: a blank where a tier should be reads as missing data, and he
-        // cannot tell "Mafutero" from "not loaded" at a glance.
-        tier: c.tier || '',
-        tierDisplay: c.tier ? 'inline-flex' : 'none',
-        tierBg: c.tier === 'Patr\u00f3n' ? 'var(--green-glow)'
-          : c.tier === 'Veterano' ? 'var(--green-pale)' : 'var(--chip)',
-        tierFg: c.tier === 'Mafutero' ? 'var(--muted)' : 'var(--ink)',
+        // cannot tell the bottom rung from "not loaded" at a glance.
+        //
+        // By rank off the id, never by the name: the names are per-language
+        // now, so comparing them would colour the badges correctly on Spanish
+        // and not at all on English.
+        tier: tierName(c.tierId) || c.tier || '',
+        tierDisplay: c.tierId ? 'inline-flex' : 'none',
+        tierBg: tierRank(c.tierId) >= 2 ? 'var(--green-glow)'
+          : tierRank(c.tierId) === 1 ? 'var(--green-pale)' : 'var(--chip)',
+        tierFg: c.tierId === TIER_BASE ? 'var(--muted)' : 'var(--ink)',
         last: c.lastOrder ? t.lastOrder(stamp(c.lastOrder)) : t.neverOrdered,
         state: c.active ? t.active : t.revoked,
         bg: c.active ? 'var(--green-pale)' : 'var(--chip)', fg: c.active ? 'var(--green-ink)' : 'var(--muted-2)',

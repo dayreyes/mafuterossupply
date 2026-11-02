@@ -14,7 +14,7 @@ import { read, write, mutate, KEYS } from './lib/store.js';
 import { requireOwner, requireClient } from './lib/session.js';
 import { mileFee, migrateProduct, shopOpen, shopDay, loadConfig } from './lib/config.js';
 import { pointsFor, orderPoints, crossed, tierAt, perksFor,
-  blocksFor, REDEEM_BLOCK, POINT_VALUE } from './lib/points.js';
+  blocksAllowed, REDEEM_BLOCK, POINT_VALUE } from './lib/points.js';
 import {
   sendAll, orderText, lowStockText, soldOutText, cancelText, removedText, paidText,
   pushTo, orderStatusMsg, lowStockCustomerMsg, pointsMsg
@@ -241,9 +241,13 @@ export default async (req) => route(req, {
     // asked for more than they hold, they get what they hold and no error —
     // a bag that refuses to check out because a stale balance was a block
     // out of date is worse than quietly giving them the right discount.
+    //
+    // blocksAllowed, not blocksFor: while REDEEM_ON is false this is zero
+    // whatever the body asked for. The bag draws no stepper, so the only way
+    // useBlocks arrives at all is a forged request, and it buys nothing.
     const held = pointsFor(await read(KEYS.orders, []), session.code || '');
     const wanted = num(body.useBlocks, 0, 99, 0);
-    const blocks = Math.min(wanted, blocksFor(held, subtotal));
+    const blocks = Math.min(wanted, blocksAllowed(held, subtotal));
     const pointsSpent = blocks * REDEEM_BLOCK;
     const discount = pointsSpent * POINT_VALUE;
 

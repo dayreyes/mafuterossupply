@@ -49,21 +49,57 @@ export const POINT_VALUE = 1;          // a point is a dollar off
 export const EXPIRE_DAYS = 60;
 export const TIER_DAYS = 90;
 
-// Redemption, in blocks.
+// ── REDEMPTION IS OFF ───────────────────────────────────────────────────────
 //
-// Twenty-five points for twenty-five dollars off, which at this shop is an
-// eighth — so the card can say "25 points = an eighth free" and mean it.
-// Blocks rather than loose pounds because "spend some points" invites a
-// slider nobody wants to use, and because a round number is what gets said
-// out loud at a door.
+// Points are earned and they are counted. They cannot be spent on anything,
+// because the shop has not decided what they buy.
+//
+// This is a deliberate state, not an unfinished one. A loyalty scheme that
+// pays out before anyone has priced the payout is how a shop ends up honouring
+// something at a door that it cannot afford — and the first version of this
+// file went the other way, promising "25 points = an eighth free" on the
+// strength of an eighth happening to cost $25 that week.
+//
+// What a customer gets today is the TIER, which is real: it multiplies what
+// every future order earns, and it carries the perks in PERKS below. The
+// points pile up behind it against whatever is decided.
+//
+// To switch redemption on: set REDEEM_ON to true. Everything below is already
+// written and tested for that day — the blocks, the caps, the spend recorded
+// on the order, the balance netting it off. Nothing else needs to change, and
+// the copy follows the flag.
+export const REDEEM_ON = false;
+
+// Redemption, in blocks, for when it is on.
+//
+// Blocks rather than loose points because "spend some points" invites a slider
+// nobody wants to use, and because a round number is what gets said out loud at
+// a door. What a block is WORTH is BLOCK_OFF, further down, and the two are
+// separate dials.
 export const REDEEM_BLOCK = 25;
 
 // Thresholds in grams: an ounce and a half, and three and a half ounces.
+//
+// The top rung is the shop's own word. Somebody who has moved three and a half
+// ounces in ninety days is not a customer of Mafutero's any more, they are a
+// Mafutero — which is a better thing for a badge to say than any rank.
+//
+// `name` here is the SPANISH name and is what goes out over Telegram, because
+// Telegram is Goldo's and Goldo reads Spanish. The app names them from its own
+// copy, by id, so that an English customer sees Buddy and Partner. The ids
+// never change with the copy: they key PERKS, and a tier wearing the wrong
+// id's perks is silent and expensive.
 export const TIERS = [
-  { id: 'mafutero', name: 'Mafutero', grams: 0,   mult: 1 },
-  { id: 'veterano', name: 'Veterano', grams: 42,  mult: 2 },
-  { id: 'patron',   name: 'Patr\u00f3n',   grams: 98,  mult: 3 }
+  { id: 'pana',     name: 'Pana',     grams: 0,   mult: 1 },
+  { id: 'socio',    name: 'Socio',    grams: 42,  mult: 2 },
+  { id: 'mafutero', name: 'Mafutero', grams: 98,  mult: 3 }
 ];
+
+// Named rather than indexed at the call sites, so "is this the top tier" does
+// not become a string literal in nine places that a rename has to find.
+export const BASE_TIER = TIERS[0];
+export const TOP_TIER = TIERS[TIERS.length - 1];
+export const tierRank = (id) => Math.max(0, TIERS.findIndex((t) => t.id === id));
 
 const EXPIRE_MS = EXPIRE_DAYS * 24 * 60 * 60 * 1000;
 
@@ -112,15 +148,19 @@ const counts = (o, code) => o.clientCode === code && !o.cancelled;
 
 // ── what a tier is actually worth, beyond earning faster ────────────────────
 //
-// Kept here rather than scattered through the handlers, so "what does Patron
-// get" has one answer that can be read in one place.
+// Kept here rather than scattered through the handlers, so "what does the top
+// tier get" has one answer that can be read in one place.
 export const PERKS = {
-  mafutero: { holdMinutes: 30, bakersDozen: false, queueFirst: false },
-  veterano: { holdMinutes: 60, bakersDozen: false, queueFirst: false },
-  patron:   { holdMinutes: 60, bakersDozen: true,  queueFirst: true }
+  pana:     { holdMinutes: 30, bakersDozen: false, queueFirst: false },
+  socio:    { holdMinutes: 60, bakersDozen: false, queueFirst: false },
+  mafutero: { holdMinutes: 60, bakersDozen: true,  queueFirst: true }
 };
 
-export const perksFor = (tierId) => PERKS[tierId] || PERKS.mafutero;
+// Falling back to the BASE tier, never to a named one. When the tiers were
+// renamed the old base id was `mafutero`, which is now the TOP tier — a
+// fallback written as `PERKS.mafutero` would have quietly handed every
+// unrecognised customer the best perks in the shop.
+export const perksFor = (tierId) => PERKS[tierId] || PERKS[BASE_TIER.id];
 
 // ── expiry ──────────────────────────────────────────────────────────────────
 //
@@ -179,8 +219,19 @@ export const BLOCK_OFF = REDEEM_BLOCK * POINT_VALUE;
 // How many blocks this order could pay for: never more than they hold, and
 // never more than the goods are worth — the delivery fee is his mileage and
 // is not something points buy.
+//
+// Kept pure, and kept correct, so the day REDEEM_ON flips there is nothing to
+// re-derive. It is not what the handlers call.
 export const blocksFor = (points, subtotal) =>
   Math.max(0, Math.min(Math.floor(points / REDEEM_BLOCK), Math.floor(subtotal / BLOCK_OFF)));
+
+// What the shop will actually allow, which today is nothing.
+//
+// ONE choke point, called by the order handler, so there is no second path by
+// which a discount could be applied while the scheme is off — including a
+// forged useBlocks in a request body.
+export const blocksAllowed = (points, subtotal) =>
+  REDEEM_ON ? blocksFor(points, subtotal) : 0;
 
 // What the balance is worth in money.
 export const pointsValue = (points) => points * POINT_VALUE;
@@ -204,13 +255,21 @@ export function expiredInfo(orders, code, now = new Date()) {
   const alive = new Set(livingOrders(orders, code, now));
   const dead = mine.filter((o) => !alive.has(o));
   if (!dead.length) return { points: 0, at: '', tier: '' };
+  const was = tierAt(orders, code, new Date(dead[0].at || 0));
   return {
     points: dead.reduce((a, o) =>
       a + orderPoints(o, tierAt(orders, code, new Date(o.at || 0)).mult), 0),
     // The day the gap closed over them, not the day of the last order.
     at: new Date(new Date(dead[0].at || 0).getTime() + EXPIRE_MS).toISOString(),
-    // And what they were, before it went.
-    tier: tierAt(orders, code, new Date(dead[0].at || 0)).name
+    // And what they were, before it went — by id, so the app can name it in
+    // the customer's own language.
+    tier: was.name,
+    tierId: was.id,
+    // Whether it is worth mentioning at all. Telling somebody they used to be
+    // the base tier is telling them nothing. Decided here rather than by the
+    // page comparing against a tier NAME, which is exactly the comparison that
+    // breaks silently the day the tiers are renamed.
+    aboveBase: tierRank(was.id) > 0
   };
 }
 

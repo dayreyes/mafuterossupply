@@ -399,7 +399,7 @@ async function customerProfile() {
   // response has to be looked at: `me` is the reply that could most easily
   // start carrying somebody else's details without anyone noticing.
   ck('and nothing else is attached',
-    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,lost,nextTier,nextTierGrams,ok,perPoint,pointValue,points,profile,redeemBlock,tier,tierDays,tierGrams,tierId,tierMult,worth', Object.keys(r));
+    Object.keys(r).sort().join(',') === 'earned,expireDays,expiresAt,ladder,lost,nextTier,nextTierGrams,nextTierId,ok,perPoint,pointValue,points,profile,redeemOn,tier,tierDays,tierFrom,tierGrams,tierId,tierMult,tierTo', Object.keys(r));
   ck('the profile itself still carries only their own fields',
     Object.keys(r.profile).sort().join(',') === 'addr,code,devices,favs,name,notify,phone', Object.keys(r.profile));
 
@@ -909,20 +909,24 @@ async function viewLayer() {
   const card = html.slice(html.indexOf('{{ t.ptsTitle }}'), html.indexOf('{{ t.ptsHistory }}'));
   ck('the tier line sits with the tier badge', card.indexOf('{{ tierNextLine }}') < card.indexOf('{{ ptsValue }}'),
     { tier: card.indexOf('{{ tierNextLine }}'), balance: card.indexOf('{{ ptsValue }}') });
-  ck('and the only line touching the bar is the one the bar measures',
-    card.indexOf('{{ ptsPct }}') < card.indexOf('{{ ptsGoalLine }}') &&
-    card.indexOf('{{ tierNextLine }}') < card.indexOf('{{ ptsPct }}'));
-  // Both languages: the tier line must not open with the same words as the
-  // points goal, or separating them spatially only half-fixes it.
+  // The card is two halves with a rule between them, and the halves say
+  // different kinds of thing. Above: the tier, which is real, and the bar that
+  // measures it. Below: the points, which are counted and buy nothing yet.
+  // Interleaved, the card contradicted itself twice \u2014 a 3x badge over "an
+  // eighth earns 1", and two "you need N more" lines straddling one bar.
+  ck('the tier bar belongs to the tier line above it',
+    card.indexOf('{{ tierNextLine }}') < card.indexOf('{{ tierPct }}') &&
+    card.indexOf('{{ tierPct }}') < card.indexOf('{{ ptsValue }}'),
+    { line: card.indexOf('{{ tierNextLine }}'), bar: card.indexOf('{{ tierPct }}'),
+      points: card.indexOf('{{ ptsValue }}') });
+  ck('and the points have no bar of their own to confuse it with',
+    !card.includes('{{ ptsPct }}') && !card.includes('{{ ptsGoalLine }}'));
+  ck('the way into the explainer sits with the tier, not the points',
+    card.indexOf('{{ t.tiersWhat }}') < card.indexOf('{{ ptsValue }}'));
   for (const lang of ['es', 'en']) {
     const block = lang === 'es'
-      ? html.slice(html.indexOf('ptsWorth: v =>'), html.indexOf('ptsWorth: v =>', html.indexOf('ptsWorth: v =>') + 1))
-      : html.slice(html.indexOf('ptsWorth: v =>', html.indexOf('ptsWorth: v =>') + 1));
-    const goal = /ptsGoal: \(n, readyOff, nextOff\) =>([\s\S]{0,300}?)(?:\n\s*tierLine)/.exec(block);
-    const next = /tierNext: \(g, t\) =>([^\n]*)/.exec(block);
-    const head = (s) => (/'([^']{4,14})/.exec(s || '') || ['', ''])[1].trim();
-    ck(lang + ': the tier line and the points goal do not open alike',
-      !!goal && !!next && head(goal[1]) !== head(next[1]), { goal: head(goal && goal[1]), next: head(next && next[1]) });
+      ? html.slice(html.indexOf('\n  es: {'), html.indexOf('\n  en: {'))
+      : html.slice(html.indexOf('\n  en: {'), html.indexOf('\n};', html.indexOf('\n  en: {')));
     ck(lang + ': the badge says the multiplier and not a second noun',
       /tierLine: \(t, m\) => t \+ ' \\u00b7 ' \+ m \+ '\\u00d7',/.test(block));
   }
@@ -1288,11 +1292,20 @@ async function mafupuntos() {
   ck('a customer with no orders has none', me.points === 0, me.points);
   ck('and is told what a point costs', me.perPoint === 25, me);
   ck('and what one is worth', me.pointValue === 1, me);
-  ck('and starts at the bottom tier', me.tier === 'Mafutero' && me.tierMult === 1, me.tier);
+  ck('and starts at the bottom tier',
+    me.tierId === pts.BASE_TIER.id && me.tierMult === 1, { id: me.tierId, mult: me.tierMult });
+  // By id, not by name. The names are per-language now and the top one is
+  // 'Mafutero' — which used to be the id of the BASE tier, so a test written
+  // against the name would have passed on the wrong rung.
+  ck('and the bottom tier is Pana', pts.BASE_TIER.id === 'pana', pts.BASE_TIER);
+  ck('and the top one is the shop itself', pts.TOP_TIER.id === 'mafutero', pts.TOP_TIER);
   await buy(ana, 4);                       // 4 x 3.5g at $25 = $100
   me = await call(codes, { action: 'me' }, ana);
   ck('a $100 order is four points', me.points === 4, me.points);
-  ck('and is worth four dollars at base tier', me.worth === 4, me.worth);
+  // Not priced. Nothing can be redeemed, so the reply carries no dollar figure
+  // at all — a number in the payload is a number that reaches a screen.
+  ck('but is not priced, because nothing can be spent',
+    me.redeemOn === false && me.worth === undefined && me.redeemBlock === undefined, me);
 
   section('the economics are not a giveaway');
   // The first draft gave a point per dollar AND made a point worth a dollar,
@@ -1331,19 +1344,24 @@ async function mafupuntos() {
   ck('the sale did not happen, so the points did not either', afterCancel.points === 3, afterCancel.points);
   ck('and it drops out of the breakdown', afterCancel.earned.length === 2, afterCancel.earned);
 
-  section('the goal ahead of them is a block, not a rung');
-  // `goal` and `toGo` are gone from this reply. They were the next rung of the
-  // MILESTONES ladder, and the card turned them into "11 more for a free
-  // eighth" for somebody holding 39 points who could already take $25 off.
-  // What the card needs is the block size, which it divides the balance by.
-  ck('no ladder rung is sent any more', afterCancel.goal === undefined, afterCancel.goal);
+  section('there is no goal, because there is no reward yet');
+  // `goal` and `toGo` are gone. They were the next rung of the MILESTONES
+  // ladder, and the card turned them into "11 more for a free eighth" — a
+  // reward nobody has priced, on a rung nobody is climbing.
+  ck('no ladder rung is sent', afterCancel.goal === undefined, afterCancel.goal);
   ck('nor a distance to one', afterCancel.toGo === undefined, afterCancel.toGo);
-  ck('the block size is, so the card can work it out',
-    afterCancel.redeemBlock === 25 && afterCancel.pointValue === 1,
-    { block: afterCancel.redeemBlock, value: afterCancel.pointValue });
-  // 3 points: nothing ready, 22 to the first block.
-  ck('and it comes out right', 3 % afterCancel.redeemBlock === afterCancel.points &&
-    afterCancel.redeemBlock - afterCancel.points === 22, afterCancel.points);
+  // What IS sent is the tier band, which is the thing a customer is climbing,
+  // and the whole ladder for the sheet that explains it.
+  ck('the tier band is, so the bar can draw the gap it is in',
+    afterCancel.tierFrom === 0 && afterCancel.tierTo === 42,
+    { from: afterCancel.tierFrom, to: afterCancel.tierTo });
+  ck('and the ladder, so the sheet does not hold its own copy of the rules',
+    afterCancel.ladder.length === 3 &&
+    afterCancel.ladder.every((x) => x.id && typeof x.grams === 'number' && x.perks),
+    afterCancel.ladder);
+  ck('with the thresholds and multipliers the server really uses',
+    JSON.stringify(afterCancel.ladder.map((x) => [x.id, x.grams, x.mult])) ===
+    JSON.stringify(pts.TIERS.map((x) => [x.id, x.grams, x.mult])), afterCancel.ladder);
 
   section('two months without ordering and you start again');
   const day = 86400000;
@@ -1418,77 +1436,182 @@ async function mafupuntos() {
   const before = (await call(codes, { action: 'me' }, rich)).points;
   ck('they have something to spend', before >= 25, before);
 
+  // ── and cannot spend it ──
+  //
+  // REDEEM_ON is false: the shop has not decided what points buy, so they buy
+  // nothing. This is the state to hold the line on, because the previous two
+  // versions of this screen both promised a reward — first "a free eighth",
+  // then "$25 off" — that nobody had priced.
+  ck('the scheme is off', pts.REDEEM_ON === false);
   const spent = await ozBuy(1);
-  ck('the discount came off the total', spent.order.discount === 25, spent.order);
-  ck('and is recorded on the order', spent.order.pointsSpent === 25, spent.order.pointsSpent);
-  ck('the total reflects it', spent.order.total === '$115', spent.order.total);
+  ck('asking to spend takes nothing off', spent.order.discount === 0, spent.order.discount);
+  ck('and nothing is recorded as spent', spent.order.pointsSpent === 0, spent.order.pointsSpent);
+  ck('the full price is charged', spent.order.total === '$140', spent.order.total);
   const after = (await call(codes, { action: 'me' }, rich)).points;
-  // Earned on this order too, so the drop is 25 less whatever it just earned.
-  // That order earned as well as spent: five ounces in, they are Patron, so
-  // $140 earns 5 x 3 = 15 while 25 goes out. Net ten down.
-  ck('the balance went down by what was spent, net of what it earned',
-    after === before + 15 - 25, { before, after, expected: before - 10 });
+  // Still earned on it, at the tier they hold: five ounces in they are the top
+  // tier, so $140 earns 5 x 3 = 15 and nothing goes out.
+  ck('the balance only went up', after === before + 15, { before, after });
+  // The one choke point, exercised directly — the maths underneath is correct
+  // and stays tested, it is simply not reachable.
+  ck('nothing is allowed through while it is off', pts.blocksAllowed(1000, 1000) === 0);
+  ck('though the maths behind it is ready for the day it is on',
+    pts.blocksFor(1000, 1000) === 40, pts.blocksFor(1000, 1000));
 
-  section('the server prices it, not the browser');
+  section('a forged request cannot switch it on');
   const broke = await rd.asCustomer('Broke');
   const cheeky = await call(orders, { action: 'place',
     items: [{ pid: rd.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash', useBlocks: 99 }, broke);
-  ck('somebody with no points gets no discount', cheeky.order.discount === 0, cheeky.order);
+  ck('somebody with no points gets no discount', cheeky.order.discount === 0, cheeky.order.discount);
   ck('and is charged the full price', cheeky.order.total === '$25', cheeky.order.total);
-  // Asking for more than the goods are worth must not make the shop pay them.
+  // The bag draws no stepper, so useBlocks can only arrive by hand. It buys
+  // nothing even from somebody who holds plenty.
   const over = await call(orders, { action: 'place',
     items: [{ pid: rd.pid, weightIdx: 0, qty: 1 }], mode: 'pickup', pay: 'cash', useBlocks: 99 }, rich);
-  ck('a discount never exceeds the goods', over.order.discount <= over.order.subtotal, over.order);
+  ck('nor does somebody with plenty', over.order.discount === 0, over.order.discount);
   ck('and a total is never negative', !/-/.test(over.order.total), over.order.total);
 
   section('the card states the rule the till actually follows');
   // It read "Un octavo te da 1 Mafupunto. 25 puntos = un octavo gratis."
   //
-  // Wrong twice. A Patron earns three per $25 and the badge directly above it
-  // says 3x, so the card argued with itself. And counting eighths does not
-  // survive a bigger basket: an ounce at $140 earns five points, not the eight
-  // you get by counting eighths into it. A customer who adds it up at the door
-  // and comes out short is the whole cost of printing a rule the till does not
-  // follow.
+  // Wrong twice over. A top-tier customer earns three per $25 and the badge
+  // directly above it says 3x, so the card argued with itself. And counting
+  // eighths does not survive a bigger basket: an ounce at $140 earns five
+  // points, not the eight you get by counting eighths into it. Somebody who
+  // adds it up at the door and comes out short is the whole cost of printing a
+  // rule the till does not follow.
   const ozPts = pts.orderPoints({ subtotal: 140, fee: 0 }, 1);
   ck('an ounce does not earn eight points, it earns five', ozPts === 5, ozPts);
   ck('so "an eighth earns a point" was never the rule',
     ozPts !== Math.round(28 / 3.5), { paid: ozPts, byEighths: 8 });
-  ck('and a Patron earns three times it', pts.orderPoints({ subtotal: 140, fee: 0 }, 3) === 15);
+  ck('and the top tier earns three times it', pts.orderPoints({ subtotal: 140, fee: 0 }, 3) === 15);
 
-  // So the copy has to be stated in money, with the multiplier, and may not
-  // promise an eighth — a price El Mafu sets and can change this afternoon.
   const { readFileSync: rfs } = await import('node:fs');
   const html = rfs(join(root, 'index.html'), 'utf8');
   const script = /<script type="text\/x-dc" data-dc-script>([\s\S]*?)<\/script>/.exec(html)[1];
+  // The two copy blocks, bounded by the COPY object itself rather than by a
+  // key that happens to appear in both — an unbounded English slice ran to the
+  // end of the file and swept up the whole app script, so "does this language
+  // mention an eighth" was reading comments in the render code.
+  //
+  // Comments stripped, because what a customer reads is the string literals.
+  const copyAt = html.indexOf('const COPY = {');
+  const esAt = html.indexOf('\n  es: {', copyAt);
+  const enAt = html.indexOf('\n  en: {', copyAt);
+  const copyEnd = html.indexOf('\n};', enAt);
+  const strip = (x) => x.replace(/^\s*\/\/.*$/gm, '');
+  const langBlock = (lang) => strip(lang === 'es'
+    ? html.slice(esAt, enAt) : html.slice(enAt, copyEnd));
+
   for (const lang of ['es', 'en']) {
-    const block = lang === 'es'
-      ? html.slice(html.indexOf('ptsWorth: v =>'), html.indexOf('ptsWorth: v =>', html.indexOf('ptsWorth: v =>') + 1))
-      : html.slice(html.indexOf('ptsWorth: v =>', html.indexOf('ptsWorth: v =>') + 1));
-    const rule = (/ptsRule: \(d, m, b, off\) =>([\s\S]{0,220}?)\n\s*ptsSoon/.exec(block) || ['', ''])[1];
-    const goal = (/ptsGoal: \(n, readyOff, nextOff\) =>([\s\S]{0,300}?)(?:\n\s*tierLine)/.exec(block) || ['', ''])[1];
-    ck(lang + ': the rule is a function of the real figures', /\+ d \+/.test(rule) && /\+ b \+/.test(rule), rule.slice(0, 90));
+    const block = langBlock(lang);
+    const rule = (/ptsRule: \(d, m\) =>([\s\S]{0,220}?)\n\s*ptsRedeemRule/.exec(block) || ['', ''])[1];
+    ck(lang + ': the rule is a function of the real figures',
+      /\+ d \+/.test(rule), rule.slice(0, 90));
     ck(lang + ': and of the customer’s own multiplier', /\+ m \+/.test(rule), rule.slice(0, 90));
-    ck(lang + ': neither line promises an eighth',
-      !/octavo|eighth/i.test(rule + goal), (rule + goal).slice(0, 120));
-    ck(lang + ': the goal is money off, not a named product', /\$' \+ nextOff/.test(goal), goal.slice(0, 90));
-    ck(lang + ': and says what is already redeemable first', /readyOff\s*$|readyOff$/m.test(goal.split('\n')[0]) || /\? *'/.test(goal), goal.slice(0, 60));
+    // Nothing anywhere in the customer copy may promise a free eighth. The
+    // price of an eighth is his to change and was never what a point bought.
+    // Word boundaries: "perWeightHint" contains the letters of "eighth" and
+    // was failing this on a key about weight labels.
+    ck(lang + ': nothing in the copy promises an eighth',
+      !/\b(octavos?|eighths?)\b/i.test(block),
+      (/.{0,40}\b(octavos?|eighths?)\b.{0,40}/i.exec(block) || [''])[0]);
   }
   // And the page must pass the tier through to it, or the badge and the rule
   // disagree again with nothing to catch it.
   ck('the rule is drawn at the tier the customer holds',
-    /ptsRuleLine: t\.ptsRule\(s\.ptsPer \|\| PTS_PER, s\.tierMult \|\| 1,/.test(script));
+    /ptsRuleLine: t\.ptsRule\(s\.ptsPer \|\| PTS_PER, s\.tierMult \|\| 1\)/.test(script));
 
-  // Nothing redeemable has to reach the copy as a number. Formatted first it
-  // becomes the string "0", which is truthy, and the card reads "Tienes $0
-  // menos listos" to somebody holding two points.
-  const esGoal = (/ptsGoal: \(n, readyOff, nextOff\) =>([\s\S]{0,300}?)(?:\n\s*tierLine)/
-    .exec(html.slice(html.indexOf('ptsWorth: v =>'))) || ['', ''])[1];
-  const goalFn = new Function('n', 'readyOff', 'nextOff', 'return (' + esGoal.trim().replace(/,$/, '') + ')');
-  ck('nothing ready says nothing, not "$0"', !/\$0/.test(goalFn('23', 0, '25')), goalFn('23', 0, '25'));
-  ck('and something ready is named before the next block',
-    /\$25/.test(goalFn('11', '25', '50')) && /\$50/.test(goalFn('11', '25', '50')), goalFn('11', '25', '50'));
-  ck('the page keeps zero a number', /ready > 0 \? ready\.toLocaleString\('en-US'\) : 0/.test(script));
+  section('nothing on the card prices a point');
+  // Points cannot be spent, so no screen may put a dollar figure on them. The
+  // card says what they ARE worth only when redeemOn says they are worth
+  // something, and the two lines are one binding so it cannot say both or
+  // neither.
+  ck('the worth line is gone from the markup', !/\{\{ ptsWorthLine \}\}/.test(html));
+  ck('and what replaces it turns on the switch',
+    /ptsPendingLine: s\.redeemOn \? t\.ptsRedeemRule\(ptsBlock, blockOff\) : t\.ptsPending/.test(script));
+  ck('the bag offers no stepper while it is off',
+    /redeemDisplay: s\.redeemOn && maxBlocks > 0/.test(script));
+  ck('and cannot even count blocks', /const maxBlocks = !s\.redeemOn \? 0 :/.test(script));
+  for (const lang of ['es', 'en']) {
+    // The pending line has to say the rewards are undecided WITHOUT naming a
+    // date. "Premios pronto" was a promise too.
+    const pend = (/ptsPending: '([^']*)'/.exec(langBlock(lang)) || ['', ''])[1];
+    ck(lang + ': it says the rewards are not decided', pend.length > 30, pend);
+    ck(lang + ': and promises no date', !/pronto|soon|next week|semana/i.test(pend), pend);
+  }
+
+  section('the tiers are named in one place and keyed in another');
+  // The rename that made this worth guarding: `mafutero` was the id of the
+  // BASE tier and is now the TOP one. PERKS is keyed by id, so a fallback or a
+  // comparison left pointing at the old meaning hands the best perks in the
+  // shop to everybody, silently.
+  const ids = pts.TIERS.map((x) => x.id);
+  const pageIds = (/const TIER_IDS = \[([^\]]*)\]/.exec(script) || ['', ''])[1]
+    .split(',').map((x) => x.trim().replace(/^'|'$/g, '')).filter(Boolean);
+  ck('the page mirrors the server’s ids, in order',
+    JSON.stringify(pageIds) === JSON.stringify(ids), { page: pageIds, server: ids });
+  ck('every tier has perks of its own', ids.every((id) => pts.PERKS[id]), Object.keys(pts.PERKS));
+  ck('an unknown tier falls back to the BASE perks, not a named tier’s',
+    pts.perksFor('nonsense') === pts.PERKS[pts.BASE_TIER.id] &&
+    pts.perksFor('nonsense').bakersDozen === false, pts.perksFor('nonsense'));
+  ck('and the fallback is written as the base, not spelt out',
+    /PERKS\[tierId\] \|\| PERKS\[BASE_TIER\.id\]/.test(rfs(join(root, 'points.js'), 'utf8')));
+  // No tier NAME may be compared as a literal anywhere in the page: the names
+  // differ by language, so such a comparison is wrong in one of them even when
+  // it is right in the other.
+  const nameLits = ids.concat(['Pana', 'Socio', 'Mafutero', 'Buddy', 'Partner'])
+    .flatMap((n) => [...script.matchAll(new RegExp("[=!]==\\s*'" + n + "'", 'gi'))].map((m) => m[0]));
+  ck('no tier is identified by its name', nameLits.length === 0, nameLits);
+  // And the one place the old comparison lived.
+  ck('the lost-tier line asks the server whether it mattered',
+    /lostAboveBase/.test(script) && !/lostTier !== 'Mafutero'/.test(script));
+
+  section('every tier is named in both languages');
+  for (const lang of ['es', 'en']) {
+    const names = (/tierNames: \{([^}]*)\}/.exec(langBlock(lang)) || ['', ''])[1];
+    for (const id of ids) {
+      ck(lang + ': ' + id + ' has a word', new RegExp(id + ":\\s*'[^']+'").test(names), names);
+    }
+  }
+  const esNames = (/tierNames: \{([^}]*)\}/.exec(langBlock('es')) || ['', ''])[1];
+  const enNames = (/tierNames: \{([^}]*)\}/.exec(langBlock('en')) || ['', ''])[1];
+  ck('and English translates the two that translate',
+    /pana: 'Buddy'/.test(enNames) && /socio: 'Partner'/.test(enNames), enNames);
+  ck('while the shop’s own word stays the shop’s own',
+    /mafutero: 'Mafutero'/.test(esNames) && /mafutero: 'Mafutero'/.test(enNames));
+
+  section('the points are Mafupuntos, or MafuPoints');
+  const es = langBlock('es'), en = langBlock('en');
+  ck('Spanish says Mafupuntos', /Mafupuntos/.test(es));
+  ck('English says MafuPoints', /MafuPoints/.test(en));
+  ck('and neither leaks into the other',
+    !/MafuPoints/.test(es) && !/Mafupuntos/.test(en),
+    { esLeak: /MafuPoints/.test(es), enLeak: (/.{0,30}Mafupuntos.{0,30}/.exec(en) || [''])[0] });
+
+  section('the sheet that explains the tiers');
+  // Asked for because nobody could work out what the badge meant. It has to
+  // list every rung from the SERVER's ladder, not a copy of it, and mark the
+  // one the reader is on.
+  ck('there is something to tap', /\{\{ t\.tiersWhat \}\}/.test(html));
+  ck('it opens a sheet', /openTiers: \(\) => this\.setState\(\{ tiersOpen: true \}\)/.test(script));
+  ck('the scrim closes it, which is what everybody tries first',
+    /onClick="\{\{ closeTiers \}\}" style="display:\{\{ tiersOpenDisplay \}\}/.test(html));
+  ck('and so does the button', (html.match(/\{\{ closeTiers \}\}/g) || []).length >= 2);
+  ck('the rungs come from the server’s ladder, not a second copy',
+    /tiersRows: \(s\.ladder \|\| \[\]\)\.map/.test(script));
+  ck('each rung shows its threshold, its multiplier and its perks',
+    /from: t\.tiersFrom\(rung\.grams\)/.test(script) &&
+    /mult: t\.tiersMult\(rung\.mult\)/.test(script) &&
+    /perk\.queueFirst \? \[t\.tiersPerkQueue\]/.test(script));
+  ck('and the reader’s own rung is marked',
+    /mine = tierRank\(s\.tierId\) === n/.test(script));
+
+  section('the bar measures the tier, because the tier is what is earned');
+  ck('it draws the gap between this tier and the next',
+    /const span = \(s\.tierTo \|\| 0\) - \(s\.tierFrom \|\| 0\)/.test(script));
+  ck('and hides at the top, where there is no gap left',
+    /tierBarDisplay: s\.nextTierId \? 'block' : 'none'/.test(script));
+  ck('the points no longer have a bar of their own', !/\{\{ ptsPct \}\}/.test(html));
 
   section('the bag promises what the order pays');
   // The bag said floor((subtotal + fee) / $25) and left the multiplier off, so
@@ -1528,10 +1651,13 @@ async function mafupuntos() {
 
   section('what a tier is worth beyond earning faster');
   const perks = pts.perksFor;
-  ck('the base tier waits half an hour', perks('mafutero').holdMinutes === 30);
-  ck('a Veterano gets an hour', perks('veterano').holdMinutes === 60);
-  ck('only Patr\u00f3n gets the free gram', perks('patron').bakersDozen === true
-    && perks('veterano').bakersDozen === false);
+  const [base, mid, top] = pts.TIERS.map((x) => x.id);
+  ck('the base tier waits half an hour', perks(base).holdMinutes === 30);
+  ck('the middle one gets an hour', perks(mid).holdMinutes === 60);
+  ck('only the top gets the free gram', perks(top).bakersDozen === true
+    && perks(mid).bakersDozen === false && perks(base).bakersDozen === false);
+  ck('and only the top jumps the queue', perks(top).queueFirst === true
+    && perks(mid).queueFirst === false);
   ck('an unknown tier falls back to the base', perks('nonsense').holdMinutes === 30);
 
   section("the baker's dozen needs BOTH gates");
@@ -1589,10 +1715,17 @@ async function mafupuntos() {
   ck('an ounce counts as an ounce', pts.gramsInWindow([g(28, 1)], 'T') === 28);
   ck('eight eighths count the same as one ounce',
     pts.gramsInWindow(Array.from({ length: 8 }, (_, i) => g(3.5, i + 1)), 'T') === 28);
-  ck('one ounce alone is still Mafutero', pts.tierForGrams(28).id === 'mafutero');
-  ck('an ounce and a half is Veterano', pts.tierForGrams(42).id === 'veterano');
-  ck('three and a half ounces is Patr\u00f3n', pts.tierForGrams(98).id === 'patron');
-  ck('three ounces is still Veterano', pts.tierForGrams(84).id === 'veterano');
+  // Thresholds read off TIERS, so the day a rung moves these move with it and
+  // only the real boundaries are asserted: just under, exactly on, just over.
+  for (const [n, rung] of pts.TIERS.entries()) {
+    if (rung.grams > 0) {
+      ck('a gram short of ' + rung.id + ' is still the rung below',
+        pts.tierForGrams(rung.grams - 1).id === pts.TIERS[n - 1].id, pts.tierForGrams(rung.grams - 1));
+    }
+    ck('exactly ' + rung.grams + 'g is ' + rung.id, pts.tierForGrams(rung.grams).id === rung.id);
+  }
+  ck('one ounce alone is still the bottom rung', pts.tierForGrams(28).id === pts.BASE_TIER.id);
+  ck('and three and a half ounces is the top', pts.tierForGrams(98).id === pts.TOP_TIER.id);
   ck('grams outside the window do not count',
     pts.gramsInWindow([g(112, 200), g(3.5, 1)], 'T') === 3.5);
 
@@ -1602,8 +1735,8 @@ async function mafupuntos() {
   const hist = [g(98, 80), { clientCode: 'T', cancelled: false,
     at: new Date(Date.now() - 70 * 86400000).toISOString(),
     subtotal: 100, fee: 0, items: [{ grams: 14, qty: 1 }] }];
-  const wasPatron = pts.tierAt(hist, 'T', new Date(Date.now() - 70 * 86400000));
-  ck('it was earned at the tier held that day', wasPatron.id === 'patron', wasPatron.id);
+  const wasTop = pts.tierAt(hist, 'T', new Date(Date.now() - 70 * 86400000));
+  ck('it was earned at the tier held that day', wasTop.id === pts.TOP_TIER.id, wasTop.id);
 }
 
 // ════════════════════════════════════════════════════════════════════════════

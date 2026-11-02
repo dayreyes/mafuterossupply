@@ -9,7 +9,7 @@ import { requireOwner, requireClient } from './lib/session.js';
 import { mintCode, withHistory } from './lib/invites.js';
 import { sendAll, codeText, pushConfigured, pushPublicKey } from './lib/notify.js';
 import { pointsFor, earnedRows, expiresAt, pointsValue,
-  tierAt, gramsInWindow, expiredInfo, TIERS, TIER_DAYS, REDEEM_BLOCK,
+  tierAt, gramsInWindow, expiredInfo, TIERS, PERKS, TIER_DAYS, REDEEM_BLOCK, REDEEM_ON,
   DOLLARS_PER_POINT, POINT_VALUE, EXPIRE_DAYS } from './lib/points.js';
 
 // What a customer may see of their own record, and nothing of anyone else's.
@@ -35,6 +35,9 @@ const tierBlock = (orders, code) => {
   const grams = gramsInWindow(orders, code);
   const tier = tierAt(orders, code);
   const next = TIERS.find((t) => t.grams > grams) || null;
+  // Both the id and the Spanish name. The id is what the app names the tier
+  // FROM, so an English customer reads Buddy and Partner; the name is what the
+  // owner's side and Telegram use, which are Goldo's and are Spanish.
   return {
     tier: tier.name,
     tierId: tier.id,
@@ -42,7 +45,13 @@ const tierBlock = (orders, code) => {
     tierGrams: Math.round(grams * 10) / 10,
     tierDays: TIER_DAYS,
     nextTier: next ? next.name : '',
-    nextTierGrams: next ? Math.round((next.grams - grams) * 10) / 10 : 0
+    nextTierId: next ? next.id : '',
+    nextTierGrams: next ? Math.round((next.grams - grams) * 10) / 10 : 0,
+    // Where the bar starts and ends, so the page draws the gap it is actually
+    // in rather than filling from zero — from zero, every bar past the first
+    // tier sits nearly full and stops meaning anything.
+    tierFrom: tier.grams,
+    tierTo: next ? next.grams : tier.grams
   };
 };
 
@@ -66,25 +75,32 @@ export default async (req) => route(req, {
     return ok({
       profile: publicSelf(mine),
       points,
-      worth: pointsValue(points),
-      // The three numbers the card states as a rule. Sent rather than mirrored
-      // in the page, because a rule the shop prints and a rule the shop
-      // applies have to be the same rule — and the page used to say "an eighth
-      // earns 1 Mafupunto" while the server was charging $25 a point and
-      // multiplying by the tier.
+      // Whether they can be spent on anything. False today: the shop has not
+      // decided what points buy, so the card must not price them. `worth` goes
+      // with it rather than being sent and ignored — a figure in the reply is
+      // a figure that ends up on a screen eventually.
+      redeemOn: REDEEM_ON,
+      ...(REDEEM_ON ? { worth: pointsValue(points), redeemBlock: REDEEM_BLOCK } : {}),
+      // What the card states as the earn rate. Sent rather than mirrored in the
+      // page, because a rule the shop prints and a rule the shop applies have to
+      // be the same rule — the page used to say "an eighth earns 1 Mafupunto"
+      // while the server was charging $25 a point and multiplying by the tier.
       perPoint: DOLLARS_PER_POINT,
       pointValue: POINT_VALUE,
-      redeemBlock: REDEEM_BLOCK,
       expireDays: EXPIRE_DAYS,
       expiresAt: expiresAt(orders, session.code),
-      // No `goal` here any more. It used to be the next rung of the MILESTONES
-      // ladder (25, 50, 100, 200), which the card turned into "11 more for an
-      // eighth free" — said to somebody holding 39 points, who could already
-      // take $25 off that afternoon. Once points can really be spent the ladder
-      // is not what a customer is climbing: every 25 points is $25 off, over
-      // and over. The card works that out from `points` and `redeemBlock`.
-      // MILESTONES stays on the server for the congratulations push, which is
-      // the one thing that should stay rare.
+      // The whole ladder, for the sheet that explains it. Sent rather than
+      // mirrored in the page: a screen whose job is to tell a customer what the
+      // rules are is the last place that should be holding its own copy of
+      // them. Thresholds, multipliers and perks all come from here.
+      ladder: TIERS.map((x) => ({
+        id: x.id, grams: x.grams, mult: x.mult, perks: PERKS[x.id] || {}
+      })),
+      // No `goal`. It was the next rung of the MILESTONES ladder, which the
+      // card turned into "11 more for an eighth free" — a reward nobody has
+      // decided on, dated to a rung nobody is climbing. MILESTONES stays on the
+      // server for the congratulations push, which says only that a number was
+      // passed and promises nothing.
       earned: earnedRows(orders, session.code).slice(0, 20),
       lost: expiredInfo(orders, session.code),
       ...tierBlock(orders, session.code)
@@ -108,7 +124,10 @@ export default async (req) => route(req, {
       name: row.name || '',
       code,
       points,
-      worth: pointsValue(points),
+      // Priced only if a price means something. There is nothing to settle at
+      // a door while nothing can be redeemed, and a figure in dollars on his
+      // screen is a figure he will quote.
+      ...(REDEEM_ON ? { worth: pointsValue(points) } : {}),
       expiresAt: expiresAt(orders, code),
       earned: earnedRows(orders, code).slice(0, 40),
       lost: expiredInfo(orders, code),
